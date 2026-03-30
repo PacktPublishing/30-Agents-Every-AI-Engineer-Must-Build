@@ -1,0 +1,32 @@
+# ─────────────────────────────────────────────────────────────
+# requirements.txt — Chapter 14: Financial and Legal Domain Agents
+# Book: 30 Agents Every AI Engineer Must Build — Imran Ahmad (Packt Publishing)
+#
+# Install: pip install -r requirements.txt
+# Note: Python 3.10+ required
+# ─────────────────────────────────────────────────────────────
+
+# --- Core LLM Framework ---
+langchain==0.2.16
+langchain-openai==0.1.23
+langchain-community==0.2.16
+langgraph==0.2.28
+openai==1.40.0
+
+# --- Financial Data ---
+yfinance==0.2.41
+finnhub-python==2.4.19
+
+# --- Search ---
+tavily-python==0.3.3
+
+# --- Data & Validation ---
+numpy==1.26.4
+pydantic==2.8.2
+
+# --- Environment & Security ---
+python-dotenv==1.0.1
+
+# --- Notebook ---
+jupyter>=1.0.0
+ipykernel>=6.25.0

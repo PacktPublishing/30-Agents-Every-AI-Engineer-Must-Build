@@ -1,0 +1,36 @@
+# ============================================================
+# Chapter 11: Multi-Modal Perception Agents
+# Book: 30 Agents Every AI Engineer Must Build — Imran Ahmad
+# ============================================================
+
+# Environment secrets — NEVER commit
+.env
+
+# Python bytecode
+__pycache__/
+*.pyc
+*.pyo
+
+# Jupyter checkpoints
+.ipynb_checkpoints/
+
+# Runtime-generated assets
+assets/*.png
+
+# Distribution artifacts
+*.egg-info/
+dist/
+build/
+
+# Virtual environments
+venv/
+.venv/
+env/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/

@@ -1,0 +1,42 @@
+# ─────────────────────────────────────────────────────────────
+# .gitignore — Chapter 14: Financial and Legal Domain Agents
+# Book: 30 Agents Every AI Engineer Must Build — Imran Ahmad
+# ─────────────────────────────────────────────────────────────
+
+# Environment & Secrets (NEVER commit)
+.env
+.env.local
+.env.production
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+*.egg-info/
+dist/
+build/
+*.egg
+
+# Jupyter Notebook
+.ipynb_checkpoints/
+
+# Virtual Environments
+venv/
+.venv/
+env/
+ENV/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log

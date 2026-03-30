@@ -1,0 +1,30 @@
+# Chapter 13: Healthcare and Scientific Agents
+# Book: 30 Agents Every AI Engineer Must Build
+# Author: Imran Ahmad
+#
+# Install: pip install -r requirements.txt
+
+# Core
+numpy>=1.24,<2.1
+python-dotenv>=1.0,<2.0
+
+# LangChain ecosystem (book dependency)
+langchain-core>=0.3,<0.4
+langchain-community>=0.3,<0.4
+
+# FHIR data handling
+fhir.resources>=7.0,<8.0
+
+# Async HTTP (for literature scanner)
+aiohttp>=3.9,<4.0
+nest-asyncio>=1.6,<2.0
+
+# NLP / embeddings (optional — used in live mode)
+transformers>=4.40,<5.0
+
+# Scientific computing
+scipy>=1.12,<2.0
+
+# Jupyter
+jupyter>=1.0
+ipykernel>=6.0

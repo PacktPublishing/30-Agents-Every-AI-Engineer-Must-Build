@@ -1,0 +1,19 @@
+# ============================================================
+# Chapter 11: Multi-Modal Perception Agents
+# Book: 30 Agents Every AI Engineer Must Build
+# Author: Imran Ahmad
+# Publisher: Packt Publishing
+# ============================================================
+#
+# CORE (required for both Simulation and Live mode):
+numpy>=1.24.0,<2.0
+Pillow>=10.0.0
+python-dotenv>=1.0.0
+
+# OPTIONAL — only needed for Live Mode (GPU inference):
+# Uncomment the lines below if you have a CUDA GPU with 16+ GB VRAM
+# and a Hugging Face account with LLaVA 1.5 access.
+#
+# torch>=2.2.0
+# transformers>=4.40.0
+# accelerate>=0.28.0
