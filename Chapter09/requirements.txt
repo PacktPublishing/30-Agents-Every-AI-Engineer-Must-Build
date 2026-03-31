@@ -1,0 +1,23 @@
+# Chapter 9: Software Development Agents
+# Book: "Agents" by Imran Ahmad (Packt, 2026)
+# Python 3.10+ required
+#
+# Install: pip install -r requirements.txt
+
+# --- Core Framework ---
+langgraph>=0.3.0,<0.4.0
+langchain-core>=0.3.0,<0.4.0
+langchain-openai>=0.3.0,<0.4.0
+
+# --- Data Validation ---
+pydantic>=2.7.0,<3.0.0
+
+# --- Secret Management ---
+python-dotenv>=1.0.0,<2.0.0
+
+# --- Notebook ---
+jupyter>=1.0.0
+ipykernel>=6.29.0
+
+# --- Utilities ---
+typing-extensions>=4.9.0
