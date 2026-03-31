@@ -1,8 +1,15 @@
-# For data manipulation and analysis (used in 7.1, 7.3)
-pandas==2.2.2
+# =============================================================================
+# Chapter 7: Tool Manipulation and Orchestration Agents
+# Book: "Agents" by Imran Ahmad (Packt, 2026)
+# Python >= 3.11 required
+# =============================================================================
 
-# For plotting and data visualization (used in 7.1)
-matplotlib==3.9.0
+# Core — required for Simulation Mode and all notebook sections
+pandas>=2.2,<3.0
+matplotlib>=3.9,<4.0
+python-dotenv>=1.1,<2.0
+ipykernel>=6.29,<7.0
+notebook>=7.2,<8.0
 
-# For interacting with the OpenAI API (used in 7.2, 7.3)
-openai==1.35.7
+# Optional — Live Mode only (uncomment to enable real API calls):
+# openai>=1.60,<2.0

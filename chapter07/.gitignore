@@ -1,0 +1,30 @@
+# Chapter 7: Tool Manipulation and Orchestration Agents
+# Book: "Agents" by Imran Ahmad (Packt, 2026)
+
+# Environment secrets
+.env
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.egg-info/
+dist/
+build/
+
+# Jupyter
+.ipynb_checkpoints/
+
+# Generated outputs
+outputs/*.png
+outputs/*.jpg
+outputs/*.svg
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Virtual environments
+.venv/
+venv/
+env/

@@ -1,0 +1,17 @@
+# Chapter 10: Conversational and Content Creation Agents
+# Book: 30 Agents Every AI Engineer Must Build
+# Author: Imran Ahmad
+#
+# Tested on Python 3.10, 3.11, 3.12
+# Install: pip install -r requirements.txt
+
+langchain==0.2.16
+langchain-openai==0.1.23
+langchain-community==0.2.16
+langchain-core==0.2.38
+openai==1.40.0
+faiss-cpu==1.8.0
+python-dotenv==1.0.1
+numpy>=1.24.0,<2.0.0
+tiktoken>=0.7.0
+ipykernel>=6.29.0
