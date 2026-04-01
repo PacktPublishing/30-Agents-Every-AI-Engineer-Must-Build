@@ -1,179 +1,214 @@
-"""
-Utility module: Color-coded logging, resilience decorators, and mode detection.
-
-Author: Imran Ahmad
-Book: 30 Agents Every AI Engineer Must Build, Chapter 12
-Section Reference: Tech Requirements (p.2), Resilience Layer (p.35)
-"""
+# src/utils.py
+# Author: Imran Ahmad
+# Book: 30 Agents Every AI Engineer Must Build, Chapter 12
+# Ref: Technical Requirements (p.2), Production Failure Modes (p.35)
+# Description: Shared utilities — color-coded logging, resilience decorator,
+#              API key resolution, and mode detection.
 
 import os
+import sys
+import time
 import functools
-import getpass
-from dotenv import load_dotenv
+from datetime import datetime
+
+try:
+    from dotenv import load_dotenv
+    load_dotenv()
+except ImportError:
+    pass  # python-dotenv not installed; rely on os.environ directly
+
 
 # ---------------------------------------------------------------------------
-# Section 5.1 — Color-Coded Logging Schema (p.2, p.35)
-# Blue=[INFO], Green=[SUCCESS], Red=[HANDLED ERROR], Yellow=[DEBUG]
+# §5.1  Color-Coded Logging Schema
 # ---------------------------------------------------------------------------
 
 class ColorLogger:
     """
-    Color-coded logger for notebook and terminal output.
-    Uses ANSI escape codes as specified in Chapter 12 resilience layer.
+    ANSI color-coded logger for notebook and terminal output.
 
-    Color map (Section 5.1):
-        DEBUG        -> Yellow  (\\033[93m)
-        INFO         -> Blue    (\\033[94m)
-        SUCCESS      -> Green   (\\033[92m)
-        HANDLED ERROR -> Red    (\\033[91m)
+    Levels:
+        DEBUG   — Yellow  (\\033[93m) — Agent initialization, internal state
+        INFO    — Blue    (\\033[94m) — Simulation Mode banners, progress
+        SUCCESS — Green   (\\033[92m) — Step completions, passed checks
+        ERROR   — Red     (\\033[91m) — Handled errors, fallback activations
+
+    Ref: Strategy §5.1, Color-Coded Logging Schema
     """
 
-    RESET = "\033[0m"
     COLORS = {
-        "DEBUG":         "\033[93m",   # Yellow
-        "INFO":          "\033[94m",   # Blue
-        "SUCCESS":       "\033[92m",   # Green
-        "HANDLED ERROR": "\033[91m",   # Red
+        "DEBUG":   "\033[93m",   # Yellow
+        "INFO":    "\033[94m",   # Blue
+        "SUCCESS": "\033[92m",   # Green
+        "ERROR":   "\033[91m",   # Red
     }
+    RESET = "\033[0m"
 
     def __init__(self, name: str = "Chapter12"):
         self.name = name
 
-    def _emit(self, level: str, message: str) -> None:
+    def _log(self, level: str, message: str) -> None:
         color = self.COLORS.get(level, self.RESET)
-        tag = f"[{level}]"
-        formatted = f"{color}{tag} [{self.name}] {message}{self.RESET}"
-        print(formatted)  # Notebook-compatible output
+        ts = datetime.now().strftime("%H:%M:%S")
+        print(f"{color}[{level}] {ts} | {self.name} | {message}{self.RESET}")
 
     def debug(self, message: str) -> None:
-        """Yellow — internal diagnostics."""
-        self._emit("DEBUG", message)
+        """Yellow — internal state, initialization."""
+        self._log("DEBUG", message)
 
     def info(self, message: str) -> None:
-        """Blue — informational banners, mode announcements."""
-        self._emit("INFO", message)
+        """Blue — Simulation Mode banners, progress updates."""
+        self._log("INFO", message)
 
     def success(self, message: str) -> None:
-        """Green — step completion, passing checks."""
-        self._emit("SUCCESS", message)
+        """Green — step completions, checks passed."""
+        self._log("SUCCESS", message)
 
     def error(self, message: str) -> None:
-        """Red — handled errors and fallback activations."""
-        self._emit("HANDLED ERROR", message)
+        """Red — handled errors, fallback activations."""
+        self._log("ERROR", message)
 
 
-# Singleton logger for module-level convenience
-logger = ColorLogger()
+# Module-level logger instance for convenience
+logger = ColorLogger("Chapter12")
 
 
 # ---------------------------------------------------------------------------
-# Section 5.2 — @graceful_fallback Decorator (p.35)
-# Catches all exceptions, logs failure in red, returns fallback value.
+# §5.2  @graceful_fallback Decorator
 # ---------------------------------------------------------------------------
 
-def graceful_fallback(fallback_value=None, section_ref: str = ""):
+def graceful_fallback(fallback_value=None, section_ref="Chapter 12", retries=3):
     """
-    Decorator that wraps any function in a try/except block.
+    Decorator that catches exceptions, applies exponential backoff on
+    retryable errors (HTTP 429), and returns a fallback value on failure.
 
-    On exception:
-      1. Logs a [HANDLED ERROR] with the section reference.
-      2. Returns the fallback_value (callable → called, else returned as-is).
+    Applied to every method that: (a) calls an LLM, (b) calls an external
+    API, or (c) performs computation that could raise (SHAP, LIME).
 
-    Args:
-        fallback_value: Static value or callable producing the fallback.
-        section_ref: Chapter section string for traceability (e.g.,
-                     "Section 12 - Bias Detection (p.16)").
+    Parameters
+    ----------
+    fallback_value : callable or static value
+        If callable, invoked with (*args, **kwargs) to produce the fallback.
+        If static, returned directly on failure.
+    section_ref : str
+        Chapter section reference for the error log message.
+    retries : int
+        Number of retry attempts with exponential backoff (2s, 4s, 8s).
 
-    Usage:
-        @graceful_fallback(
-            fallback_value={"score": 0.0, "source": "fallback"},
-            section_ref="Section 12 - Resume Scoring (p.20)"
-        )
-        def score_resume(candidate):
-            ...
+    Ref: Strategy §5.2, Failure Mode Matrix §5.3
     """
     def decorator(func):
         @functools.wraps(func)
         def wrapper(*args, **kwargs):
-            try:
-                return func(*args, **kwargs)
-            except Exception as exc:
-                ref_tag = f" | Ref: {section_ref}" if section_ref else ""
-                logger.error(
-                    f"{func.__qualname__}() failed: {type(exc).__name__}: {exc}{ref_tag}. "
-                    f"Falling back to safe default."
-                )
-                if callable(fallback_value):
+            last_exc = None
+            for attempt in range(retries):
+                try:
+                    return func(*args, **kwargs)
+                except Exception as exc:
+                    last_exc = exc
+                    exc_name = type(exc).__name__
+                    # Retryable: rate limits, timeouts
+                    if _is_retryable(exc) and attempt < retries - 1:
+                        wait = 2 ** (attempt + 1)
+                        logger.error(
+                            f"[Retry {attempt + 1}/{retries}] {exc_name} "
+                            f"in {func.__name__}. Retrying in {wait}s. "
+                            f"Ref: {section_ref}"
+                        )
+                        time.sleep(wait)
+                        continue
+                    # Non-retryable or final attempt: fall back
+                    logger.error(
+                        f"[HANDLED ERROR] {exc_name} in {func.__name__}. "
+                        f"Falling back to mock logic. Ref: {section_ref}"
+                    )
+                    break
+
+            # Return fallback value
+            if callable(fallback_value):
+                try:
+                    return fallback_value(*args, **kwargs)
+                except TypeError:
                     return fallback_value()
-                return fallback_value
+            return fallback_value
+
         return wrapper
     return decorator
 
 
+def _is_retryable(exc: Exception) -> bool:
+    """Check if an exception is retryable (rate limits, timeouts)."""
+    exc_str = str(exc).lower()
+    retryable_signals = ["429", "rate limit", "timeout", "timed out"]
+    return any(signal in exc_str for signal in retryable_signals)
+
+
 # ---------------------------------------------------------------------------
-# Mode Detection — resolve_api_key() and get_mode() (p.2)
-# Flow: .env → getpass → Simulation Mode
+# API Key Resolution & Mode Detection
+# Ref: Strategy §1.3 (Mode Detection Flow), Tech Requirements (p.2)
 # ---------------------------------------------------------------------------
 
-_SIMULATION_MODE = None  # Cached after first resolution
+_CURRENT_MODE = None  # Cached after first resolution
 
 
-def resolve_api_key(interactive: bool = True) -> str:
+def resolve_api_key() -> str:
     """
-    Three-tier API key resolution (Section 1.3 — Mode Detection Flow):
-      1. Load from .env file via python-dotenv.
-      2. If empty and interactive=True, prompt via getpass.
-      3. If still empty, return empty string (triggers Simulation Mode).
+    Cascading API key resolution:
+        1. os.environ / .env  →  OPENAI_API_KEY
+        2. getpass prompt     →  (interactive terminals only)
+        3. Empty string       →  triggers Simulation Mode
 
-    Returns:
-        The resolved API key string (may be empty).
+    Returns the resolved key (may be empty).
+    Ref: Strategy §1.3, Mode Detection Flow
     """
-    global _SIMULATION_MODE
+    global _CURRENT_MODE
 
-    load_dotenv()
-    key = os.getenv("OPENAI_API_KEY", "").strip()
+    # Step 1: Environment variable (includes .env via python-dotenv)
+    key = os.environ.get("OPENAI_API_KEY", "").strip()
+    if key:
+        _CURRENT_MODE = "live"
+        logger.success("API key detected from environment. Live Mode enabled.")
+        return key
 
-    if not key and interactive:
+    # Step 2: Interactive getpass (only if stdin is a terminal)
+    if sys.stdin.isatty():
         try:
+            import getpass
             key = getpass.getpass(
-                "[INFO] No API key in .env. Enter OpenAI key (or press Enter for Simulation Mode): "
+                "[Chapter 12] Enter OpenAI API key (or press Enter for Simulation Mode): "
             ).strip()
             if key:
                 os.environ["OPENAI_API_KEY"] = key
-        except Exception:
-            # Handles EOFError, StdinNotImplementedError, etc.
-            key = ""
+                _CURRENT_MODE = "live"
+                logger.success("API key entered via prompt. Live Mode enabled.")
+                return key
+        except (EOFError, OSError):
+            pass  # Non-interactive environment; fall through
 
-    if key:
-        _SIMULATION_MODE = False
-        logger.success("API key detected. Running in Live Mode.")
-    else:
-        _SIMULATION_MODE = True
-        logger.info(
-            "No API key detected. Running in Simulation Mode with "
-            "chapter-derived mock data. All outputs are synthetic. "
-            "Supply an OpenAI API key via .env for live mode."
-        )
-
-    return key
+    # Step 3: No key → Simulation Mode
+    _CURRENT_MODE = "simulation"
+    logger.info(
+        "No API key detected. Running in Simulation Mode with chapter-derived "
+        "mock data. All outputs are synthetic. Supply an OpenAI API key via "
+        ".env for live mode."
+    )
+    return ""
 
 
 def get_mode() -> str:
     """
-    Return the current operating mode.
+    Return the current operating mode: 'live' or 'simulation'.
 
-    Returns:
-        'live' if a valid API key was resolved, 'simulation' otherwise.
+    If resolve_api_key() has not been called yet, calls it to determine
+    the mode.
     """
-    global _SIMULATION_MODE
-    if _SIMULATION_MODE is None:
-        # First call — attempt non-interactive resolution
-        resolve_api_key(interactive=False)
-    return "simulation" if _SIMULATION_MODE else "live"
+    global _CURRENT_MODE
+    if _CURRENT_MODE is None:
+        resolve_api_key()
+    return _CURRENT_MODE
 
 
 def is_simulation() -> bool:
-    """Convenience check for Simulation Mode."""
+    """Convenience check: True if running in Simulation Mode."""
     return get_mode() == "simulation"
 
 
@@ -182,24 +217,23 @@ def is_simulation() -> bool:
 # ---------------------------------------------------------------------------
 
 if __name__ == "__main__":
-    log = ColorLogger(name="SelfTest")
-    log.debug("Testing Yellow — [DEBUG] level.")
-    log.info("Testing Blue — [INFO] level.")
-    log.success("Testing Green — [SUCCESS] level.")
-    log.error("Testing Red — [HANDLED ERROR] level.")
+    log = ColorLogger("SelfTest")
+    log.debug("Debug message — Yellow")
+    log.info("Info message — Blue")
+    log.success("Success message — Green")
+    log.error("Error message — Red")
 
-    # Test graceful_fallback
+    print(f"\nMode: {get_mode()}")
+
+    # Test @graceful_fallback
     @graceful_fallback(
-        fallback_value={"result": "safe_default"},
-        section_ref="Section 12 - Self-Test (p.0)"
+        fallback_value={"status": "fallback_triggered"},
+        section_ref="Self-test",
+        retries=1,
     )
-    def risky_function():
-        raise RuntimeError("Simulated failure")
+    def will_fail():
+        raise ValueError("Intentional test failure")
 
-    result = risky_function()
-    log.success(f"Fallback returned: {result}")
-
-    # Test mode detection (non-interactive for self-test)
-    mode = get_mode()
-    log.info(f"Detected mode: {mode}")
-    log.success("All self-tests passed.")
+    result = will_fail()
+    print(f"Fallback result: {result}")
+    log.success("Self-test complete.")

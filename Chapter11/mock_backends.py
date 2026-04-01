@@ -1,414 +1,405 @@
-"""
-mock_backends.py — High-Fidelity Mock Backends for Simulation Mode
-===================================================================
-Book:    30 Agents Every AI Engineer Must Build
-Author:  Imran Ahmad
-Chapter: 11 — Multi-Modal Perception Agents
-Ref:     Technical Requirements + all three domain sections
+# mock_backends.py
+# Chapter 11: Multi-Modal Perception Agents
+# Book: 30 Agents Every AI Engineer Must Build
+# Author: Imran Ahmad | Publisher: Packt Publishing
+#
+# Simulation Mode backends for all three agent domains.
+# Each mock class mirrors the real API surface used in the chapter code
+# and returns chapter-accurate responses keyed by scenario.
+#
+# Ref: Technical Requirements (p.2), all three domain sections
 
-Provides mock implementations so the entire notebook runs without
-GPU hardware, Hugging Face tokens, or microphone access.
-
-Classes:
-    MockVLM             — Simulates LLaVA 1.5 vision-language model
-    MockProcessor       — Simulates AutoProcessor for image+text inputs
-    MockWhisperBackend  — Simulates Whisper speech recognition + sentiment
-    MockSensorStream    — Simulates IoT sensor data for building management
-
-Every mock returns realistic, chapter-sourced data keyed to scenario names
-from the Mock Data ↔ Chapter Section Mapping table.
-"""
-
-from __future__ import annotations
-
-from dataclasses import dataclass, field
-from datetime import datetime
-from typing import Any, Dict, List, Optional
+from dataclasses import dataclass
+from datetime import datetime, timedelta
+from typing import Any, Dict, List, Optional, Tuple
 
 
-# ============================================================
-# Vision-Language Mocks
-# Ref: Architecture of Vision-Language Agents, Building a Vision QA Agent
-# ============================================================
+# ──────────────────────────────────────────────────────────────────────
+# SHARED UTILITIES
+# ──────────────────────────────────────────────────────────────────────
 
-class MockProcessor:
-    """Simulates transformers.AutoProcessor for LLaVA 1.5.
+@dataclass
+class SensorReading:
+    """
+    A single sensor measurement with temporal metadata.
+    Used by MockSensorStream and consumed by SmartBuildingAgent's
+    sensor fusion logic.
 
-    Ref: Architecture of Vision-Language Agents — alignment mechanism.
-    Author: Imran Ahmad
+    Ref: Smart Building Management Architecture, Sensor Fusion (p.23-24)
+    """
+    timestamp: datetime
+    sensor_type: str  # "temperature", "co2", "occupancy"
+    value: float
+    zone_id: str
 
-    In Live Mode, AutoProcessor tokenizes text and preprocesses images.
-    This mock simply packages the inputs into a dict that MockVLM expects.
+
+class MockInputs(dict):
+    """
+    Dict subclass that supports .to(device) chaining, mimicking
+    the transformers BatchEncoding interface.
+
+    Ref: Building a Vision Question-Answering Agent (p.5-6)
     """
 
-    def __init__(self, model_id: str = "mock-llava") -> None:
+    def __init__(self, prompt_text: str = "", **kwargs):
+        super().__init__(**kwargs)
+        self._prompt_text = prompt_text
+
+    def to(self, device: Any) -> "MockInputs":
+        """No-op device transfer for Simulation Mode."""
+        return self
+
+    @property
+    def prompt_text(self) -> str:
+        return self._prompt_text
+
+
+# ──────────────────────────────────────────────────────────────────────
+# DOMAIN 1: VISION-LANGUAGE
+# ──────────────────────────────────────────────────────────────────────
+
+class MockProcessor:
+    """
+    Simulates transformers.AutoProcessor for Vision-Language models.
+
+    Provides __call__ (tokenization + image preprocessing) and decode
+    (detokenization) methods that the VisionQuestionAnsweringAgent
+    expects.
+
+    Ref: Building a Vision Question-Answering Agent (p.5-6)
+    """
+
+    def __init__(self, model_id: str = "mock-vlm"):
         self.model_id = model_id
+        self._last_prompt = ""
+
+    @classmethod
+    def from_pretrained(cls, model_id: str) -> "MockProcessor":
+        """Factory method matching AutoProcessor.from_pretrained()."""
+        return cls(model_id=model_id)
 
     def __call__(
         self,
-        text: str | list[str] = "",
+        text: str = "",
         images: Any = None,
+        audio: Any = None,
         return_tensors: str = "pt",
-        padding: bool = True,
-    ) -> Dict[str, Any]:
-        """Package text + image into a mock input dict.
-
-        Args:
-            text:           The prompt or question string.
-            images:         A PIL Image or None.
-            return_tensors: Ignored in mock (always 'pt' in live).
-            padding:        Ignored in mock.
-
-        Returns:
-            dict with 'input_ids' (placeholder) and '_mock_text' / '_mock_image'.
+        **kwargs,
+    ) -> MockInputs:
         """
-        if images is None:
-            raise ValueError(
-                "MockProcessor received None as image input. "
-                "Provide a valid PIL Image. [Ref: Building a Vision QA Agent]"
+        Mimics processor(text=..., images=..., return_tensors='pt').
+        Stores the prompt text for downstream scenario detection.
+        """
+        self._last_prompt = text
+        return MockInputs(
+            prompt_text=text,
+            input_ids=[[1, 2, 3]],
+            attention_mask=[[1, 1, 1]],
+        )
+
+    def decode(self, token_ids: Any, skip_special_tokens: bool = True) -> str:
+        """
+        Returns a pre-built response string based on the last prompt.
+        The response includes 'ASSISTANT:' prefix so the VQA agent's
+        split logic works correctly.
+        """
+        return self._last_prompt_response()
+
+    def _last_prompt_response(self) -> str:
+        """Select scenario response based on keywords in stored prompt.
+        Priority: more specific matches (spatial, count) checked before
+        general matches (describe) to avoid false positives."""
+        prompt = self._last_prompt.lower()
+
+        # Check specific queries first (spatial/count may co-occur with "describe")
+        if "spatial" in prompt or "relationship" in prompt or "where" in prompt:
+            return (
+                "ASSISTANT: Reasoning: Analyzing spatial layout — the laptop "
+                "is centered on the desk. The coffee cup is to the right, "
+                "approximately 15cm from the laptop edge. Papers are stacked "
+                "beneath the cup. The desk lamp is positioned at the upper "
+                "left corner of the desk.\n"
+                "Therefore, the answer is: The laptop occupies the center of "
+                "the desk, with the coffee cup to its right resting on a "
+                "paper stack, and the desk lamp at the upper-left corner."
             )
-        return {
-            "input_ids": [0],  # placeholder tensor-like
-            "_mock_text": text if isinstance(text, str) else text[0],
-            "_mock_image": images,
-        }
+
+        if "count" in prompt or "how many" in prompt:
+            return (
+                "ASSISTANT: Reasoning: I will scan the image systematically "
+                "from left to right. I can see one person seated at the desk "
+                "and a second person partially occluded by the bookshelf in "
+                "the background. There are no other figures visible.\n"
+                "Therefore, the answer is: 2 people are visible in the image."
+            )
+
+        if "describe" in prompt:
+            return (
+                "ASSISTANT: Reasoning: The image shows an indoor workspace. "
+                "I can identify a desk with a laptop, scattered papers, a "
+                "coffee cup positioned near the edge, and an adjustable desk "
+                "lamp. The lighting suggests daytime with natural light from "
+                "a window on the left side.\n"
+                "Therefore, the answer is: This is a cluttered workspace "
+                "containing a laptop, papers, a coffee cup precariously "
+                "balanced on a stack of documents, and a desk lamp. Natural "
+                "light enters from the left."
+            )
+
+        # Default fallback
+        return (
+            "ASSISTANT: Reasoning: I observe a general scene in the image.\n"
+            "Therefore, the answer is: The image shows an indoor environment "
+            "with standard office furnishings."
+        )
 
 
 class MockVLM:
-    """Simulates LLaVA 1.5 (7B) vision-language model inference.
+    """
+    Simulates LlavaForConditionalGeneration for Simulation Mode.
 
-    Ref: Building a Vision QA Agent — the model generates natural-language
-    answers conditioned on the image and a text question.
-    Author: Imran Ahmad
+    Provides .device attribute and .generate() method matching the
+    transformers model interface used by the VQA agent.
 
-    Scenario routing (keyword-based):
-        "describe" → detailed workspace description
-        "count"    → object/person counting response
-        "spatial"  → spatial relationship analysis
-        (default)  → generic visual observation
+    Ref: Building a Vision Question-Answering Agent (p.5-6)
     """
 
-    # Chapter-sourced mock responses keyed by scenario
-    _RESPONSES: Dict[str, str] = {
-        "describe": (
-            "The image shows a modern workspace with a dual-monitor setup, "
-            "an ergonomic keyboard, and a desk lamp providing warm lighting. "
-            "Several sticky notes are arranged on the left monitor's bezel. "
-            "A coffee mug sits to the right of the keyboard. "
-            "Chain-of-thought: I identified the primary objects (monitors, "
-            "keyboard, lamp, sticky notes, mug) and described their spatial "
-            "arrangement from left to right."
-        ),
-        "count": (
-            "I can see 2 people in the image. One person is seated at the "
-            "desk facing the monitors, and another is standing near the "
-            "whiteboard in the background. "
-            "Chain-of-thought: I scanned the image for human figures, "
-            "identified two distinct individuals by pose and location."
-        ),
-        "spatial": (
-            "The monitors are positioned centrally on the desk. The keyboard "
-            "is directly in front of the monitors. The desk lamp is to the "
-            "upper-left, and the coffee mug is to the lower-right of the "
-            "keyboard. The whiteboard is mounted on the wall behind the desk. "
-            "Chain-of-thought: I established a reference frame (desk center) "
-            "and described each object's relative position."
-        ),
-    }
-
-    _DEFAULT_RESPONSE: str = (
-        "The image contains several objects arranged in an indoor setting. "
-        "Chain-of-thought: I performed a general visual scan and summarized "
-        "the most salient elements."
-    )
-
-    def __init__(self, model_id: str = "mock-llava-1.5-7b") -> None:
+    def __init__(self, model_id: str = "mock-vlm"):
         self.model_id = model_id
+        self.device = "cpu"
 
-    def generate(self, **kwargs: Any) -> list[list[int]]:
-        """Simulate model.generate() — returns placeholder token IDs.
+    @classmethod
+    def from_pretrained(
+        cls,
+        model_id: str,
+        torch_dtype: Any = None,
+        low_cpu_mem_usage: bool = True,
+        device_map: str = "auto",
+    ) -> "MockVLM":
+        """Factory method matching LlavaForConditionalGeneration.from_pretrained()."""
+        return cls(model_id=model_id)
 
-        The notebook's decode step will call MockVLM.decode() instead of
-        a real tokenizer, so this just stores the scenario key.
+    def generate(self, **kwargs) -> list:
         """
-        mock_text = kwargs.get("_mock_text", "")
-        # Stash for decode
-        self._last_text = mock_text
-        return [[0]]  # placeholder token IDs
-
-    def decode(self, token_ids: list[int], skip_special_tokens: bool = True) -> str:
-        """Return the scenario-matched mock response string.
-
-        Args:
-            token_ids:          Ignored (placeholder from generate).
-            skip_special_tokens: Ignored in mock.
-
-        Returns:
-            A chapter-sourced natural-language answer.
+        Returns a mock tensor (list) that MockProcessor.decode() will
+        convert to a scenario-appropriate response string.
         """
-        text = getattr(self, "_last_text", "").lower()
-        for key, response in self._RESPONSES.items():
-            if key in text:
-                return response
-        return self._DEFAULT_RESPONSE
+        # Return a placeholder; actual response is driven by MockProcessor.decode()
+        return [[0]]
 
 
-# ============================================================
-# Audio Processing Mocks
-# Ref: Architecture of Audio Processing Agents,
-#      Building a Speech Recognition Agent,
-#      Voice Sentiment Analysis
-# ============================================================
+# ──────────────────────────────────────────────────────────────────────
+# DOMAIN 2: AUDIO PROCESSING
+# ──────────────────────────────────────────────────────────────────────
 
-@dataclass
-class MockTranscriptionSegment:
-    """A single timestamped segment of transcribed speech.
-
-    Ref: Building a Speech Recognition Agent.
-    Author: Imran Ahmad
-    """
-    start: float
-    end: float
-    text: str
-    confidence: float = 0.95
+# Scenario registry: raw transcript segments with fillers for testing
+# CLEAN vs VERBATIM modes.
+# Ref: Building a Speech Recognition Agent (p.13-15)
+_AUDIO_SCENARIOS: Dict[str, Dict[str, Any]] = {
+    "customer_complaint": {
+        "full_text": (
+            "Yes um I've been waiting for um three weeks now and uh "
+            "nobody has called me back. This is um unacceptable and "
+            "I want to speak with a manager right now."
+        ),
+        "segments": [
+            {
+                "text": "Yes um I've been waiting for um three weeks now",
+                "start": 0.0,
+                "end": 3.2,
+                "confidence": 0.94,
+            },
+            {
+                "text": "and uh nobody has called me back.",
+                "start": 3.2,
+                "end": 5.5,
+                "confidence": 0.91,
+            },
+            {
+                "text": "This is um unacceptable",
+                "start": 5.8,
+                "end": 7.6,
+                "confidence": 0.96,
+            },
+            {
+                "text": "and I want to speak with a manager right now.",
+                "start": 7.6,
+                "end": 10.1,
+                "confidence": 0.98,
+            },
+        ],
+        "language": "en",
+    },
+    "meeting_notes": {
+        "full_text": (
+            "So um the Q3 results are in and uh we exceeded targets "
+            "by twelve percent. Um the marketing team um deserves "
+            "credit for the campaign push."
+        ),
+        "segments": [
+            {
+                "text": "So um the Q3 results are in",
+                "start": 0.0,
+                "end": 2.1,
+                "confidence": 0.93,
+            },
+            {
+                "text": "and uh we exceeded targets by twelve percent.",
+                "start": 2.1,
+                "end": 5.0,
+                "confidence": 0.95,
+            },
+            {
+                "text": "Um the marketing team um deserves credit for the campaign push.",
+                "start": 5.3,
+                "end": 9.2,
+                "confidence": 0.90,
+            },
+        ],
+        "language": "en",
+    },
+}
 
 
 class MockWhisperBackend:
-    """Simulates Whisper-based speech recognition and voice sentiment.
+    """
+    Simulates a Whisper-compatible ASR backend for Simulation Mode.
 
-    Ref: Building a Speech Recognition Agent, Voice Sentiment Analysis.
-    Author: Imran Ahmad
+    The transcribe() method returns (full_text, segments, language),
+    matching the interface expected by SpeechRecognitionAgent.
 
-    Scenario keys:
-        "customer_complaint" — Clean mode: fillers ('um', 'uh') removed
-        "meeting_notes"      — Verbatim mode: fillers preserved
+    Scenario selection is based on the scenario_key set at construction
+    or overridden per-call.
+
+    Ref: Building a Speech Recognition Agent (p.13-15)
     """
 
-    _SCENARIOS: Dict[str, Dict[str, Any]] = {
-        "customer_complaint": {
-            "raw_segments": [
-                MockTranscriptionSegment(0.0, 2.1, "I've been waiting for three weeks"),
-                MockTranscriptionSegment(2.1, 4.3, "um and nobody has called me back"),
-                MockTranscriptionSegment(4.3, 6.8, "uh this is completely unacceptable"),
-                MockTranscriptionSegment(6.8, 9.0, "I want to speak to a manager"),
-            ],
-            "clean_segments": [
-                MockTranscriptionSegment(0.0, 2.1, "I've been waiting for three weeks"),
-                MockTranscriptionSegment(2.1, 4.3, "and nobody has called me back"),
-                MockTranscriptionSegment(4.3, 6.8, "this is completely unacceptable"),
-                MockTranscriptionSegment(6.8, 9.0, "I want to speak to a manager"),
-            ],
-        },
-        "meeting_notes": {
-            "raw_segments": [
-                MockTranscriptionSegment(0.0, 3.2, "So um the quarterly numbers look good"),
-                MockTranscriptionSegment(3.2, 5.9, "uh we exceeded target by twelve percent"),
-                MockTranscriptionSegment(5.9, 8.4, "um the main driver was the new product line"),
-            ],
-            "clean_segments": [
-                MockTranscriptionSegment(0.0, 3.2, "So the quarterly numbers look good"),
-                MockTranscriptionSegment(3.2, 5.9, "we exceeded target by twelve percent"),
-                MockTranscriptionSegment(5.9, 8.4, "the main driver was the new product line"),
-            ],
-        },
-    }
-
-    # Prosodic features for sentiment analysis
-    # Ref: Voice Sentiment Analysis — VAD (Valence-Arousal-Dominance) model
-    _PROSODIC: Dict[str, Dict[str, float]] = {
-        "angry": {"pitch_hz": 210.0, "speech_rate_sps": 5.8, "energy_db": -12.0},
-        "calm":  {"pitch_hz": 140.0, "speech_rate_sps": 3.2, "energy_db": -28.0},
-    }
-
-    def __init__(self, model_id: str = "mock-whisper-large-v3") -> None:
-        self.model_id = model_id
+    def __init__(self, scenario_key: str = "customer_complaint"):
+        self.scenario_key = scenario_key
 
     def transcribe(
-        self,
-        audio: Any,
-        scenario: str = "customer_complaint",
-        clean: bool = True,
-    ) -> List[MockTranscriptionSegment]:
-        """Simulate Whisper transcription.
+        self, audio: Any, scenario_key: Optional[str] = None
+    ) -> Tuple[str, List[Dict[str, Any]], str]:
+        """
+        Simulate ASR transcription.
 
         Args:
-            audio:    Audio array (ignored in mock — scenario key drives output).
-            scenario: One of 'customer_complaint' or 'meeting_notes'.
-            clean:    If True, return filler-removed segments; else verbatim.
+            audio: NumPy array (ignored in Simulation Mode).
+            scenario_key: Override the default scenario for this call.
 
         Returns:
-            List of MockTranscriptionSegment objects.
+            Tuple of (full_text, segment_dicts, language_code).
         """
-        data = self._SCENARIOS.get(scenario, self._SCENARIOS["customer_complaint"])
-        key = "clean_segments" if clean else "raw_segments"
-        return data[key]
-
-    def get_prosodic_features(
-        self, audio: Any, emotion: str = "angry"
-    ) -> Dict[str, float]:
-        """Return mock prosodic features for sentiment analysis.
-
-        Ref: Voice Sentiment Analysis — prosodic feature extraction.
-        Author: Imran Ahmad
-
-        Args:
-            audio:   Audio array (ignored in mock).
-            emotion: Scenario key — 'angry' or 'calm'.
-
-        Returns:
-            Dict with pitch_hz, speech_rate_sps, energy_db.
-        """
-        return self._PROSODIC.get(emotion, self._PROSODIC["angry"]).copy()
+        key = scenario_key or self.scenario_key
+        scenario = _AUDIO_SCENARIOS.get(key, _AUDIO_SCENARIOS["customer_complaint"])
+        return (
+            scenario["full_text"],
+            scenario["segments"],
+            scenario["language"],
+        )
 
 
-# ============================================================
-# Physical World Sensing Mocks
-# Ref: Smart Building Management Architecture,
-#      Event Detection Through Pattern Matching,
-#      Control Management and Feedback Loops,
-#      Sensor Fusion Through Data Aggregation
-# ============================================================
+# ──────────────────────────────────────────────────────────────────────
+# DOMAIN 3: PHYSICAL WORLD SENSING
+# ──────────────────────────────────────────────────────────────────────
 
-@dataclass
-class MockSensorReading:
-    """A single sensor reading from a building zone.
+# Scenario registry: pre-built sensor reading sets for each demo.
+# Values are sourced from the chapter's EventPattern thresholds:
+#   - critical_temp: >95°F or <50°F  (p.21)
+#   - unexpected_occupancy: >0.7 outside occupied_hours (p.21-22)
+#   - CO2 ventilation: >max_co2 (default 1000 ppm) (p.22-23)
+#   - deadband: abs(error) > 1.0 from target avg (p.22)
+#
+# Ref: Smart Building Management Architecture (p.18-24)
 
-    Ref: Smart Building Management Architecture.
-    Author: Imran Ahmad
+def _recent(minutes_ago: float = 1.0) -> datetime:
+    """Helper: create a timestamp N minutes in the past."""
+    return datetime.now() - timedelta(minutes=minutes_ago)
+
+
+def _build_sensor_scenarios() -> Dict[str, List[SensorReading]]:
     """
-    zone_id: str
-    timestamp: datetime
-    temperature_f: float
-    humidity_pct: float
-    co2_ppm: float
-    occupancy_fraction: float
-    light_lux: float
+    Build scenario-keyed sensor reading lists.
+
+    Each scenario produces readings within the 5-minute fusion window
+    used by SmartBuildingAgent.update_zone_state().
+    """
+    return {
+        # Normal office: 72°F is within default target range (68-76),
+        # so deadband check (abs(72 - 72) = 0 < 1.0) produces no commands.
+        "normal_office": [
+            SensorReading(_recent(1), "temperature", 72.0, "zone_a_office"),
+            SensorReading(_recent(2), "temperature", 71.8, "zone_a_office"),
+            SensorReading(_recent(3), "temperature", 72.2, "zone_a_office"),
+            SensorReading(_recent(1), "co2", 650.0, "zone_a_office"),
+            SensorReading(_recent(1), "occupancy", 0.8, "zone_a_office"),
+        ],
+        # Server room overheat: 96.5°F exceeds the critical_temp
+        # threshold of 95°F. Ref: EventPattern critical_temp (p.21)
+        "server_room_overheat": [
+            SensorReading(_recent(1), "temperature", 96.5, "zone_d_server"),
+            SensorReading(_recent(2), "temperature", 96.3, "zone_d_server"),
+            SensorReading(_recent(3), "temperature", 96.7, "zone_d_server"),
+            SensorReading(_recent(1), "co2", 450.0, "zone_d_server"),
+            SensorReading(_recent(1), "occupancy", 0.0, "zone_d_server"),
+        ],
+        # After-hours intrusion: occupancy 0.9 at 23:00, outside
+        # default occupied_hours (8-18).
+        # Ref: EventPattern unexpected_occupancy (p.21-22)
+        "after_hours_intrusion": [
+            SensorReading(_recent(1), "temperature", 70.0, "zone_b_meeting"),
+            SensorReading(_recent(1), "co2", 500.0, "zone_b_meeting"),
+            SensorReading(_recent(1), "occupancy", 0.9, "zone_b_meeting"),
+        ],
+        # High CO2 in occupied lab: 1350 ppm exceeds max_co2 (1000).
+        # Excess = 350 → ventilation intensity = min(100, 50 + 350/10) = 85.
+        # Ref: Control Management and Feedback Loops (p.22-23)
+        "high_co2_occupied": [
+            SensorReading(_recent(1), "temperature", 73.0, "zone_c_lab"),
+            SensorReading(_recent(2), "temperature", 72.8, "zone_c_lab"),
+            SensorReading(_recent(1), "co2", 1350.0, "zone_c_lab"),
+            SensorReading(_recent(1), "occupancy", 0.95, "zone_c_lab"),
+        ],
+    }
 
 
 class MockSensorStream:
-    """Simulates IoT sensor data streams for smart building management.
+    """
+    Provides pre-built sensor reading sequences for Simulation Mode.
 
-    Ref: Smart Building Management Architecture, Event Detection,
-         Control Management, Sensor Fusion.
-    Author: Imran Ahmad
+    Each scenario maps to a list of SensorReading objects with recent
+    timestamps, ensuring they pass the 5-minute temporal filter in
+    SmartBuildingAgent.update_zone_state().
 
-    Scenario keys (zone_id → scenario):
-        "zone_a_office"  / "normal_office"         — 72°F, normal
-        "zone_d_server"  / "server_room_overheat"   — 96.5°F, critical
-        "zone_b_meeting" / "after_hours_intrusion"   — occupancy at 23:00
-        "zone_c_lab"     / "high_co2_occupied"       — CO2 1350 ppm
+    Usage:
+        stream = MockSensorStream("server_room_overheat")
+        readings = stream.get_readings()
+
+    Ref: Smart Building Management Architecture (p.18-24)
     """
 
-    _SCENARIOS: Dict[str, Dict[str, Any]] = {
-        "normal_office": {
-            "zone_id": "zone_a_office",
-            "temperature_f": 72.0,
-            "humidity_pct": 45.0,
-            "co2_ppm": 620.0,
-            "occupancy_fraction": 0.4,
-            "light_lux": 350.0,
-            "hour": 10,
-        },
-        "server_room_overheat": {
-            "zone_id": "zone_d_server",
-            "temperature_f": 96.5,
-            "humidity_pct": 30.0,
-            "co2_ppm": 410.0,
-            "occupancy_fraction": 0.0,
-            "light_lux": 50.0,
-            "hour": 14,
-        },
-        "after_hours_intrusion": {
-            "zone_id": "zone_b_meeting",
-            "temperature_f": 68.0,
-            "humidity_pct": 42.0,
-            "co2_ppm": 500.0,
-            "occupancy_fraction": 0.9,
-            "light_lux": 20.0,
-            "hour": 23,
-        },
-        "high_co2_occupied": {
-            "zone_id": "zone_c_lab",
-            "temperature_f": 74.0,
-            "humidity_pct": 55.0,
-            "co2_ppm": 1350.0,
-            "occupancy_fraction": 0.7,
-            "light_lux": 500.0,
-            "hour": 11,
-        },
-    }
+    def __init__(self, scenario_key: str = "normal_office"):
+        self.scenario_key = scenario_key
+        self._scenarios = _build_sensor_scenarios()
 
-    # Reverse map: zone_id → scenario key
-    _ZONE_MAP: Dict[str, str] = {
-        v["zone_id"]: k for k, v in _SCENARIOS.items()
-    }
-
-    def __init__(self) -> None:
-        self._history: Dict[str, List[MockSensorReading]] = {}
-
-    def get_reading(self, zone_id: str) -> MockSensorReading:
-        """Return a single mock sensor reading for the given zone.
-
-        Routes by zone_id or falls back to treating zone_id as a scenario key.
+    def get_readings(
+        self, scenario_key: Optional[str] = None
+    ) -> List[SensorReading]:
+        """
+        Return sensor readings for the specified scenario.
 
         Args:
-            zone_id: Either a zone identifier ('zone_a_office') or
-                     a scenario key ('normal_office').
+            scenario_key: Override the default scenario for this call.
 
         Returns:
-            MockSensorReading with chapter-sourced values.
+            List of SensorReading objects with recent timestamps.
         """
-        # Resolve scenario key
-        scenario_key = self._ZONE_MAP.get(zone_id, zone_id)
-        data = self._SCENARIOS.get(scenario_key)
-        if data is None:
-            # Fallback to normal_office if unknown zone
-            data = self._SCENARIOS["normal_office"]
-            scenario_key = "normal_office"
+        key = scenario_key or self.scenario_key
+        # Rebuild to get fresh timestamps each call
+        fresh = _build_sensor_scenarios()
+        return fresh.get(key, fresh["normal_office"])
 
-        reading = MockSensorReading(
-            zone_id=data["zone_id"],
-            timestamp=datetime.now().replace(hour=data["hour"], minute=0, second=0),
-            temperature_f=data["temperature_f"],
-            humidity_pct=data["humidity_pct"],
-            co2_ppm=data["co2_ppm"],
-            occupancy_fraction=data["occupancy_fraction"],
-            light_lux=data["light_lux"],
-        )
-
-        # Store in history for sensor fusion (temporal averaging)
-        self._history.setdefault(data["zone_id"], []).append(reading)
-        return reading
-
-    def get_history(
-        self, zone_id: str, window_size: int = 5
-    ) -> List[MockSensorReading]:
-        """Return recent readings for temporal averaging (sensor fusion).
-
-        Ref: Sensor Fusion Through Data Aggregation.
-        Author: Imran Ahmad
-
-        If fewer readings exist than window_size, duplicates the last
-        reading to fill the window (simulates steady-state).
-
-        Args:
-            zone_id:     The zone identifier.
-            window_size: Number of readings to return.
-
-        Returns:
-            List of MockSensorReading (most recent last).
-        """
-        resolved = self._ZONE_MAP.get(zone_id, zone_id)
-        actual_zone = self._SCENARIOS.get(resolved, {}).get("zone_id", zone_id)
-
-        history = self._history.get(actual_zone, [])
-        if not history:
-            # Generate one reading to seed history
-            self.get_reading(zone_id)
-            history = self._history.get(actual_zone, [])
-
-        # Pad to window_size by repeating last reading
-        while len(history) < window_size:
-            history.append(history[-1])
-
-        return history[-window_size:]
+    @property
+    def available_scenarios(self) -> List[str]:
+        """List all registered scenario keys."""
+        return list(self._scenarios.keys())

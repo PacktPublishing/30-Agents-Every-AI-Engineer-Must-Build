@@ -1,53 +1,37 @@
-# ─────────────────────────────────────────────────────────────────────────────
-# mock_llm.py — Mocking & Resilience Layer
+# mock_llm.py
 # Chapter 14: Financial and Legal Domain Agents
 # Book: 30 Agents Every AI Engineer Must Build — Imran Ahmad (Packt Publishing)
-#
-# This module provides:
-#   - ColorLogger:          Color-coded terminal logging (Blue/Green/Red/Yellow)
-#   - ServiceConfig:        Per-service API key detection with getpass fallback
-#   - @graceful_fallback:   Decorator that catches exceptions and returns fallback values
-#   - MockChatOpenAI:       LangGraph-compatible mock LLM with keyword routing
-#   - MockStructuredChain:  Deterministic supervisor routing sequence
-#   - MockEmbeddingModel:   Hash-based pseudo-embeddings for vector store testing
-#   - MockVectorStore:      In-memory vector store with cosine similarity search
-#
 # Author: Imran Ahmad
-# ─────────────────────────────────────────────────────────────────────────────
+#
+# Provides the resilience layer, color-coded logging, service configuration,
+# and mock implementations that enable Simulation Mode without API keys.
+# Ref: Technical Requirements (p.2), Sections 14.1–14.2
 
 import os
 import sys
+import time
 import hashlib
 import functools
-import traceback
+import math
 from datetime import datetime
-from typing import Any, Dict, List, Optional, Callable, Union
-from dataclasses import dataclass, field
-
-import numpy as np
-from langchain_core.messages import AIMessage, HumanMessage, SystemMessage
+from typing import Any, Callable, Optional
 
 
 # ═══════════════════════════════════════════════════════════════════════════════
-# B1: ColorLogger — Color-Coded Visual Logging
-# Chapter Ref: Used across all sections (14.1.x, 14.2.x)
+# B1: ColorLogger — Color-coded visual logging
+# Ref: Used across all sections for agent activity tracing
 # ═══════════════════════════════════════════════════════════════════════════════
 
 class ColorLogger:
-    """Color-coded logger for agent execution tracing.
+    """Color-coded logger for agent activity tracing.
 
-    Provides visual differentiation of log levels:
-        - BLUE:   Informational messages (agent starts, data loading)
-        - GREEN:  Success messages (tool completion, validation pass)
-        - RED:    Handled errors (caught by @graceful_fallback)
-        - YELLOW: Warnings (fallback activated, simulated mode)
-
-    No external dependencies — uses ANSI escape codes only.
+    Provides visual distinction between information (BLUE), success (GREEN),
+    error (RED), and warning (YELLOW) messages with ISO timestamps.
 
     Author: Imran Ahmad
+    Ref: Chapter 14, all sections
     """
 
-    # ANSI color codes
     BLUE = "\033[94m"
     GREEN = "\033[92m"
     RED = "\033[91m"
@@ -57,32 +41,29 @@ class ColorLogger:
 
     def __init__(self, name: str = "Chapter14"):
         self.name = name
-        # Enable ANSI on Windows cmd if applicable
-        if sys.platform == "win32":
-            os.system("")
 
     def _timestamp(self) -> str:
         return datetime.now().strftime("%H:%M:%S")
 
-    def _log(self, color: str, level: str, message: str) -> None:
+    def _log(self, color: str, level: str, message: str):
         ts = self._timestamp()
         prefix = f"{color}{self.BOLD}[{ts}] [{self.name}] {level}{self.RESET}"
         print(f"{prefix} {color}{message}{self.RESET}")
 
-    def info(self, message: str) -> None:
-        """Blue — informational messages."""
+    def info(self, message: str):
+        """Log informational message in BLUE."""
         self._log(self.BLUE, "INFO", message)
 
-    def success(self, message: str) -> None:
-        """Green — success and completion messages."""
+    def success(self, message: str):
+        """Log success message in GREEN."""
         self._log(self.GREEN, "SUCCESS", message)
 
-    def error(self, message: str) -> None:
-        """Red — handled errors (caught exceptions)."""
+    def error(self, message: str):
+        """Log handled error in RED."""
         self._log(self.RED, "ERROR", message)
 
-    def warning(self, message: str) -> None:
-        """Yellow — warnings and fallback activations."""
+    def warning(self, message: str):
+        """Log warning in YELLOW."""
         self._log(self.YELLOW, "WARNING", message)
 
 
@@ -91,654 +72,607 @@ logger = ColorLogger("Chapter14")
 
 
 # ═══════════════════════════════════════════════════════════════════════════════
-# B2: ServiceConfig — Per-Service API Key Detection
-# Chapter Ref: Technical Requirements (p.2), Simulation Mode Decision Flow
+# B2: ServiceConfig — Per-service API key detection with dashboard
+# Ref: Technical Requirements (p.2)
 # ═══════════════════════════════════════════════════════════════════════════════
 
 class ServiceConfig:
-    """Detects API key availability per service and prints a status dashboard.
+    """Detects per-service API availability and prints a status dashboard.
 
-    For each service (OpenAI, Finnhub, Tavily):
-      1. Check os.getenv() for the key
-      2. If not found, prompt via getpass (user can press Enter to skip)
-      3. Record status as LIVE or SIMULATED
-
-    The dashboard is printed once at instantiation time.
+    For each service (OpenAI, Finnhub, Tavily), checks os.getenv first,
+    then falls back to getpass if running interactively. Empty inputs
+    activate Simulation Mode for that service.
 
     Author: Imran Ahmad
-    Chapter Ref: Technical Requirements (p.2)
+    Ref: Chapter 14, Technical Requirements (p.2)
     """
 
     SERVICES = {
-        "OPENAI_API_KEY":  "OpenAI (LLM)",
+        "OPENAI_API_KEY": "OpenAI (LLM)",
         "FINNHUB_API_KEY": "Finnhub (Financial Data)",
-        "TAVILY_API_KEY":  "Tavily (News Search)",
+        "TAVILY_API_KEY": "Tavily (News Search)",
     }
 
-    def __init__(self, interactive: bool = True):
-        """Initialize service configuration.
-
-        Args:
-            interactive: If True, prompt for missing keys via getpass.
-                         If False (e.g., CI/CD), skip prompts and default to SIMULATED.
-        """
-        self.status: Dict[str, str] = {}
-        self.keys: Dict[str, Optional[str]] = {}
-
-        for env_var, display_name in self.SERVICES.items():
-            key = os.getenv(env_var, "")
-
-            if key:
-                self.status[env_var] = "LIVE"
-                self.keys[env_var] = key
-            elif interactive and self._is_interactive():
-                key = self._safe_getpass(env_var, display_name)
-                if key:
-                    os.environ[env_var] = key
-                    self.status[env_var] = "LIVE"
-                    self.keys[env_var] = key
-                else:
-                    self.status[env_var] = "SIMULATED"
-                    self.keys[env_var] = None
-            else:
-                self.status[env_var] = "SIMULATED"
-                self.keys[env_var] = None
-
+    def __init__(self):
+        self.status = {}
+        self.keys = {}
+        self._detect_all()
         self._print_dashboard()
 
-    def _is_interactive(self) -> bool:
-        """Check if running in an interactive environment."""
-        try:
-            return sys.stdin.isatty() or "ipykernel" in sys.modules
-        except Exception:
-            return False
+    def _detect_all(self):
+        for env_var, label in self.SERVICES.items():
+            key = os.getenv(env_var, "")
+            if not key:
+                key = self._try_getpass(env_var, label)
+            is_live = bool(key and key.strip())
+            self.status[env_var] = is_live
+            self.keys[env_var] = key if is_live else ""
 
-    def _safe_getpass(self, env_var: str, display_name: str) -> str:
-        """Prompt for a key, handling both terminal and Jupyter contexts."""
+    @staticmethod
+    def _try_getpass(env_var: str, label: str) -> str:
+        """Prompt for key via getpass; return empty if non-interactive."""
         try:
+            if not sys.stdin.isatty():
+                return ""
             import getpass
             key = getpass.getpass(
-                f"  Enter {display_name} key (or press Enter for Simulation Mode): "
+                f"  Enter {label} key (or press Enter for Simulation): "
             )
-            return key.strip()
-        except Exception:
+            return key
+        except (EOFError, OSError, KeyboardInterrupt):
             return ""
 
-    def _print_dashboard(self) -> None:
-        """Print the color-coded service status dashboard."""
-        line = "═" * 56
-        print(f"\n{ColorLogger.BOLD}{line}")
+    def _print_dashboard(self):
+        border = "═" * 54
+        print(f"\n{border}")
         print("  CHAPTER 14 — SERVICE STATUS DASHBOARD")
         print("  Book: 30 Agents Every AI Engineer Must Build")
         print("  Author: Imran Ahmad")
-        print(f"{line}{ColorLogger.RESET}")
-
-        for env_var, display_name in self.SERVICES.items():
-            status = self.status[env_var]
-            if status == "LIVE":
-                color = ColorLogger.GREEN
-                symbol = "●"
-            else:
-                color = ColorLogger.YELLOW
-                symbol = "○"
-            padding = " " * (32 - len(display_name))
-            print(f"  {display_name}{padding}{color}{symbol} {status}{ColorLogger.RESET}")
-
-        print(f"{ColorLogger.BOLD}{line}{ColorLogger.RESET}\n")
+        print(border)
+        for env_var, label in self.SERVICES.items():
+            is_live = self.status[env_var]
+            dot = "●" if is_live else "○"
+            mode = "LIVE" if is_live else "SIMULATED"
+            color = ColorLogger.GREEN if is_live else ColorLogger.YELLOW
+            reset = ColorLogger.RESET
+            print(f"  {label:<35} {color}{dot} {mode}{reset}")
+        print(f"{border}\n")
 
     def is_live(self, env_var: str) -> bool:
-        """Check if a specific service is in LIVE mode."""
-        return self.status.get(env_var) == "LIVE"
+        """Check if a specific service has a live API key."""
+        return self.status.get(env_var, False)
 
-    def get_key(self, env_var: str) -> Optional[str]:
-        """Retrieve the API key for a service, or None if SIMULATED."""
-        return self.keys.get(env_var)
+    def get_key(self, env_var: str) -> str:
+        """Retrieve the API key for a service (empty if simulated)."""
+        return self.keys.get(env_var, "")
 
 
 # ═══════════════════════════════════════════════════════════════════════════════
-# B3: @graceful_fallback — Defensive Execution Decorator
-# Chapter Ref: Sections 14.1.1 through 14.2.4
+# B3: @graceful_fallback — Resilience decorator
+# Ref: Sections 14.1.1–14.2.4 (wraps every agent tool)
 # ═══════════════════════════════════════════════════════════════════════════════
 
 def graceful_fallback(
     fallback_value: Any = None,
-    section_ref: str = "",
-    log_traceback: bool = False,
+    section_ref: str = "Chapter 14",
+    max_retries: int = 2,
+    base_delay: float = 0.5,
 ):
-    """Decorator that wraps a callable with exception handling.
-
-    When the decorated function raises any exception:
-      1. The exception is caught (notebook never crashes)
-      2. A RED log message is printed with the section reference
-      3. The fallback_value is returned instead
+    """Decorator that catches all exceptions, logs them in RED, and returns
+    a structured fallback value. Supports exponential backoff for transient
+    failures.
 
     Args:
-        fallback_value: Value to return on failure. Can be any type.
-        section_ref:    Chapter section reference (e.g., "Sec 14.1.1") for traceability.
-        log_traceback:  If True, print the full traceback (useful for debugging).
-
-    Usage:
-        @graceful_fallback(fallback_value={}, section_ref="Sec 14.1.1")
-        def get_market_data(symbol):
-            ...
+        fallback_value: Value returned when all retries are exhausted.
+        section_ref: Chapter section reference for log tracing.
+        max_retries: Number of retry attempts before falling back.
+        base_delay: Base delay in seconds for exponential backoff.
 
     Author: Imran Ahmad
+    Ref: Chapter 14, Sections 14.1.1–14.2.4
     """
+
     def decorator(func: Callable) -> Callable:
         @functools.wraps(func)
         def wrapper(*args, **kwargs):
-            try:
-                return func(*args, **kwargs)
-            except Exception as e:
-                ref = f" [{section_ref}]" if section_ref else ""
-                logger.error(
-                    f"@graceful_fallback caught exception in "
-                    f"{func.__name__}(){ref}: {type(e).__name__}: {e}"
-                )
-                if log_traceback:
-                    logger.error(traceback.format_exc())
-                logger.warning(
-                    f"Returning fallback value for {func.__name__}(){ref}"
-                )
-                return fallback_value
+            for attempt in range(max_retries + 1):
+                try:
+                    return func(*args, **kwargs)
+                except Exception as exc:
+                    if attempt < max_retries:
+                        delay = base_delay * (2 ** attempt)
+                        logger.warning(
+                            f"[{section_ref}] {func.__name__} attempt "
+                            f"{attempt + 1}/{max_retries + 1} failed: "
+                            f"{type(exc).__name__}: {exc} — "
+                            f"retrying in {delay:.1f}s"
+                        )
+                        time.sleep(delay)
+                    else:
+                        logger.error(
+                            f"[{section_ref}] {func.__name__} failed after "
+                            f"{max_retries + 1} attempts: "
+                            f"{type(exc).__name__}: {exc} — "
+                            f"returning fallback"
+                        )
+                        return fallback_value
         return wrapper
     return decorator
 
 
 # ═══════════════════════════════════════════════════════════════════════════════
-# B4: MockChatOpenAI — LangGraph-Compatible Mock LLM
-# Chapter Ref: Section 14.1 (supervisor routing), 14.2.x (legal analysis)
+# B4: MockChatOpenAI — Keyword-based mock LLM (BaseChatModel subclass)
+# Ref: Section 14.1 (supervisor routing, agent responses)
 # ═══════════════════════════════════════════════════════════════════════════════
 
-class MockChatOpenAI:
-    """Mock LLM that returns chapter-faithful responses via keyword classification.
+from typing import List, Optional as Opt
 
-    Designed to be a drop-in replacement for ChatOpenAI in LangGraph pipelines.
-    Returns AIMessage objects with properly formatted tool_calls when tools are
-    bound, making it compatible with create_react_agent.
+try:
+    from langchain_core.language_models.chat_models import BaseChatModel
+    from langchain_core.messages import AIMessage, BaseMessage as _BM
+    from langchain_core.outputs import ChatResult, ChatGeneration
+    _HAS_LANGCHAIN = True
+except ImportError:
+    _HAS_LANGCHAIN = False
 
-    Keyword routing logic:
-        - "market" / "stock" / "price"  → financial market data response
-        - "risk" / "var" / "volatility" → risk assessment response
-        - "legal" / "case" / "court"    → legal research response
-        - "contract" / "clause"         → contract analysis response
-        - "compliance" / "validate"     → compliance check response
-        - "news" / "headline"           → financial news response
-        - default                       → generic analytical response
 
-    Supports:
-        - .invoke(messages) → AIMessage
-        - .bind_tools(tools) → self (for create_react_agent compatibility)
-        - .with_structured_output(schema) → MockStructuredChain
-        - .generate(messages_list) → LLMResult-like
+def _classify_and_respond(query: str) -> str:
+    """Classify query by keyword and return chapter-faithful response.
 
     Author: Imran Ahmad
-    Chapter Ref: Section 14.1 (supervisor routing)
+    Ref: Chapter 14, Sections 14.1–14.2
     """
+    q = query.lower()
 
-    def __init__(self, model: str = "mock-gpt-4o-mini", temperature: float = 0, **kwargs):
-        self.model = model
-        self.temperature = temperature
-        self.bound_tools: List[Any] = []
-        self._call_count = 0
+    # Financial market data responses (Sec 14.1.1)
+    if any(kw in q for kw in ["market data", "price", "stock", "aapl",
+                                "msft", "googl", "ticker"]):
+        return (
+            "Market Data for AAPL: Price: $178.72, "
+            "Market Cap: $2800000000000, P/E Ratio: 28.5, "
+            "Day Range: $176.50-$179.80, Volume: 52340000. "
+            "The stock shows stable trading within a narrow range."
+        )
 
-    def bind_tools(self, tools: List[Any]) -> "MockChatOpenAI":
-        """Bind tools for create_react_agent compatibility."""
-        self.bound_tools = tools
-        return self
+    # Risk assessment responses (Sec 14.1.2)
+    if any(kw in q for kw in ["risk", "volatility", "var", "drawdown"]):
+        return (
+            "Risk Assessment: Composite risk score 4.85 (MODERATE). "
+            "Annualized volatility: 0.2340, Max drawdown: -0.0812, "
+            "VaR (95%): -0.0198. Position is within acceptable "
+            "risk parameters for a moderate-tolerance client."
+        )
 
-    def invoke(self, messages: Union[List, str, Any], **kwargs) -> AIMessage:
-        """Generate a mock response based on keyword classification.
+    # Financial analysis responses (Sec 14.1.1)
+    if any(kw in q for kw in ["analysis", "financials", "portfolio",
+                                "metric", "ratio"]):
+        return (
+            "Portfolio Analysis for AAPL: P/E Ratio: 28.5, "
+            "Revenue Growth: 7.8%, 52W High: $199.62, "
+            "52W Low: $143.90. Fundamentals indicate stable growth "
+            "with strong earnings momentum."
+        )
 
-        If tools are bound and the query matches a tool, returns an AIMessage
-        with tool_calls. Otherwise returns a plain text AIMessage.
+    # News responses (Sec 14.1.1)
+    if any(kw in q for kw in ["news", "sentiment", "headline",
+                                "market outlook"]):
+        return (
+            "Financial News Summary: (1) Federal Reserve signals "
+            "cautious approach to rate adjustments amid stable "
+            "inflation data. (2) Technology sector continues strong "
+            "Q4 earnings momentum. (3) Global markets respond "
+            "positively to improved trade outlook."
+        )
+
+    # Legal issue extraction (Sec 14.2.2)
+    if any(kw in q for kw in ["legal issue", "extract issue",
+                                "decompose", "legal matter"]):
+        return (
+            "Identified Issues: 1) Standard of care in data "
+            "protection (Regulatory Compliance, Priority 1). "
+            "2) Elements of negligence in security breach "
+            "(Tort Law, Priority 1). 3) Applicable statutory "
+            "obligations under GDPR/CCPA (Privacy Law, Priority 2)."
+        )
+
+    # Legal analysis (Sec 14.2.1–14.2.4)
+    if any(kw in q for kw in ["legal", "contract", "clause",
+                                "precedent", "citation", "court",
+                                "jurisdiction"]):
+        return (
+            "Legal Analysis: The matter involves established principles "
+            "of contractual interpretation under common law. Key "
+            "authorities include relevant Supreme Court holdings on "
+            "duty of care and statutory obligations. Recommend "
+            "focusing on binding precedent within the applicable "
+            "jurisdiction before expanding to persuasive authority."
+        )
+
+    # Compliance / advisory (Sec 14.1.3)
+    if any(kw in q for kw in ["compliance", "suitability",
+                                "recommend", "invest", "allocat"]):
+        return (
+            "Advisory Recommendation: For a moderate-risk client "
+            "with a 10-year horizon and $50,000 initial investment, "
+            "the recommended allocation is: US Equities 45%, "
+            "International Equities 20%, Fixed Income 25%, "
+            "Alternatives 10%. This allocation has been validated "
+            "against suitability and concentration limits."
+        )
+
+    # Default response
+    return (
+        f"[Simulation Mode] Processed query: '{query[:80]}...' — "
+        f"Response generated using chapter-derived mock logic."
+    )
+
+
+if _HAS_LANGCHAIN:
+    class MockChatOpenAI(BaseChatModel):
+        """Mock LLM that returns chapter-faithful responses based on
+        keyword classification of the input query.
+
+        Extends BaseChatModel so it is fully compatible with LangGraph's
+        create_react_agent, the pipe operator (|), bind_tools(), and
+        with_structured_output().
+
+        Author: Imran Ahmad
+        Ref: Chapter 14, Section 14.1
         """
-        self._call_count += 1
-        query = self._extract_query(messages)
-        query_lower = query.lower()
 
-        # If tools are bound, check if we should invoke one
-        if self.bound_tools and self._call_count <= len(self.bound_tools):
-            tool = self._match_tool(query_lower)
-            if tool:
-                return AIMessage(
+        model_name: str = "gpt-4o-mini-2024-07-18"
+
+        class Config:
+            arbitrary_types_allowed = True
+
+        def __init__(self, model: str = "gpt-4o-mini-2024-07-18",
+                     temperature: float = 0, **kwargs):
+            super().__init__(model_name=model, **kwargs)
+            # Use object.__setattr__ to bypass pydantic v1 field validation
+            object.__setattr__(self, "_mock_call_count", 0)
+            object.__setattr__(self, "_mock_bound_tools", [])
+            logger.info(
+                f"[Simulation Mode] MockChatOpenAI initialized "
+                f"(model={model})"
+            )
+
+        @property
+        def _llm_type(self) -> str:
+            return "mock-chat-openai"
+
+        def _generate(self, messages: List[_BM],
+                      stop: Opt[List[str]] = None,
+                      **kwargs) -> ChatResult:
+            """Core generation method required by BaseChatModel."""
+            query = ""
+            if messages:
+                query = messages[-1].content if hasattr(
+                    messages[-1], "content"
+                ) else str(messages[-1])
+
+            self_count = getattr(self, "_mock_call_count", 0) + 1
+            object.__setattr__(self, "_mock_call_count", self_count)
+
+            # If tools are bound and odd call, emit a tool_call
+            bound_tools = getattr(self, "_mock_bound_tools", [])
+            if bound_tools and self_count % 2 == 1:
+                tool = bound_tools[0]
+                tool_name = getattr(tool, "name",
+                                    getattr(tool, "__name__", "tool"))
+                msg = AIMessage(
                     content="",
                     tool_calls=[{
-                        "id": f"call_mock_{self._call_count}",
-                        "name": tool.name if hasattr(tool, "name") else str(tool),
-                        "args": self._generate_tool_args(tool, query_lower),
+                        "id": f"mock_call_{self_count}",
+                        "name": tool_name,
+                        "args": {"query": query},
                     }],
                 )
+            else:
+                content = _classify_and_respond(query)
+                msg = AIMessage(content=content)
 
-        # Text-only response via keyword routing
-        response_text = self._route_response(query_lower)
-        return AIMessage(content=response_text)
+            return ChatResult(generations=[ChatGeneration(message=msg)])
 
-    def with_structured_output(self, schema: Any, **kwargs) -> "MockStructuredChain":
-        """Return a MockStructuredChain for structured output routing."""
-        return MockStructuredChain(schema=schema)
+        def bind_tools(self, tools, **kwargs):
+            """Bind tools to enable tool_calls in responses.
+            Returns a new instance with tools bound.
+            """
+            clone = MockChatOpenAI(model=self.model_name)
+            object.__setattr__(clone, "_mock_bound_tools",
+                               list(tools) if tools else [])
+            object.__setattr__(clone, "_mock_call_count", 0)
+            return clone
 
-    def generate(self, messages_list: List[List], **kwargs) -> Any:
-        """Batch generation — returns a simple result structure."""
-        results = []
-        for messages in messages_list:
-            msg = self.invoke(messages)
-            results.append(msg)
-        return _MockLLMResult(generations=[[_MockGeneration(text=r.content)] for r in results])
+        def with_structured_output(self, schema, **kwargs):
+            """Return a Runnable that produces structured routing decisions.
+            Ref: Section 14.1, supervisor_agent() on p.5
+            """
+            from langchain_core.runnables import RunnableLambda
+            chain = MockStructuredChain(schema)
+            return RunnableLambda(chain.invoke)
 
-    def _extract_query(self, messages: Any) -> str:
-        """Extract the text query from various message formats."""
-        if isinstance(messages, str):
-            return messages
-        if isinstance(messages, list):
-            for msg in reversed(messages):
-                if isinstance(msg, HumanMessage):
-                    return msg.content
-                if isinstance(msg, dict) and msg.get("role") == "user":
-                    return msg.get("content", "")
-                if isinstance(msg, (SystemMessage, AIMessage)):
-                    continue
-            # Fallback: concatenate all string-like content
-            parts = []
-            for msg in messages:
-                if isinstance(msg, str):
-                    parts.append(msg)
-                elif hasattr(msg, "content"):
-                    parts.append(msg.content)
-            return " ".join(parts)
-        if hasattr(messages, "content"):
-            return messages.content
-        return str(messages)
+        def generate_text(self, prompt: str, **kwargs) -> str:
+            """Simple text generation for non-agent use cases.
+            Used by PrecedentFinder._extract_issues() (Sec 14.2.2).
+            """
+            return _classify_and_respond(prompt)
 
-    def _match_tool(self, query_lower: str) -> Optional[Any]:
-        """Match query keywords to a bound tool."""
-        for tool in self.bound_tools:
-            tool_name = tool.name if hasattr(tool, "name") else str(tool)
-            tool_name_lower = tool_name.lower()
-            # Match tool name keywords against query
-            if any(kw in query_lower for kw in tool_name_lower.split("_")):
-                return tool
-        # Default: return first tool if available
-        return self.bound_tools[0] if self.bound_tools else None
+else:
+    # Fallback if langchain is not installed
+    class MockChatOpenAI:
+        """Minimal mock LLM for environments without langchain.
 
-    def _generate_tool_args(self, tool: Any, query_lower: str) -> Dict:
-        """Generate plausible tool arguments based on tool schema."""
-        if hasattr(tool, "args_schema") and tool.args_schema:
-            schema_fields = tool.args_schema.model_fields if hasattr(
-                tool.args_schema, "model_fields"
-            ) else {}
-            args = {}
-            for field_name, field_info in schema_fields.items():
-                if "symbol" in field_name.lower():
-                    args[field_name] = "AAPL"
-                elif "query" in field_name.lower():
-                    args[field_name] = query_lower[:100]
-                else:
-                    args[field_name] = ""
-            return args
-        return {"query": query_lower[:100]}
+        Author: Imran Ahmad
+        Ref: Chapter 14, Section 14.1
+        """
 
-    def _route_response(self, query_lower: str) -> str:
-        """Route to chapter-faithful mock responses based on keywords."""
-
-        if any(kw in query_lower for kw in ["market", "stock", "price", "ticker"]):
-            return (
-                "Based on current market analysis (Sec 14.1.1): "
-                "AAPL is trading at $178.72 with a P/E ratio of 28.5 and market cap "
-                "of $2.8T. MSFT is at $338.11 with P/E of 32.1 and market cap of $2.5T. "
-                "Both show stable fundamentals with moderate growth indicators. "
-                "The technology sector continues to demonstrate resilience despite "
-                "broader market volatility. Volume patterns suggest institutional "
-                "accumulation in large-cap tech names."
+        def __init__(self, model: str = "gpt-4o-mini-2024-07-18",
+                     temperature: float = 0, **kwargs):
+            self.model_name = model
+            self._mock_bound_tools = []
+            self._mock_call_count = 0
+            logger.info(
+                f"[Simulation Mode] MockChatOpenAI initialized "
+                f"(model={model})"
             )
 
-        if any(kw in query_lower for kw in ["risk", "var", "volatility", "cvar"]):
-            return (
-                "Risk Assessment Summary (Sec 14.1.2): "
-                "Portfolio VaR (95%): -2.34% daily. CVaR (95%): -3.12% daily. "
-                "Annualized volatility: 18.7%. Maximum drawdown over 90 days: -8.2%. "
-                "The portfolio risk score is 5.8/10 (Moderate). "
-                "Recommendation: Current allocation is within acceptable risk bounds "
-                "for a moderate-growth investor profile. Consider rebalancing if "
-                "volatility exceeds 25% annualized."
-            )
+        def invoke(self, input_data, **kwargs):
+            query = str(input_data)
+            return type("Msg", (), {
+                "content": _classify_and_respond(query)
+            })()
 
-        if any(kw in query_lower for kw in ["legal", "case", "court", "precedent", "jurisdiction"]):
-            return (
-                "Legal Research Summary (Sec 14.2.1-14.2.2): "
-                "Found 4 relevant precedents in the knowledge base. "
-                "Highest authority: Supreme Court ruling in SEC v. Capital Growth "
-                "(authority level 10). Supporting circuit court decisions provide "
-                "consistent interpretation of fiduciary duty standards. "
-                "Note: All citations verified against the knowledge base. "
-                "One potential hallucinated citation (Varghese v. Tech Corp) was "
-                "flagged and excluded per verification protocol."
-            )
+        def bind_tools(self, tools, **kwargs):
+            return self
 
-        if any(kw in query_lower for kw in ["contract", "clause", "indemnif", "liability"]):
-            return (
-                "Contract Analysis Summary (Sec 14.2.3): "
-                "Analyzed 8 contract clauses. Risk findings: "
-                "HIGH — Indemnification clause (Section 4) contains unlimited liability exposure. "
-                "HIGH — Liability cap (Section 5) is set below industry standard thresholds. "
-                "CRITICAL — No GDPR data processing addendum found. "
-                "MEDIUM — Termination clause lacks mutual termination rights. "
-                "Recommendation: Negotiate liability cap increase and add GDPR addendum "
-                "before execution."
-            )
+        def with_structured_output(self, schema, **kwargs):
+            return MockStructuredChain(schema)
 
-        if any(kw in query_lower for kw in ["compliance", "validate", "compliant"]):
-            return (
-                "Compliance Validation (Sec 14.1.3): "
-                "Checking advisory plan against regulatory requirements... "
-                "Suitability check: PASS — Risk level matches client tolerance. "
-                "Concentration check: PASS — No single position exceeds 40%. "
-                "Disclosure check: PASS — All required disclaimers present. "
-                "Overall compliance status: APPROVED. "
-                "Plan may proceed to client delivery."
-            )
-
-        if any(kw in query_lower for kw in ["news", "headline", "sentiment"]):
-            return (
-                "Financial News Summary (Sec 14.1.1): "
-                "Top 5 relevant headlines: "
-                "1. Federal Reserve signals steady rates through Q2 (Reuters). "
-                "2. Tech earnings season shows mixed results with AI spending focus (Bloomberg). "
-                "3. S&P 500 reaches new highs amid strong employment data (CNBC). "
-                "4. Global supply chain improvements reduce inflation concerns (WSJ). "
-                "5. Semiconductor sector rallies on increased data center demand (FT). "
-                "Overall sentiment: Moderately bullish with cautious optimism."
-            )
-
-        if any(kw in query_lower for kw in ["allocat", "portfolio", "invest", "plan"]):
-            return (
-                "Investment Plan (Sec 14.1.3-14.1.4): "
-                "Recommended allocation for moderate growth, 10-year horizon: "
-                "US Equities: 45% — Diversified large-cap growth and value mix. "
-                "International Equities: 20% — Developed markets with emerging market tilt. "
-                "Fixed Income: 25% — Investment-grade corporate and government bonds. "
-                "Alternatives: 10% — REITs and commodity exposure for inflation hedge. "
-                "Expected annual return: 7.2%. Expected volatility: 12.4%."
-            )
-
-        # Default analytical response
-        return (
-            "Analysis complete (Chapter 14 — Financial and Legal Domain Agents). "
-            "The multi-agent system has processed the request through the supervisor "
-            "architecture. All agent nodes executed successfully with results aggregated "
-            "at the supervisor level. For detailed methodology, refer to the relevant "
-            "chapter section in '30 Agents Every AI Engineer Must Build' by Imran Ahmad."
-        )
+        def generate_text(self, prompt: str, **kwargs) -> str:
+            return _classify_and_respond(prompt)
 
 
 # ═══════════════════════════════════════════════════════════════════════════════
-# B5: MockStructuredChain — Deterministic Supervisor Routing
-# Chapter Ref: Section 14.1, Fig 14.1 (supervisor pattern)
+# B5: MockStructuredChain — Deterministic supervisor routing
+# Ref: Section 14.1, supervisor routing (p.4-5)
 # ═══════════════════════════════════════════════════════════════════════════════
 
 class MockStructuredChain:
-    """Deterministic routing for the supervisor agent.
+    """Deterministic routing chain for the supervisor agent.
 
-    Returns a fixed sequence of routing decisions:
-        Call 1: "market_data_agent"
-        Call 2: "analysis_agent"
-        Call 3: "news_agent"
-        Call 4+: "FINISH"
+    Cycles through the specialist agent sequence defined in the chapter:
+    Market_Data_Agent → Financial_Analysis_Agent → News_Agent → FINISH.
 
-    This mirrors the supervisor architecture in Fig 14.1 where the supervisor
-    orchestrates agents in a logical sequence.
+    Uses a class-level step counter so routing progresses even when
+    new instances are created by with_structured_output() calls.
 
     Author: Imran Ahmad
-    Chapter Ref: Section 14.1, Fig 14.1
+    Ref: Chapter 14, Section 14.1 (p.4-5)
     """
 
-    ROUTE_SEQUENCE = ["market_data_agent", "analysis_agent", "news_agent", "FINISH"]
+    ROUTING_SEQUENCE = [
+        "Market_Data_Agent",
+        "Financial_Analysis_Agent",
+        "News_Agent",
+        "FINISH",
+    ]
 
-    def __init__(self, schema: Any = None):
+    _global_step = 0
+
+    def __init__(self, schema=None):
         self.schema = schema
-        self._call_index = 0
 
-    def invoke(self, messages: Any, **kwargs) -> Any:
-        """Return the next routing decision in the sequence."""
-        route = self.ROUTE_SEQUENCE[
-            min(self._call_index, len(self.ROUTE_SEQUENCE) - 1)
+    def invoke(self, input_data, **kwargs):
+        """Return the next routing target in the deterministic sequence."""
+        target = self.ROUTING_SEQUENCE[
+            MockStructuredChain._global_step % len(self.ROUTING_SEQUENCE)
         ]
-        self._call_index += 1
+        MockStructuredChain._global_step += 1
+        logger.info(f"[Supervisor] Routing to: {target}")
 
-        # If schema is provided, try to instantiate it with the route
-        if self.schema:
+        # Return an instance of the schema if provided
+        if self.schema is not None:
             try:
-                return self.schema(next=route)
+                return self.schema(next=target)
             except Exception:
                 pass
 
-        return _MockRouteResponse(next=route)
+        # Fallback: return a simple object with .next attribute
+        return type("RouteResult", (), {"next": target})()
 
-    def reset(self) -> None:
-        """Reset the routing sequence (useful for re-running demos)."""
-        self._call_index = 0
-
-
-@dataclass
-class _MockRouteResponse:
-    """Fallback route response when no Pydantic schema is provided."""
-    next: str = "FINISH"
+    @classmethod
+    def reset(cls):
+        """Reset the routing counter (useful for repeated demos)."""
+        cls._global_step = 0
 
 
 # ═══════════════════════════════════════════════════════════════════════════════
-# B6: MockEmbeddingModel — Deterministic Hash-Based Embeddings
-# Chapter Ref: Section 14.2.1 (legal knowledge base)
+# B6: MockEmbeddingModel — Hash-based pseudo-embeddings
+# Ref: Section 14.2.1 (legal knowledge base, p.20-22)
 # ═══════════════════════════════════════════════════════════════════════════════
 
 class MockEmbeddingModel:
-    """Produces deterministic pseudo-embeddings from text via hashing.
+    """Generates deterministic pseudo-embeddings using text hashing.
 
-    Uses SHA-256 to generate reproducible float vectors from input text.
-    Same input always produces the same embedding, enabling consistent
-    similarity search results across runs.
+    Produces consistent embeddings for the same input text, enabling
+    reproducible similarity comparisons without a real embedding model.
 
     Author: Imran Ahmad
-    Chapter Ref: Section 14.2.1
+    Ref: Chapter 14, Section 14.2.1 (p.20-22)
     """
 
-    def __init__(self, dimension: int = 384):
-        """Initialize with embedding dimension.
-
-        Args:
-            dimension: Output vector dimension (default 384 for MiniLM compatibility).
-        """
+    def __init__(self, dimension: int = 128):
         self.dimension = dimension
 
-    def embed_documents(self, texts: List[str]) -> List[List[float]]:
-        """Embed a list of documents."""
-        return [self._hash_embed(text) for text in texts]
+    def encode(self, text: str) -> list:
+        """Generate a deterministic pseudo-embedding from text content."""
+        text_bytes = text.encode("utf-8")
+        hash_digest = hashlib.sha512(text_bytes).hexdigest()
 
-    def embed_query(self, text: str) -> List[float]:
-        """Embed a single query string."""
-        return self._hash_embed(text)
+        # Extend hash to cover the full dimension
+        extended = hash_digest
+        while len(extended) < self.dimension * 2:
+            extended += hashlib.sha512(
+                extended.encode("utf-8")
+            ).hexdigest()
 
-    def _hash_embed(self, text: str) -> List[float]:
-        """Generate a deterministic embedding from text using SHA-256 expansion.
+        # Convert hex pairs to floats in [-1, 1]
+        embedding = []
+        for i in range(self.dimension):
+            hex_pair = extended[i * 2: i * 2 + 2]
+            value = (int(hex_pair, 16) / 255.0) * 2 - 1
+            embedding.append(round(value, 6))
 
-        Process:
-          1. Hash the input text with SHA-256
-          2. Use the hash as a seed for numpy random
-          3. Generate a unit-normalized float vector of the configured dimension
-        """
-        hash_bytes = hashlib.sha256(text.encode("utf-8")).digest()
-        seed = int.from_bytes(hash_bytes[:4], "big")
-        rng = np.random.RandomState(seed)
-        vector = rng.randn(self.dimension).astype(float)
-        # L2 normalize
-        norm = np.linalg.norm(vector)
+        # Normalize to unit length
+        norm = math.sqrt(sum(v * v for v in embedding))
         if norm > 0:
-            vector = vector / norm
-        return vector.tolist()
+            embedding = [round(v / norm, 6) for v in embedding]
+
+        return embedding
 
 
 # ═══════════════════════════════════════════════════════════════════════════════
-# B7: MockVectorStore — In-Memory Vector Store with Cosine Similarity
-# Chapter Ref: Section 14.2.1 (legal knowledge base, hybrid retrieval)
+# B7: MockVectorStore — In-memory vector store with cosine similarity
+# Ref: Section 14.2.1 (legal knowledge base, p.20-22)
 # ═══════════════════════════════════════════════════════════════════════════════
 
-@dataclass
 class MockSearchResult:
-    """A single search result from MockVectorStore.
+    """Container for vector search results with metadata.
 
-    Attributes:
-        id:       Document identifier
-        text:     Original document text
-        metadata: Associated metadata (court, jurisdiction, authority_level, etc.)
-        score:    Cosine similarity score (0 to 1)
+    Author: Imran Ahmad
+    Ref: Chapter 14, Section 14.2.1
     """
-    id: str
-    text: str
-    metadata: Dict[str, Any] = field(default_factory=dict)
-    score: float = 0.0
+
+    def __init__(self, id: str, embedding: list, metadata: dict,
+                 similarity_score: float = 0.0):
+        self.id = id
+        self.embedding = embedding
+        self.metadata = metadata
+        self.similarity_score = similarity_score
+        self.final_score = similarity_score
 
 
 class MockVectorStore:
-    """In-memory vector store with cosine similarity search and metadata filtering.
+    """In-memory vector store with cosine similarity search and
+    metadata filtering.
 
-    Provides the core operations needed for the legal knowledge base:
-      - upsert(): Add or update documents with embeddings and metadata
-      - query():  Find similar documents with optional metadata filters
-      - delete(): Remove documents by ID
-      - count():  Return the number of stored documents
-
-    Uses MockEmbeddingModel for automatic text-to-vector conversion.
+    Supports upsert(), query(), and verify_citation() operations
+    needed by LegalKnowledgeBase and the citation verification gate.
 
     Author: Imran Ahmad
-    Chapter Ref: Section 14.2.1
+    Ref: Chapter 14, Section 14.2.1 (p.20-22)
     """
 
-    def __init__(self, embedding_model: Optional[MockEmbeddingModel] = None):
-        self.embedding_model = embedding_model or MockEmbeddingModel()
-        self._store: Dict[str, Dict[str, Any]] = {}
+    def __init__(self):
+        self._store = {}
 
-    def upsert(
-        self,
-        doc_id: str,
-        text: str,
-        metadata: Optional[Dict[str, Any]] = None,
-        embedding: Optional[List[float]] = None,
-    ) -> None:
-        """Add or update a document in the store.
-
-        Args:
-            doc_id:    Unique document identifier
-            text:      Document text
-            metadata:  Optional metadata dictionary
-            embedding: Pre-computed embedding (if None, auto-computed from text)
-        """
-        if embedding is None:
-            embedding = self.embedding_model.embed_query(text)
-
-        self._store[doc_id] = {
-            "text": text,
-            "metadata": metadata or {},
+    def upsert(self, id: str, embedding: list, metadata: dict):
+        """Insert or update a document in the store."""
+        self._store[id] = {
+            "id": id,
             "embedding": embedding,
+            "metadata": metadata,
         }
-        logger.info(f"MockVectorStore: Upserted document '{doc_id}'")
+        logger.info(
+            f"[VectorStore] Upserted document: {id} "
+            f"({len(embedding)}-dim embedding)"
+        )
 
-    def query(
-        self,
-        query_text: str,
-        top_k: int = 5,
-        metadata_filter: Optional[Dict[str, Any]] = None,
-    ) -> List[MockSearchResult]:
-        """Search for similar documents using cosine similarity.
+    def query(self, embedding: list, filter: dict = None,
+              top_k: int = 10) -> list:
+        """Retrieve top-k results by cosine similarity with optional
+        metadata filtering.
 
         Args:
-            query_text:      Search query text
-            top_k:           Maximum number of results to return
-            metadata_filter: Optional dict of metadata key-value pairs to filter by
+            embedding: Query embedding vector.
+            filter: Metadata filter dict. Supports exact match and
+                    $gte operator for numeric fields.
+            top_k: Maximum number of results to return.
 
         Returns:
-            List of MockSearchResult ordered by descending similarity score.
+            List of MockSearchResult objects sorted by similarity.
         """
-        if not self._store:
-            return []
-
-        query_embedding = np.array(self.embedding_model.embed_query(query_text))
         results = []
-
         for doc_id, doc in self._store.items():
-            # Apply metadata filter
-            if metadata_filter:
-                skip = False
-                for key, value in metadata_filter.items():
-                    if doc["metadata"].get(key) != value:
-                        skip = True
-                        break
-                if skip:
-                    continue
+            # Apply metadata filters
+            if filter and not self._matches_filter(doc["metadata"], filter):
+                continue
 
-            # Compute cosine similarity
-            doc_embedding = np.array(doc["embedding"])
-            dot_product = np.dot(query_embedding, doc_embedding)
-            norm_product = np.linalg.norm(query_embedding) * np.linalg.norm(doc_embedding)
-
-            if norm_product > 0:
-                score = float(dot_product / norm_product)
-            else:
-                score = 0.0
-
+            score = self._cosine_similarity(embedding, doc["embedding"])
             results.append(MockSearchResult(
                 id=doc_id,
-                text=doc["text"],
+                embedding=doc["embedding"],
                 metadata=doc["metadata"],
-                score=score,
+                similarity_score=score,
             ))
 
-        # Sort by score descending and return top_k
-        results.sort(key=lambda r: r.score, reverse=True)
+        results.sort(key=lambda r: r.similarity_score, reverse=True)
         return results[:top_k]
 
-    def delete(self, doc_id: str) -> bool:
-        """Remove a document by ID. Returns True if found and deleted."""
-        if doc_id in self._store:
-            del self._store[doc_id]
-            return True
+    def verify_citation(self, citation_text: str,
+                        jurisdiction: str = None,
+                        check_precedential: bool = True,
+                        check_good_law: bool = True) -> bool:
+        """Verify a citation exists in the store and is valid.
+
+        Used by the citation verification gate (Sec 14.2.4, p.31-32).
+
+        Returns:
+            True if the citation exists, is good law, and meets
+            jurisdiction/precedential requirements.
+        """
+        for doc_id, doc in self._store.items():
+            meta = doc["metadata"]
+            citation = meta.get("citation", "")
+            case_name = meta.get("case_name", "")
+
+            # Match by citation string or case name substring
+            if (citation_text in citation or
+                    citation_text in case_name or
+                    citation in citation_text):
+
+                # Check precedential status
+                if check_good_law and meta.get("status") != "good_law":
+                    return False
+
+                # Check jurisdiction match
+                if jurisdiction and meta.get("jurisdiction") != jurisdiction:
+                    continue
+
+                # Check minimum authority
+                if check_precedential and meta.get("authority_level", 0) < 1:
+                    return False
+
+                return True
+
         return False
+
+    @staticmethod
+    def _cosine_similarity(vec_a: list, vec_b: list) -> float:
+        """Compute cosine similarity between two vectors."""
+        if len(vec_a) != len(vec_b):
+            return 0.0
+        dot = sum(a * b for a, b in zip(vec_a, vec_b))
+        norm_a = math.sqrt(sum(a * a for a in vec_a))
+        norm_b = math.sqrt(sum(b * b for b in vec_b))
+        if norm_a == 0 or norm_b == 0:
+            return 0.0
+        return dot / (norm_a * norm_b)
+
+    @staticmethod
+    def _matches_filter(metadata: dict, filter_dict: dict) -> bool:
+        """Check if document metadata matches all filter criteria."""
+        for key, condition in filter_dict.items():
+            value = metadata.get(key)
+            if isinstance(condition, dict):
+                if "$gte" in condition:
+                    if value is None or value < condition["$gte"]:
+                        return False
+            else:
+                if value != condition:
+                    return False
+        return True
 
     def count(self) -> int:
         """Return the number of documents in the store."""
         return len(self._store)
-
-    def list_ids(self) -> List[str]:
-        """Return all document IDs in the store."""
-        return list(self._store.keys())
-
-
-# ═══════════════════════════════════════════════════════════════════════════════
-# Internal Helper Classes
-# ═══════════════════════════════════════════════════════════════════════════════
-
-@dataclass
-class _MockGeneration:
-    """Mimics LangChain's Generation object for .generate() compatibility."""
-    text: str = ""
-
-
-@dataclass
-class _MockLLMResult:
-    """Mimics LangChain's LLMResult object for .generate() compatibility."""
-    generations: List[List[_MockGeneration]] = field(default_factory=list)
-
-
-# ═══════════════════════════════════════════════════════════════════════════════
-# Module Exports
-# ═══════════════════════════════════════════════════════════════════════════════
-
-__all__ = [
-    "ColorLogger",
-    "ServiceConfig",
-    "graceful_fallback",
-    "MockChatOpenAI",
-    "MockStructuredChain",
-    "MockEmbeddingModel",
-    "MockVectorStore",
-    "MockSearchResult",
-    "logger",
-]

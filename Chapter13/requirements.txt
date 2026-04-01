@@ -3,6 +3,7 @@
 # Author: Imran Ahmad
 #
 # Install: pip install -r requirements.txt
+# Requires: Python 3.10+
 
 # Core
 numpy>=1.24,<2.1
@@ -19,7 +20,7 @@ fhir.resources>=7.0,<8.0
 aiohttp>=3.9,<4.0
 nest-asyncio>=1.6,<2.0
 
-# NLP / embeddings (optional — used in live mode)
+# NLP / embeddings (optional — used in live mode only)
 transformers>=4.40,<5.0
 
 # Scientific computing

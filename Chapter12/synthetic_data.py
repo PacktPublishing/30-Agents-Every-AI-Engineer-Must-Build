@@ -1,135 +1,143 @@
-"""
-Synthetic data generators for Chapter 12 demonstrations.
+# src/synthetic_data.py
+# Author: Imran Ahmad
+# Book: 30 Agents Every AI Engineer Must Build, Chapter 12
+# Ref: Strategy §4.1 (HR Dataset), §4.2 (Medical Dataset)
+# Description: Deterministic synthetic dataset generators for the HR fairness
+#              case study and the medical diagnosis explainability case study.
 
-Produces deterministic, seeded datasets for the HR (bias detection) and
-Medical (explainability) case studies.
+import random
+from typing import Any
 
-Author: Imran Ahmad
-Book: 30 Agents Every AI Engineer Must Build, Chapter 12
-Section Reference: Synthetic Data Spec (Strategy §4), HR p.14-23, Medical p.30-35
-"""
+from src.utils import ColorLogger
 
-import numpy as np
-import pandas as pd
-from typing import Optional
+logger = ColorLogger("SyntheticData")
 
-from src.utils import ColorLogger, graceful_fallback
-
-logger = ColorLogger(name="SyntheticData")
 
 # ---------------------------------------------------------------------------
-# Skill / symptom / institution pools (chapter-derived)
+# Shared constants
 # ---------------------------------------------------------------------------
 
-_TECH_SKILLS = [
+SKILL_POOL = [
     "python", "java", "sql", "machine_learning", "deep_learning",
-    "data_analysis", "cloud_computing", "devops", "nlp", "computer_vision",
-    "statistics", "react", "node_js", "kubernetes", "terraform",
-    "data_engineering", "spark", "tableau", "project_management", "agile",
+    "data_analysis", "cloud_computing", "aws", "docker", "kubernetes",
+    "react", "node_js", "tensorflow", "pytorch", "nlp",
+    "computer_vision", "statistics", "project_management", "agile", "communication",
 ]
 
-_INSTITUTIONS = [
+INSTITUTION_POOL = [
+    # Tier 1 (high prestige)
     "MIT", "Stanford University", "Carnegie Mellon", "UC Berkeley",
-    "Georgia Tech", "University of Michigan", "University of Washington",
-    "Harvard University", "Princeton University", "Caltech",
-    "University of Illinois", "Cornell University", "Columbia University",
-    "University of Texas Austin", "UCLA", "NYU", "Duke University",
-    "State University A", "State University B", "State University C",
-    "Regional College D", "Regional College E", "Community College F",
-    "Community College G", "Technical Institute H", "Technical Institute I",
-    "Online University J", "Online University K",
-    "International University L", "International University M",
+    "Harvard University", "Caltech", "Oxford University", "ETH Zurich",
+    "University of Cambridge", "Princeton University",
+    # Tier 2 (mid prestige)
+    "University of Michigan", "Georgia Tech", "University of Toronto",
+    "University of Washington", "UT Austin", "NYU", "UCLA",
+    "University of Illinois", "Penn State", "University of Maryland",
+    # Tier 3 (regional / community)
+    "State College of Technology", "Metro Community College",
+    "Regional Technical University", "City University",
+    "Community College of Arts", "Westfield State University",
+    "Northern State College", "Lakeside Community College",
+    "Prairie View University", "Valley Technical Institute",
 ]
 
-_SYMPTOMS = [
-    "productive cough", "fever", "shortness of breath", "chest pain",
-    "fatigue", "headache", "nausea", "chills", "night sweats",
-    "wheezing", "dizziness", "dry cough", "muscle ache",
-    "sore throat", "weight loss",
+SYMPTOM_POOL = [
+    "productive cough", "dry cough", "fever", "chills",
+    "shortness of breath", "chest pain", "fatigue", "headache",
+    "muscle aches", "sore throat", "runny nose", "nausea",
+    "wheezing", "rapid breathing", "night sweats",
 ]
 
-_PATIENT_HISTORY_ITEMS = ["COPD", "CHF", "diabetes", "hypertension", "asthma"]
+HISTORY_POOL = ["COPD", "CHF", "diabetes", "hypertension", "asthma"]
 
 
 # ---------------------------------------------------------------------------
-# Section 4.1 — HR Dataset: generate_hr_dataset(n=200, seed=42)
+# §4.1  HR Dataset Generator
+# Ref: Bias detection and mitigation (p.14–19),
+#      FairHiringAgent case study (p.20–23)
 # ---------------------------------------------------------------------------
 
-@graceful_fallback(
-    fallback_value=pd.DataFrame(),
-    section_ref="Section 12 - HR Dataset Generation (p.14-23)"
-)
-def generate_hr_dataset(n: int = 200, seed: int = 42) -> pd.DataFrame:
+def generate_hr_dataset(n: int = 200, seed: int = 42) -> list[dict[str, Any]]:
     """
-    Generate a synthetic HR / hiring dataset with injected gender bias.
+    Generate a synthetic HR dataset with injected gender bias.
 
-    The raw_score formula (p.20):
-        score = 0.3 + 0.1 * min(skill_matches, 5) + 0.02 * min(years_exp, 10)
-    Where skill_matches = number of candidate skills matching the job's
-    required skills (a subset of their total skills).
+    The dataset models the scenario from the FairHiringAgent case study
+    (p.20–23), inspired by the Amazon AI recruiting failure (p.15, p.20).
 
-    Bias injection (p.22): gender-based penalty for female candidates,
-    plus small assessment noise (simulates real interview variance).
-    Calibrated to produce a four-fifths violation with disparate impact ~0.73.
+    Bias injection (Strategy §4.1):
+        score -= 0.05 for gender == 'female'
+    This produces a disparate impact ratio of approximately 0.73,
+    below the four-fifths rule threshold (0.80) from p.16/p.22.
 
-    Args:
-        n: Number of candidates to generate.
-        seed: Random seed for reproducibility.
+    Parameters
+    ----------
+    n : int
+        Number of candidate records to generate (default: 200).
+    seed : int
+        Random seed for reproducibility (default: 42).
 
-    Returns:
-        pd.DataFrame with columns matching Strategy §4.1.
+    Returns
+    -------
+    list[dict]
+        List of candidate records with fields per Strategy §4.1.
     """
-    rng = np.random.RandomState(seed)
-    logger.info(f"Generating HR dataset: n={n}, seed={seed}")
+    rng = random.Random(seed)
+    dataset = []
 
-    # Job posting requires these 5 specific skills (used for skill_matches)
-    required_skills = {"python", "machine_learning", "sql", "statistics", "cloud_computing"}
-
-    records = []
     for i in range(n):
-        # Demographics — weighted distributions per strategy spec
-        gender = rng.choice(
+        candidate_id = f"C-{i:04d}"
+
+        # Demographics — imbalanced to mirror Amazon scenario (p.15, p.20)
+        gender = rng.choices(
             ["male", "female", "non_binary"],
-            p=[0.55, 0.40, 0.05],
-        )
-        ethnicity = rng.choice(
-            ["group_a", "group_b", "group_c", "group_d"],
-            p=[0.50, 0.25, 0.15, 0.10],
-        )
-        education_level = rng.choice(
+            weights=[0.55, 0.40, 0.05],
+            k=1,
+        )[0]
+        ethnicity = rng.choices(
+            ["group_A", "group_B", "group_C", "group_D"],
+            weights=[0.50, 0.25, 0.15, 0.10],
+            k=1,
+        )[0]
+
+        # Qualifications
+        num_skills = rng.randint(3, 8)
+        skills = rng.sample(SKILL_POOL, num_skills)
+        years_experience = rng.randint(1, 20)
+        education_level = rng.choices(
             ["bachelors", "masters", "phd"],
-            p=[0.50, 0.35, 0.15],
-        )
-        education_institution = rng.choice(_INSTITUTIONS)
+            weights=[0.50, 0.35, 0.15],
+            k=1,
+        )[0]
+        education_institution = rng.choice(INSTITUTION_POOL)
 
-        # Skills and experience
-        num_skills = rng.randint(3, 9)  # 3-8 inclusive
-        skills = list(rng.choice(_TECH_SKILLS, size=num_skills, replace=False))
-        years_experience = int(rng.randint(1, 21))  # Uniform(1, 20)
+        # --- Deterministic scoring ---
+        # The MockLLM._mock_resume_scoring formula (p.20–21) uses matched
+        # skills against job requirements:
+        #     score = 0.3 + 0.1 * min(skill_matches, 5) + 0.02 * min(exp, 10)
+        # For batch generation, we simulate partial matches (typically 1–3
+        # of a candidate's skills match a 5-skill job posting) so that the
+        # score distribution centers near the 0.65 qualification threshold.
+        # This ensures the bias injection creates a visible DI gap.
+        simulated_matches = rng.randint(1, min(num_skills, 4))
+        skill_contribution = 0.1 * min(simulated_matches, 5)
+        exp_contribution = 0.02 * min(years_experience, 10)
+        raw_score = 0.3 + skill_contribution + exp_contribution
 
-        # Deterministic base score (p.20-21)
-        # skill_matches = overlap between candidate skills and job requirements
-        skill_matches = len(set(skills) & required_skills)
-        raw_score = (
-            0.3
-            + 0.1 * min(skill_matches, 5)
-            + 0.02 * min(years_experience, 10)
-        )
+        # Add noise to spread the distribution around the threshold
+        raw_score += rng.gauss(0, 0.06)
 
-        # Assessment noise — simulates real interview/evaluation variance
-        raw_score += rng.normal(0, 0.04)
-
-        # Injected gender bias (p.22) — calibrated for disparate impact ~0.73
+        # --- Bias injection (Strategy §4.1) ---
+        # Penalize female candidates to produce DI ≈ 0.73 (p.22)
         if gender == "female":
-            raw_score -= 0.03
+            raw_score -= 0.055
 
-        raw_score = round(min(max(raw_score, 0.0), 1.0), 4)
+        raw_score = round(max(0.0, min(1.0, raw_score)), 4)
 
-        # Ground truth qualification threshold
+        # Qualification threshold (p.22)
         qualified = raw_score >= 0.65
 
-        records.append({
-            "candidate_id": f"C-{i:04d}",
+        dataset.append({
+            "candidate_id": candidate_id,
             "skills": skills,
             "years_experience": years_experience,
             "education_level": education_level,
@@ -140,90 +148,142 @@ def generate_hr_dataset(n: int = 200, seed: int = 42) -> pd.DataFrame:
             "qualified": qualified,
         })
 
-    df = pd.DataFrame(records)
-    logger.success(
-        f"HR dataset generated: {len(df)} candidates, "
-        f"gender distribution: {df['gender'].value_counts().to_dict()}"
+    logger.info(
+        f"Generated HR dataset: {n} candidates (seed={seed}). "
+        f"Bias injected for fairness demonstration."
     )
-    return df
+    return dataset
 
 
 # ---------------------------------------------------------------------------
-# Section 4.2 — Medical Dataset: generate_medical_dataset(n=50, seed=42)
+# §4.2  Medical Dataset Generator
+# Ref: DiagnosticAssistant case study (p.30–35),
+#      Edge computing for privacy (p.31–32)
 # ---------------------------------------------------------------------------
 
-@graceful_fallback(
-    fallback_value=pd.DataFrame(),
-    section_ref="Section 12 - Medical Dataset Generation (p.30-35)"
-)
-def generate_medical_dataset(n: int = 50, seed: int = 42) -> pd.DataFrame:
+def generate_medical_dataset(n: int = 50, seed: int = 42) -> list[dict[str, Any]]:
     """
-    Generate a synthetic medical / diagnostic dataset.
+    Generate a synthetic medical dataset for the DiagnosticAssistant.
 
-    All distributions match the Strategy §4.2 specification. Vital signs
-    are clipped to physiologically plausible ranges.
+    All patient IDs are de-identified tokens (p.31–32). Vitals represent
+    aggregated features from the edge processing layer, not raw sensor data.
 
-    Args:
-        n: Number of patient records.
-        seed: Random seed for reproducibility.
+    Parameters
+    ----------
+    n : int
+        Number of patient records to generate (default: 50).
+    seed : int
+        Random seed for reproducibility (default: 42).
 
-    Returns:
-        pd.DataFrame with columns matching Strategy §4.2.
+    Returns
+    -------
+    list[dict]
+        List of patient records with fields per Strategy §4.2.
     """
-    rng = np.random.RandomState(seed)
-    logger.info(f"Generating Medical dataset: n={n}, seed={seed}")
+    rng = random.Random(seed)
+    dataset = []
 
-    records = []
     for i in range(n):
-        # Vital signs — Normal distributions with physiological clipping
-        heart_rate_avg = round(float(rng.normal(75, 12)), 1)
-        spo2_min = round(float(np.clip(rng.normal(96, 3), 85, 100)), 1)
-        wbc_count = round(float(np.clip(rng.normal(7.5, 2.5), 2, 25)), 1)
-        temperature = round(float(rng.normal(37.0, 0.8)), 1)
+        patient_id = f"P-{i:04d}"
 
-        # Symptoms — 2-4 sampled from pool
-        num_symptoms = rng.randint(2, 5)  # 2-4 inclusive
-        reported_symptoms = list(
-            rng.choice(_SYMPTOMS, size=num_symptoms, replace=False)
-        )
+        # Vitals — aggregated features (p.32)
+        heart_rate_avg = round(rng.gauss(75, 12), 1)
+        spo2_min = round(max(85.0, min(100.0, rng.gauss(96, 3))), 1)
+        wbc_count = round(max(2.0, min(25.0, rng.gauss(7.5, 2.5))), 1)
+        temperature = round(rng.gauss(37.0, 0.8), 1)
 
-        # Chest imaging — weighted categories
-        chest_imaging = rng.choice(
-            ["clear", "right_lower_consolidation",
-             "bilateral_infiltrates", "normal"],
-            p=[0.25, 0.35, 0.25, 0.15],
-        )
+        # Symptoms — 2 to 4 from pool (p.33)
+        num_symptoms = rng.randint(2, 4)
+        reported_symptoms = rng.sample(SYMPTOM_POOL, num_symptoms)
 
-        # True diagnosis — weighted categories
-        true_diagnosis = rng.choice(
+        # Chest imaging (p.34)
+        chest_imaging = rng.choices(
+            ["clear", "right_lower_consolidation", "bilateral_infiltrates", "normal"],
+            weights=[0.25, 0.35, 0.25, 0.15],
+            k=1,
+        )[0]
+
+        # True diagnosis (p.34)
+        true_diagnosis = rng.choices(
             ["pneumonia", "bronchitis", "atelectasis", "pulmonary_embolism"],
-            p=[0.50, 0.25, 0.15, 0.10],
-        )
+            weights=[0.50, 0.25, 0.15, 0.10],
+            k=1,
+        )[0]
 
-        # Patient history — 0-3 conditions
-        num_history = rng.randint(0, 4)  # 0-3 inclusive
-        patient_history = list(
-            rng.choice(_PATIENT_HISTORY_ITEMS, size=num_history, replace=False)
-        ) if num_history > 0 else []
+        # Patient history — 0 to 3 conditions (p.31)
+        num_history = rng.randint(0, 3)
+        patient_history = rng.sample(HISTORY_POOL, min(num_history, len(HISTORY_POOL)))
 
-        records.append({
-            "patient_id": f"P-{i:04d}",
+        dataset.append({
+            "patient_id": patient_id,
             "heart_rate_avg": heart_rate_avg,
             "spo2_min": spo2_min,
             "wbc_count": wbc_count,
             "temperature": temperature,
-            "reported_symptoms": ", ".join(reported_symptoms),
+            "reported_symptoms": reported_symptoms,
             "chest_imaging": chest_imaging,
             "true_diagnosis": true_diagnosis,
             "patient_history": patient_history,
         })
 
-    df = pd.DataFrame(records)
-    logger.success(
-        f"Medical dataset generated: {len(df)} patients, "
-        f"diagnosis distribution: {df['true_diagnosis'].value_counts().to_dict()}"
+    logger.info(
+        f"Generated medical dataset: {n} patients (seed={seed}). "
+        f"All IDs de-identified per HIPAA/GDPR requirements."
     )
-    return df
+    return dataset
+
+
+# ---------------------------------------------------------------------------
+# Dataset summary utilities
+# ---------------------------------------------------------------------------
+
+def summarize_hr_dataset(dataset: list[dict]) -> dict:
+    """Compute summary statistics for the HR dataset."""
+    total = len(dataset)
+    gender_counts = {}
+    gender_qualified = {}
+    for rec in dataset:
+        g = rec["gender"]
+        gender_counts[g] = gender_counts.get(g, 0) + 1
+        if rec["qualified"]:
+            gender_qualified[g] = gender_qualified.get(g, 0) + 1
+
+    qualification_rates = {
+        g: round(gender_qualified.get(g, 0) / gender_counts[g], 4)
+        for g in gender_counts
+    }
+
+    # Disparate impact ratio (p.16, p.22): female rate / male rate
+    # This mirrors the chapter's Amazon HR scenario where gender is the
+    # protected attribute and the four-fifths rule applies.
+    female_rate = qualification_rates.get("female", 0.0)
+    male_rate = qualification_rates.get("male", 1.0)
+    di_ratio = round(female_rate / male_rate, 4) if male_rate > 0 else 0.0
+
+    return {
+        "total_candidates": total,
+        "gender_distribution": gender_counts,
+        "qualification_rates_by_gender": qualification_rates,
+        "disparate_impact_ratio": di_ratio,
+        "four_fifths_compliant": di_ratio >= 0.80,
+    }
+
+
+def summarize_medical_dataset(dataset: list[dict]) -> dict:
+    """Compute summary statistics for the medical dataset."""
+    total = len(dataset)
+    diagnosis_counts = {}
+    for rec in dataset:
+        d = rec["true_diagnosis"]
+        diagnosis_counts[d] = diagnosis_counts.get(d, 0) + 1
+
+    return {
+        "total_patients": total,
+        "diagnosis_distribution": diagnosis_counts,
+        "avg_heart_rate": round(sum(r["heart_rate_avg"] for r in dataset) / total, 1),
+        "avg_spo2": round(sum(r["spo2_min"] for r in dataset) / total, 1),
+        "avg_wbc": round(sum(r["wbc_count"] for r in dataset) / total, 1),
+    }
 
 
 # ---------------------------------------------------------------------------
@@ -231,24 +291,14 @@ def generate_medical_dataset(n: int = 50, seed: int = 42) -> pd.DataFrame:
 # ---------------------------------------------------------------------------
 
 if __name__ == "__main__":
-    # HR dataset
-    hr_df = generate_hr_dataset(n=200, seed=42)
-    logger.info(f"HR shape: {hr_df.shape}")
-    logger.info(f"HR columns: {list(hr_df.columns)}")
-    logger.info(f"HR score stats:\n{hr_df['raw_score'].describe()}")
+    hr = generate_hr_dataset()
+    hr_summary = summarize_hr_dataset(hr)
+    print("HR Summary:", hr_summary)
+    print(f"  DI Ratio: {hr_summary['disparate_impact_ratio']} "
+          f"({'PASS' if hr_summary['four_fifths_compliant'] else 'FAIL — bias detected'})")
 
-    # Verify bias injection: female selection rate / male selection rate
-    male_rate = hr_df[hr_df["gender"] == "male"]["qualified"].mean()
-    female_rate = hr_df[hr_df["gender"] == "female"]["qualified"].mean()
-    disparate_impact = round(female_rate / male_rate, 2) if male_rate > 0 else 0
-    logger.info(
-        f"Disparate impact ratio: {disparate_impact} "
-        f"(expected ~0.73, four-fifths threshold is 0.80)"
-    )
+    med = generate_medical_dataset()
+    med_summary = summarize_medical_dataset(med)
+    print("\nMedical Summary:", med_summary)
 
-    # Medical dataset
-    med_df = generate_medical_dataset(n=50, seed=42)
-    logger.info(f"Medical shape: {med_df.shape}")
-    logger.info(f"Medical columns: {list(med_df.columns)}")
-
-    logger.success("All synthetic data self-tests passed.")
+    logger.success("Synthetic data self-test complete.")

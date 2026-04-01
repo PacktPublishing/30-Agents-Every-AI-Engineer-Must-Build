@@ -1,10 +1,9 @@
-# ─────────────────────────────────────────────────────────────
-# requirements.txt — Chapter 14: Financial and Legal Domain Agents
+# requirements.txt
+# Chapter 14: Financial and Legal Domain Agents
 # Book: 30 Agents Every AI Engineer Must Build — Imran Ahmad (Packt Publishing)
 #
 # Install: pip install -r requirements.txt
 # Note: Python 3.10+ required
-# ─────────────────────────────────────────────────────────────
 
 # --- Core LLM Framework ---
 langchain==0.2.16

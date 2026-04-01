@@ -1,4 +1,4 @@
-# Chapter 14 — Financial and Legal Domain Agents
+# Chapter 14: Financial and Legal Domain Agents
 
 **Book:** *30 Agents Every AI Engineer Must Build*
 **Author:** Imran Ahmad
@@ -9,33 +9,56 @@
 
 ## Overview
 
-This repository contains the complete, runnable code for Chapter 14 of *30 Agents Every AI Engineer Must Build*. It implements two production-grade agent architectures:
+This repository contains the companion code for Chapter 14 of *30 Agents Every AI
+Engineer Must Build*. It implements two production-grade agent architectures for
+regulated domains:
 
-**Financial Advisory Agent** — A supervised multi-agent system (Section 14.1) featuring market data analysis, quantitative risk assessment (VaR, CVaR, volatility scoring), personalized financial planning with configurable investor profiles, and compliance-by-architecture validation gates that structurally enforce regulatory requirements.
+**Financial Advisory Agent** — A supervised multi-agent system (Figure 14.1) that
+coordinates specialist agents through a LangGraph StateGraph. The Supervisor Agent
+routes queries to a Market Data Agent (yfinance/Finnhub), a Financial Analysis Agent,
+and a News Agent (Tavily). The architecture includes composite risk scoring (VaR,
+volatility, maximum drawdown), client tolerance adjustment, and a compliance-by-architecture
+validation gate that makes it structurally impossible for non-compliant recommendations
+to reach the client.
 
-**Legal Intelligence Agent** — A RAG-powered legal research system (Section 14.2) featuring hybrid retrieval with a custom vector store, authority-weighted case ranking based on court hierarchy, multi-stage contract analysis, and a citation verification pipeline that detects hallucinated case references — directly inspired by the Schwartz v. Avianca incident discussed in the chapter.
+**Legal Intelligence Agent** — A RAG-powered legal research system (Figures 14.2–14.3)
+with hybrid retrieval combining dense vector search and sparse keyword matching. It
+implements authority-weighted ranking (0.5 × similarity + 0.3 × authority + 0.2 × recency),
+a three-stage precedent-finding pipeline (Issue Extraction → Multi-Dimensional Retrieval →
+Synthesis and Verification), contract analysis with parallel compliance validation, and a
+citation verification gate that detects hallucinated case law.
 
-Both agents are built on LangChain and LangGraph, using a supervisor pattern for orchestration and StateGraph for workflow management.
+Both agents are designed as educational demonstrations. Financial outputs are illustrative
+and must not be treated as investment advice. Legal outputs are illustrative and must not
+be treated as legal opinions.
 
 ---
 
 ## Prerequisites
 
-- **Python 3.10+** (tested on 3.10, 3.11, 3.12)
-- **pip** (package manager)
-- **Jupyter Notebook** or **JupyterLab** (for running the notebook)
-- (Optional) API keys for Live Mode — see the Live Mode section below
+- Python 3.10 or later
+- pip (Python package manager)
+- Jupyter Notebook or JupyterLab
+
+### Optional API Keys (for Live Mode)
+
+| Service | Purpose | Free Tier |
+|:--------|:--------|:----------|
+| OpenAI | LLM reasoning (gpt-4o-mini) | Requires paid API access |
+| Finnhub | Real-time financial data | Free at [finnhub.io](https://finnhub.io) |
+| Tavily | News search and retrieval | Free at [tavily.com](https://tavily.com) |
+
+API keys are **not required**. Without them, the notebook runs in Simulation Mode
+with high-fidelity mock data derived from the chapter.
 
 ---
 
 ## Quick Start
 
-Three commands to get running:
-
 ```bash
-# 1. Clone and enter the repository
-git clone https://github.com/your-username/chapter14-financial-legal-agents.git
-cd chapter14-financial-legal-agents
+# 1. Clone and navigate to the repository
+git clone https://github.com/PacktPublishing/30-Agents-Every-AI-Engineer-Must-Build.git
+cd 30-Agents-Every-AI-Engineer-Must-Build/chapter14
 
 # 2. Install dependencies
 pip install -r requirements.txt
@@ -44,7 +67,15 @@ pip install -r requirements.txt
 jupyter notebook chapter14_financial_legal_agents.ipynb
 ```
 
-When the notebook starts, press Enter at each API key prompt to run in **Simulation Mode** — no API keys required. Every cell will execute successfully with chapter-faithful mock data.
+The notebook will detect missing API keys and automatically activate Simulation Mode.
+No additional configuration is needed.
+
+### Optional: Enable Live Mode
+
+```bash
+cp .env.template .env
+# Edit .env and add your API keys
+```
 
 ---
 
@@ -53,47 +84,47 @@ When the notebook starts, press Enter at each API key prompt to run in **Simulat
 ```
 chapter14-financial-legal-agents/
 │
-├── README.md                                    ← You are here
-├── AGENTS.md                                    ← Agentic metadata & AI persona
-├── LICENSE                                      ← MIT License
-├── requirements.txt                             ← Pinned dependencies
-├── .env.template                                ← API key placeholders (zero secrets)
-├── .gitignore                                   ← .env, __pycache__, checkpoints
+├── README.md                                 ← You are here
+├── AGENTS.md                                 ← Agentic metadata and AI persona
+├── LICENSE                                   ← MIT License
+├── requirements.txt                          ← Pinned dependencies (Python 3.10+)
+├── .env.template                             ← API key placeholders (zero secrets)
+├── .gitignore                                ← .env, __pycache__, .ipynb_checkpoints
 │
-├── chapter14_financial_legal_agents.ipynb        ← PRIMARY: Full chapter walkthrough
+├── chapter14_financial_legal_agents.ipynb     ← Primary notebook (full chapter walkthrough)
 │
-├── mock_llm.py                                  ← Mocking & resilience layer
-│   ├── ColorLogger                              ← Color-coded logging (Blue/Green/Red/Yellow)
-│   ├── ServiceConfig                            ← Per-service API key detection
-│   ├── @graceful_fallback                       ← Defensive execution decorator
-│   ├── MockChatOpenAI                           ← LangGraph-compatible mock LLM
-│   ├── MockStructuredChain                      ← Deterministic supervisor routing
-│   ├── MockEmbeddingModel                       ← Hash-based pseudo-embeddings
-│   └── MockVectorStore                          ← In-memory vector store with cosine similarity
+├── mock_llm.py                               ← Mocking and resilience layer
+│   ├── ColorLogger                           ← Color-coded visual logging
+│   ├── ServiceConfig                         ← Per-service API detection + dashboard
+│   ├── @graceful_fallback                    ← Resilience decorator with backoff
+│   ├── MockChatOpenAI                        ← Keyword-based mock LLM
+│   ├── MockStructuredChain                   ← Deterministic supervisor routing
+│   ├── MockEmbeddingModel                    ← Hash-based pseudo-embeddings
+│   └── MockVectorStore                       ← In-memory vector store with cosine similarity
 │
-├── mock_data.py                                 ← Synthetic data derived from chapter
-│   ├── MOCK_STOCK_DATA                          ← AAPL, MSFT, GOOGL (yfinance schema)
-│   ├── MOCK_FINNHUB_QUOTES                      ← Quote data with risk classification
-│   ├── MOCK_FINNHUB_FINANCIALS                  ← Company financials for portfolio analysis
-│   ├── generate_mock_price_history()            ← 90-day deterministic price series
-│   ├── MOCK_TAVILY_NEWS                         ← 5 news results (Tavily format)
-│   ├── MOCK_CLIENT_PROFILES                     ← 2 investor profiles (moderate + conservative)
-│   ├── MOCK_LEGAL_CASES                         ← 6 cases (5 verified + 1 fabricated)
-│   ├── MOCK_CONTRACT                            ← 8-clause contract for analysis
-│   └── MOCK_INTER_AGENT_MESSAGE                 ← Inter-agent JSON protocol (45/20/25/10)
+├── mock_data.py                              ← Synthetic data derived from chapter
+│   ├── MOCK_STOCK_DATA                       ← yfinance .info schema (AAPL, MSFT, GOOGL)
+│   ├── MOCK_FINNHUB_QUOTES                   ← Finnhub quote data with risk tiers
+│   ├── MOCK_FINNHUB_FINANCIALS               ← Company financial metrics
+│   ├── generate_mock_price_history()         ← Deterministic price series for VaR
+│   ├── MOCK_TAVILY_NEWS                      ← 5 financial news results
+│   ├── MOCK_CLIENT_PROFILES                  ← Moderate and conservative investors
+│   ├── MOCK_LEGAL_CASES                      ← 6 cases (including 1 fabricated)
+│   ├── MOCK_CONTRACT                         ← 8-clause MSA with risk areas
+│   └── MOCK_INTER_AGENT_MESSAGE              ← Inter-agent JSON protocol (p.19)
 │
-└── troubleshooting.md                           ← Dependency conflict resolutions (T1-T10)
+└── troubleshooting.md                        ← Solutions for 10 common issues
 ```
 
 ---
 
-## Simulation Mode (Default — No API Keys Required)
+## Simulation Mode
 
-The repository is designed to run completely without any API keys. When keys are absent, the system automatically switches to high-fidelity mock responses derived directly from Chapter 14 content.
+When API keys are absent, the system automatically switches to Simulation Mode on a
+per-service basis. This means a user with an OpenAI key but no Finnhub key gets real
+LLM reasoning over mock financial data.
 
-**How it works:**
-
-At notebook startup, `ServiceConfig` checks each API key:
+At notebook startup, a color-coded dashboard shows the status of each service:
 
 ```
 ══════════════════════════════════════════════════════════
@@ -101,115 +132,96 @@ At notebook startup, `ServiceConfig` checks each API key:
   Book: 30 Agents Every AI Engineer Must Build
   Author: Imran Ahmad
 ══════════════════════════════════════════════════════════
-  OpenAI (LLM)                 ○ SIMULATED
-  Finnhub (Financial Data)     ○ SIMULATED
-  Tavily (News Search)         ○ SIMULATED
+  OpenAI (LLM)                    ○ SIMULATED
+  Finnhub (Financial Data)        ○ SIMULATED
+  Tavily (News Search)            ○ SIMULATED
 ══════════════════════════════════════════════════════════
 ```
 
-**Per-service detection** means you can mix live and simulated services. For example, if you have an OpenAI key but not a Finnhub key, you get real LLM reasoning over mock financial data.
-
-**Defensive execution** ensures the notebook never crashes: every tool call is wrapped in `@graceful_fallback`, which catches exceptions, logs them in color-coded RED, and returns structured fallback data.
+All mock data is derived directly from Chapter 14's code examples and narrative. The
+`@graceful_fallback` decorator wraps every external call, ensuring the notebook never
+crashes — errors are logged in RED and execution continues with fallback values.
 
 ---
 
-## Live Mode (With API Keys)
+## Live Mode
 
-To run with real API services:
+To use real API services, copy the template and add your keys:
 
 ```bash
-# 1. Copy the template
 cp .env.template .env
-
-# 2. Edit .env and add your keys
-OPENAI_API_KEY=sk-...
-FINNHUB_API_KEY=...
-TAVILY_API_KEY=tvly-...
 ```
 
-**Required API keys:**
+Edit `.env`:
 
-| Service | Purpose | Where to Get |
-|---------|---------|--------------|
-| OpenAI | LLM reasoning (GPT-4o-mini) | https://platform.openai.com/api-keys |
-| Finnhub | Real-time financial data | https://finnhub.io/ (free tier available) |
-| Tavily | AI-optimized news search | https://tavily.com/ (free tier available) |
+```
+OPENAI_API_KEY=sk-your-key-here
+FINNHUB_API_KEY=your-finnhub-key
+TAVILY_API_KEY=tvly-your-key-here
+```
 
-All keys are loaded via `python-dotenv` with a `getpass` fallback for interactive environments. No keys are ever hardcoded in any file.
-
----
-
-## What You Will Build
-
-### Financial Advisory Agent (Section 14.1)
-
-- **Supervisor Architecture** (Fig 14.1) — Central orchestrator routes queries to specialized agents
-- **Market Data Agent** — Fetches real-time stock data via yfinance or Finnhub
-- **Risk Assessment** — Computes VaR (Value at Risk), CVaR, volatility scoring, and maximum drawdown
-- **Personalized Planning** — Generates investment plans matched to client risk tolerance
-- **Compliance Gate** — Structural validation that blocks non-compliant plans (inspired by the Knight Capital incident)
-- **RetailAdvisor Case Study** — End-to-end demo with a $50K moderate-growth investor profile
-
-### Legal Intelligence Agent (Section 14.2)
-
-- **Legal Knowledge Base** — Hybrid retrieval combining keyword and semantic search
-- **Precedent Finding** (Fig 14.2) — 3-stage pipeline with authority-weighted ranking by court hierarchy
-- **Contract Analysis** (Fig 14.3) — 5-stage pipeline analyzing 8 contract clauses for risk and compliance
-- **Citation Verification** — Detects hallucinated case references (inspired by Schwartz v. Avianca)
-- **LegalBrief Case Study** — Full research workflow with verified vs. unverified citation output
+The dashboard will show `● LIVE` for each configured service. You can mix live and
+simulated services — each is detected independently.
 
 ---
 
-## Color-Coded Logging
+## Notebook Sections
 
-The notebook uses visual logging throughout for clear execution tracing:
-
-- 🔵 **BLUE** — Informational messages (agent starts, data loading)
-- 🟢 **GREEN** — Success messages (tool completion, validation pass)
-- 🔴 **RED** — Handled errors (caught by `@graceful_fallback`)
-- 🟡 **YELLOW** — Warnings (fallback activated, simulated mode)
+| Cells | Section | Chapter Reference |
+|:------|:--------|:------------------|
+| 0 | Setup and Configuration | Technical Requirements (p.2) |
+| 1–2 | Supervisor Architecture and Market Data Agent | Section 14.1.1, Figure 14.1 |
+| 3–4 | Finnhub Integration and News Agent | Section 14.1.1 |
+| 5 | StateGraph Assembly and Streaming | Section 14.1, p.7–9 |
+| 6 | Risk Assessment (VaR, Volatility, Drawdown) | Section 14.1.2, p.10–14 |
+| 7 | Personalized Planning and Compliance Gate | Section 14.1.3, p.14–18 |
+| 8 | RetailAdvisor Case Study | Section 14.1.4, p.18–20 |
+| 9 | Legal Knowledge Base (Hybrid Retrieval) | Section 14.2.1, p.20–23 |
+| 10 | Precedent Finding (3-Stage Pipeline) | Section 14.2.2, Figure 14.2, p.23–27 |
+| 11 | Contract Analysis (5-Stage Pipeline) | Section 14.2.3, Figure 14.3, p.27–30 |
+| 12 | LegalBrief Case Study (Citation Verification) | Section 14.2.4, p.31–33 |
+| 13 | Summary and Extensions | Summary, p.33–34 |
 
 ---
 
-## Dependencies
+## Key Concepts
 
-All versions are pinned to the exact versions specified in the chapter's Technical Requirements:
+### Risk Scoring (Section 14.1.2)
 
-| Package | Version | Purpose |
-|---------|---------|---------|
-| langchain | 0.2.16 | Core LLM framework |
-| langchain-openai | 0.1.23 | OpenAI integration |
-| langchain-community | 0.2.16 | Community tools |
-| langgraph | 0.2.28 | Agent workflow graphs |
-| openai | 1.40.0 | OpenAI API client |
-| yfinance | 0.2.41 | Yahoo Finance data |
-| finnhub-python | 2.4.19 | Finnhub financial data |
-| tavily-python | 0.3.3 | Tavily news search |
-| numpy | 1.26.4 | Numerical computing |
-| pydantic | 2.8.2 | Data validation |
-| python-dotenv | 1.0.1 | Environment management |
+The `RiskScorer` computes a composite score on a 0–10 scale:
+- **Annualized Volatility** (weight: 0.40) — `returns.std() × √252`, scaled by `/0.05`
+- **Maximum Drawdown** (weight: 0.35) — largest peak-to-trough decline, scaled by `/0.05`
+- **Value at Risk, 95%** (weight: 0.25) — 5th percentile of returns, scaled by `/0.03`
 
-For dependency conflicts, see [troubleshooting.md](troubleshooting.md).
+Risk categories: **HIGH** (≥ 7.0), **MODERATE** (≥ 4.0), **LOW** (< 4.0)
+
+### Authority-Weighted Ranking (Section 14.2.1)
+
+Legal search results are re-ranked by:
+- `final_score = 0.5 × similarity + 0.3 × authority_boost + 0.2 × recency_boost`
+
+A Supreme Court decision (authority 10) outranks a district court ruling (authority 3)
+when semantic similarity is comparable.
 
 ---
 
 ## Troubleshooting
 
-If you encounter issues, check [troubleshooting.md](troubleshooting.md) which covers the 10 most common problems including LangChain version conflicts (T1), Pydantic V1/V2 issues (T2), yfinance empty data (T3), API rate limits (T4), and more.
+See [troubleshooting.md](troubleshooting.md) for solutions to 10 common issues including
+version conflicts, API rate limits, and platform-specific display problems.
 
 ---
 
-## About the Book
+## References
 
-*30 Agents Every AI Engineer Must Build* by Imran Ahmad (Packt Publishing) is a hands-on guide to building production-grade AI agents. Chapter 14 covers financial and legal domain agents — two of the most demanding application areas for agentic AI, where reliability, compliance, and auditability are critical requirements.
+- **Book:** *30 Agents Every AI Engineer Must Build* — Imran Ahmad (Packt Publishing, 2026)
+- **Chapter:** 14 — Financial and Legal Domain Agents
+- **GitHub:** [PacktPublishing/30-Agents-Every-AI-Engineer-Must-Build](https://github.com/PacktPublishing/30-Agents-Every-AI-Engineer-Must-Build)
 
 ---
 
 ## License
 
-MIT License — see [LICENSE](LICENSE) for details.
+This project is licensed under the MIT License. See [LICENSE](LICENSE) for details.
 
----
-
-*Book: 30 Agents Every AI Engineer Must Build — Imran Ahmad (Packt Publishing)*
-*Chapter: 14 — Financial and Legal Domain Agents*
+*Author: Imran Ahmad*

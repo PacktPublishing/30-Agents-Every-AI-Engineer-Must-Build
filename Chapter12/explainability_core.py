@@ -1,976 +1,946 @@
-"""
-Explainability Core: Reasoning transparency, feature attribution, counterfactual
-analysis, confidence communication, and clinical diagnosis explanation.
+# src/explainability_core.py
+# Author: Imran Ahmad
+# Book: 30 Agents Every AI Engineer Must Build, Chapter 12
+# Ref: The Explainable Agent (p.23–39)
+# Description: Complete explainability pipeline — reasoning transparency,
+#              LIME/SHAP explanation helpers, counterfactual analysis,
+#              confidence calibration, and the DiagnosticAssistant case study.
 
-Implements the complete explainability pipeline from Chapter 12, including:
-  - ExplainableAgent with DecisionLogger and immutable audit trail (p.24-25)
-  - LIME and SHAP wrapper functions for feature attribution (p.26)
-  - Counterfactual analysis for minimal-change explanations (p.27)
-  - ConfidenceAwareAgent with calibration and qualifier mapping (p.28-29)
-  - DiagnosticAssistant with BiometricAnalyzer, SymptomInterpreter,
-    DiagnosticCoordinator, and ClinicalExplainer (p.30-35)
-
-Author: Imran Ahmad
-Book: 30 Agents Every AI Engineer Must Build, Chapter 12
-"""
+from __future__ import annotations
 
 import copy
-import numpy as np
-import pandas as pd
-from typing import Any, Optional
+import math
+import random
 from datetime import datetime, timezone
+from typing import Any
 
-from src.utils import ColorLogger, graceful_fallback, get_mode, is_simulation
-from src.mock_llm import MockLLM, get_mock_llm
+import numpy as np
 
-logger = ColorLogger(name="ExplainCore")
+from src.utils import ColorLogger, graceful_fallback, is_simulation
+from src.mock_llm import MockLLM, _make_meta
+
+logger = ColorLogger("ExplainabilityCore")
 
 
 # ═══════════════════════════════════════════════════════════════════════════
-# Section 4.1 — ExplainableAgent + DecisionLogger (Chapter 12, p.24–25)
+# §4.1  ExplainableAgent + DecisionLogger
+# Ref: Reasoning Transparency Techniques, p.24–25
 # ═══════════════════════════════════════════════════════════════════════════
 
 class DecisionLogger:
     """
-    Immutable audit trail for agent decisions. See Chapter 12, p.24-25.
+    Immutable decision trace logger. Records each processing stage as
+    an ordered, write-once trace entry.
 
-    Records every step in the four-step decision process:
-        1. Input reception
-        2. Reasoning / analysis
-        3. Decision output
-        4. Explanation generation
-
-    The trace is append-only; get_trace() returns a deep copy.
+    Ref: p.24–25, DecisionLogger for reasoning transparency.
     """
 
-    def __init__(self, agent_name: str = "ExplainableAgent"):
+    def __init__(self):
         self._trace: list[dict] = []
-        self._agent_name = agent_name
-        logger.debug(f"DecisionLogger initialized for '{agent_name}'.")
+        self._recording = False
 
-    def log_step(self, step_name: str, data: dict, status: str = "complete") -> None:
-        """
-        Append a step to the audit trail.
+    def start_recording(self) -> None:
+        """Begin a new decision trace (clears previous)."""
+        self._trace = []
+        self._recording = True
 
-        Args:
-            step_name: Human-readable step identifier.
-            data: Arbitrary payload for this step.
-            status: One of 'complete', 'partial', 'failed'.
-        """
-        entry = {
-            "step": step_name,
-            "agent": self._agent_name,
+    def record(self, stage: str, data: Any) -> None:
+        """Append a stage to the trace. Ref: p.24"""
+        if not self._recording:
+            return
+        self._trace.append({
+            "stage": stage,
+            "data": data,
             "timestamp": datetime.now(timezone.utc).isoformat(),
-            "status": status,
-            "data": copy.deepcopy(data),
-        }
-        self._trace.append(entry)
-        logger.debug(f"[Trace] {step_name} → {status}")
+            "entry_index": len(self._trace),
+        })
 
     def get_trace(self) -> list[dict]:
-        """Return the immutable audit trail (deep copy)."""
+        """Return an immutable copy of the reasoning trace. Ref: p.25"""
         return copy.deepcopy(self._trace)
 
-    def summary(self) -> str:
-        """Return a one-line summary of the trace."""
-        steps = [e["step"] for e in self._trace]
-        statuses = [e["status"] for e in self._trace]
-        failed = sum(1 for s in statuses if s == "failed")
-        return (
-            f"Trace: {len(self._trace)} steps [{' → '.join(steps)}]. "
-            f"Failures: {failed}."
-        )
+    def stop_recording(self) -> None:
+        self._recording = False
+
+
+class ExplanationGenerator:
+    """
+    Generates audience-adapted explanations from a decision trace.
+    Ref: p.25, ExplanationGenerator
+    """
+
+    @graceful_fallback(
+        fallback_value={"explanation": "Explanation unavailable.", "audience": "general"},
+        section_ref="Section 12 — ExplanationGenerator.explain() (p.25)",
+    )
+    def explain(self, input_data: Any, decision: Any,
+                trace: list[dict], audience: str = "general") -> dict:
+        """
+        Generate an explanation from the recorded trace.
+        Ref: p.25 — faithful representation, not post-hoc rationalization.
+        """
+        steps = [f"Step {i+1} ({t['stage']}): processed"
+                 for i, t in enumerate(trace)]
+
+        if audience == "engineer":
+            explanation = (
+                f"Decision trace ({len(trace)} steps): "
+                + " → ".join(t["stage"] for t in trace)
+                + f". Final decision: {decision}"
+            )
+        elif audience == "clinician":
+            explanation = (
+                f"Clinical reasoning: {len(trace)} analysis steps completed. "
+                f"Decision: {decision}"
+            )
+        else:
+            explanation = (
+                f"The system analyzed your information in {len(trace)} steps "
+                f"and reached a recommendation."
+            )
+
+        return {
+            "explanation": explanation,
+            "audience": audience,
+            "trace_length": len(trace),
+            "steps": steps,
+        }
 
 
 class ExplainableAgent:
     """
-    Agent with built-in reasoning transparency. See Chapter 12, p.24-25.
+    Agent with built-in reasoning transparency.
+
+    Records the reasoning process at every critical stage via
+    DecisionLogger. After the final decision, passes the complete
+    trace to ExplanationGenerator for audience-adapted output.
 
     Four-step decision process:
-        1. receive_input() — log and validate incoming data.
-        2. reason() — analyze input, produce intermediate results.
-        3. decide() — generate final output.
-        4. explain() — produce human-readable explanation of the decision.
+        1. Analyze inputs
+        2. Apply domain rules
+        3. Assess risks and confidence
+        4. Synthesize decision
 
-    Every step is logged via DecisionLogger for full auditability.
+    Ref: p.24–25, ExplainableAgent
     """
 
-    def __init__(self, name: str = "ExplainableAgent"):
-        self._logger = DecisionLogger(agent_name=name)
-        self._name = name
-        self._mock_llm = get_mock_llm() if is_simulation() else None
-        self._last_input = None
-        self._last_reasoning = None
-        self._last_decision = None
-        logger.info(f"ExplainableAgent '{name}' initialized. Mode: {get_mode()}")
+    def __init__(self):
+        self.decision_logger = DecisionLogger()
+        self.explanation_gen = ExplanationGenerator()
+        logger.debug("ExplainableAgent initialized.")
 
     @graceful_fallback(
-        fallback_value={"status": "input_failed", "data": None},
-        section_ref="Section 12 - Input Reception (p.24)"
+        fallback_value=({"decision": "fallback"}, {"explanation": "unavailable"}),
+        section_ref="Section 12 — ExplainableAgent.make_decision() (p.24–25)",
     )
-    def receive_input(self, data: dict) -> dict:
-        """Step 1: Receive and validate input data."""
-        self._last_input = copy.deepcopy(data)
-        self._logger.log_step("input_reception", {
-            "fields_received": list(data.keys()),
-            "record_count": len(data) if isinstance(data, dict) else 1,
-        })
-        logger.info(f"Input received: {len(data)} field(s).")
-        return {"status": "received", "data": data}
-
-    @graceful_fallback(
-        fallback_value={"status": "reasoning_failed", "intermediate": {}},
-        section_ref="Section 12 - Reasoning Step (p.24)"
-    )
-    def reason(self, input_data: Optional[dict] = None) -> dict:
+    def make_decision(self, input_data: dict,
+                      audience: str = "general") -> tuple[dict, dict]:
         """
-        Step 2: Analyze input and produce intermediate results.
-        In simulation mode, delegates to MockLLM.
+        Make a decision and generate its explanation.
+        Ref: p.24–25, four-step decision process.
         """
-        data = input_data or self._last_input or {}
+        self.decision_logger.start_recording()
 
-        # Simple rule-based reasoning (extended by subclasses)
-        intermediate = {
-            "input_summary": {k: type(v).__name__ for k, v in data.items()},
-            "analysis_mode": get_mode(),
-        }
+        # Step 1: Analyze inputs
+        analysis = self.analyze_input(input_data)
+        self.decision_logger.record("Input Analysis", analysis)
 
-        self._last_reasoning = intermediate
-        self._logger.log_step("reasoning", intermediate)
-        logger.debug("Reasoning step complete.")
-        return {"status": "complete", "intermediate": intermediate}
+        # Step 2: Apply domain rules
+        rule_results = self.apply_rules(analysis)
+        self.decision_logger.record("Rule Application", rule_results)
 
-    @graceful_fallback(
-        fallback_value={"status": "decision_failed", "output": None},
-        section_ref="Section 12 - Decision Output (p.25)"
-    )
-    def decide(self, reasoning: Optional[dict] = None) -> dict:
-        """Step 3: Generate final decision based on reasoning."""
-        r = reasoning or self._last_reasoning or {}
+        # Step 3: Assess risks and confidence
+        risk = self.assess_risk(analysis, rule_results)
+        self.decision_logger.record("Risk Assessment", risk)
 
-        decision = {
-            "recommendation": "proceed",
-            "confidence": 0.85,
-            "basis": r,
-        }
+        # Step 4: Synthesize decision
+        decision = self.synthesize(analysis, rule_results, risk)
+        self.decision_logger.record("Final Decision", decision)
 
-        self._last_decision = decision
-        self._logger.log_step("decision", decision)
-        logger.success(f"Decision: {decision['recommendation']} "
-                       f"(confidence: {decision['confidence']:.2f})")
-        return {"status": "decided", "output": decision}
-
-    @graceful_fallback(
-        fallback_value={"status": "explanation_failed", "explanation": ""},
-        section_ref="Section 12 - Explanation Generation (p.25)"
-    )
-    def explain(self, decision: Optional[dict] = None) -> dict:
-        """Step 4: Produce a human-readable explanation."""
-        d = decision or self._last_decision or {}
-        confidence = d.get("confidence", 0.0)
-
-        explanation = (
-            f"The agent recommends '{d.get('recommendation', 'N/A')}' "
-            f"with {confidence:.0%} confidence. "
-            f"This decision was based on analysis of the provided input data "
-            f"using the {get_mode()} pipeline."
+        # Generate explanation from the recorded trace
+        explanation = self.explanation_gen.explain(
+            input_data, decision,
+            self.decision_logger.get_trace(),
+            audience=audience,
         )
 
-        self._logger.log_step("explanation", {"text": explanation})
-        logger.info("Explanation generated.")
-        return {"status": "explained", "explanation": explanation}
+        return decision, explanation
 
-    def run_full_pipeline(self, data: dict) -> dict:
-        """Execute all four steps and return the complete result with trace."""
-        self.receive_input(data)
-        self.reason(data)
-        self.decide()
-        explanation = self.explain()
-
+    def analyze_input(self, input_data: dict) -> dict:
+        """Step 1: Analyze input data. Ref: p.24"""
+        features = list(input_data.keys())
         return {
-            "explanation": explanation.get("explanation", ""),
-            "decision": self._last_decision,
-            "trace": self.get_trace(),
+            "feature_count": len(features),
+            "features": features,
+            "data_quality": "complete" if all(
+                v is not None for v in input_data.values()
+            ) else "partial",
         }
 
-    def get_trace(self) -> list[dict]:
-        """Return the immutable audit trail."""
-        return self._logger.get_trace()
+    def apply_rules(self, analysis: dict) -> dict:
+        """Step 2: Apply domain rules. Ref: p.24"""
+        return {
+            "rules_evaluated": 5,
+            "rules_triggered": 2,
+            "applicable_rules": ["qualification_threshold", "experience_weight"],
+        }
 
-    def get_trace_summary(self) -> str:
-        """Return a one-line summary of the trace."""
-        return self._logger.summary()
+    def assess_risk(self, analysis: dict, rule_results: dict) -> dict:
+        """Step 3: Assess risk and confidence. Ref: p.24"""
+        return {
+            "risk_level": "moderate",
+            "confidence": 0.82,
+            "uncertainty_type": "epistemic",
+        }
+
+    def synthesize(self, analysis: dict, rule_results: dict,
+                   risk: dict) -> dict:
+        """Step 4: Synthesize final decision. Ref: p.24"""
+        return {
+            "decision": "approve",
+            "confidence": risk.get("confidence", 0.5),
+            "rationale": (
+                f"Based on {analysis['feature_count']} features and "
+                f"{rule_results['rules_triggered']} triggered rules."
+            ),
+        }
+
+    def get_reasoning_trace(self) -> list[dict]:
+        """Expose the full reasoning trace for audit. Ref: p.25, p.34"""
+        return self.decision_logger.get_trace()
 
 
 # ═══════════════════════════════════════════════════════════════════════════
-# Section 4.2 — LIME / SHAP Explanation Helpers (Chapter 12, p.26)
+# §4.2  LIME / SHAP Explanation Helpers
+# Ref: Decision Explanation Frameworks, p.26
 # ═══════════════════════════════════════════════════════════════════════════
 
 @graceful_fallback(
-    fallback_value={"shap_values": None, "feature_importance": {},
-                    "status": "shap_unavailable"},
-    section_ref="Section 12 - SHAP Explanations (p.26)"
+    fallback_value={"shap_values": {}, "note": "SHAP computation unavailable."},
+    section_ref="Section 12 — SHAP explanation helper (p.26)",
 )
-def compute_shap_explanations(model, X: pd.DataFrame,
-                              feature_names: Optional[list] = None,
-                              max_evals: int = 500) -> dict:
+def compute_shap_explanation(model, X: np.ndarray, feature_names: list[str],
+                             instance_index: int = 0) -> dict:
     """
-    Compute SHAP feature attributions for a trained sklearn model.
+    Compute SHAP feature attributions for a single prediction.
 
-    Wraps shap.Explainer with @graceful_fallback for import errors
-    and computation timeouts. See Chapter 12, p.26.
+    Uses TreeSHAP for tree models (exact, polynomial-time per
+    Lundberg et al., 2020) or KernelSHAP as model-agnostic fallback.
 
-    Args:
-        model: A trained sklearn classifier/regressor.
-        X: Feature matrix (DataFrame or ndarray).
-        feature_names: Optional column names.
-        max_evals: Maximum SHAP evaluations (controls speed).
+    Ref: p.26, SHAP provides unified feature attribution via Shapley values.
 
-    Returns:
-        dict with 'shap_values', 'feature_importance', 'status'.
+    Parameters
+    ----------
+    model : sklearn estimator
+        Trained model supporting .predict() or .predict_proba().
+    X : np.ndarray
+        Feature matrix (n_samples × n_features).
+    feature_names : list[str]
+        Human-readable names for each feature column.
+    instance_index : int
+        Index of the instance to explain.
+
+    Returns
+    -------
+    dict
+        {'shap_values': {feature: value}, 'base_value': float,
+         'predicted_value': float}
     """
-    import shap
+    try:
+        import shap
+    except ImportError:
+        logger.error(
+            "SHAP not installed. Returning mock feature attributions. "
+            "Install with: pip install shap>=0.45.1"
+        )
+        return _mock_shap_values(feature_names)
 
-    if feature_names is None:
-        feature_names = list(X.columns) if hasattr(X, "columns") else \
-            [f"feature_{i}" for i in range(X.shape[1])]
+    try:
+        # Try TreeExplainer first (exact, fast)
+        explainer = shap.TreeExplainer(model)
+    except Exception:
+        # Fall back to KernelSHAP (model-agnostic, approximate)
+        try:
+            background = shap.sample(X, min(50, len(X)))
+            explainer = shap.KernelExplainer(model.predict_proba, background)
+        except Exception:
+            explainer = shap.Explainer(model, X)
 
-    logger.info(f"Computing SHAP explanations: {X.shape[0]} samples, "
-                f"{len(feature_names)} features.")
+    shap_values = explainer.shap_values(X[instance_index:instance_index + 1])
 
-    explainer = shap.Explainer(model, X, feature_names=feature_names)
-    shap_values = explainer(X, max_evals=max_evals)
+    # Handle multi-class output
+    if isinstance(shap_values, list):
+        sv = shap_values[1][0] if len(shap_values) > 1 else shap_values[0][0]
+    elif shap_values.ndim == 3:
+        sv = shap_values[0, :, 1] if shap_values.shape[2] > 1 else shap_values[0, :, 0]
+    else:
+        sv = shap_values[0]
 
-    # Mean absolute SHAP values for global feature importance
-    mean_abs = np.abs(shap_values.values).mean(axis=0)
-    if mean_abs.ndim > 1:
-        # Multi-class: take mean across classes
-        mean_abs = mean_abs.mean(axis=-1)
-
-    importance = {
+    attribution = {
         name: round(float(val), 4)
-        for name, val in zip(feature_names, mean_abs)
+        for name, val in zip(feature_names, sv)
     }
-    # Sort by importance
-    importance = dict(sorted(importance.items(), key=lambda x: -x[1]))
-
-    logger.success(f"SHAP complete. Top feature: "
-                   f"{list(importance.keys())[0]} = {list(importance.values())[0]:.4f}")
-
-    return {
-        "shap_values": shap_values,
-        "feature_importance": importance,
-        "status": "complete",
-    }
-
-
-@graceful_fallback(
-    fallback_value={"lime_explanation": None, "feature_weights": {},
-                    "status": "lime_unavailable"},
-    section_ref="Section 12 - LIME Explanations (p.26)"
-)
-def compute_lime_explanations(model, X: pd.DataFrame, instance_idx: int = 0,
-                              feature_names: Optional[list] = None,
-                              num_features: int = 5) -> dict:
-    """
-    Compute LIME explanation for a single instance. See Chapter 12, p.26.
-
-    Args:
-        model: A trained sklearn classifier/regressor.
-        X: Feature matrix.
-        instance_idx: Index of the instance to explain.
-        feature_names: Optional column names.
-        num_features: Number of top features in explanation.
-
-    Returns:
-        dict with 'lime_explanation', 'feature_weights', 'status'.
-    """
-    import lime
-    import lime.lime_tabular
-
-    if feature_names is None:
-        feature_names = list(X.columns) if hasattr(X, "columns") else \
-            [f"feature_{i}" for i in range(X.shape[1])]
-
-    X_array = X.values if hasattr(X, "values") else np.array(X)
-
-    logger.info(f"Computing LIME explanation for instance {instance_idx}.")
-
-    explainer = lime.lime_tabular.LimeTabularExplainer(
-        training_data=X_array,
-        feature_names=feature_names,
-        mode="classification" if hasattr(model, "predict_proba") else "regression",
-        random_state=42,
+    # Sort by absolute contribution
+    attribution = dict(
+        sorted(attribution.items(), key=lambda x: abs(x[1]), reverse=True)
     )
 
-    # Determine predict function
-    if hasattr(model, "predict_proba"):
-        predict_fn = model.predict_proba
-    else:
-        predict_fn = model.predict
+    try:
+        base_value = float(explainer.expected_value)
+    except (TypeError, IndexError):
+        if hasattr(explainer, "expected_value"):
+            ev = explainer.expected_value
+            base_value = float(ev[1]) if hasattr(ev, "__len__") and len(ev) > 1 else float(ev)
+        else:
+            base_value = 0.5
+
+    prediction = model.predict_proba(X[instance_index:instance_index + 1])
+    pred_val = float(prediction[0][1]) if prediction.shape[1] > 1 else float(prediction[0][0])
+
+    logger.success(
+        f"SHAP computed for instance {instance_index}: "
+        f"top feature = {list(attribution.keys())[0]} "
+        f"({list(attribution.values())[0]:.4f})"
+    )
+
+    return {
+        "shap_values": attribution,
+        "base_value": round(base_value, 4),
+        "predicted_value": round(pred_val, 4),
+    }
+
+
+def _mock_shap_values(feature_names: list[str]) -> dict:
+    """Return chapter-derived mock SHAP values when library is unavailable."""
+    # Default values from the chapter example (p.34)
+    default_contribs = {
+        "wbc_count": 0.31,
+        "chest_imaging": 0.28,
+        "reported_symptoms": 0.19,
+        "spo2_min": 0.09,
+        "heart_rate_avg": 0.06,
+        "temperature": 0.04,
+        "patient_history": 0.03,
+    }
+    attribution = {}
+    for name in feature_names:
+        attribution[name] = default_contribs.get(name, round(random.uniform(-0.05, 0.05), 4))
+    return {
+        "shap_values": attribution,
+        "base_value": 0.5,
+        "predicted_value": 0.87,
+        "note": "Mock SHAP values (SHAP library not available).",
+    }
+
+
+@graceful_fallback(
+    fallback_value={"lime_weights": {}, "note": "LIME computation unavailable."},
+    section_ref="Section 12 — LIME explanation helper (p.26)",
+)
+def compute_lime_explanation(model, X: np.ndarray, feature_names: list[str],
+                             instance_index: int = 0,
+                             num_features: int = 6) -> dict:
+    """
+    Generate a LIME explanation for a single prediction.
+
+    LIME constructs a local interpretable model approximating the
+    original model's behavior in the neighborhood of the instance.
+
+    Ref: p.26, LIME for local feature attribution.
+
+    Returns
+    -------
+    dict
+        {'lime_weights': {feature: weight}, 'intercept': float,
+         'predicted_class': int, 'local_accuracy': float}
+    """
+    try:
+        from lime.lime_tabular import LimeTabularExplainer
+    except ImportError:
+        logger.error(
+            "LIME not installed. Returning mock weights. "
+            "Install with: pip install lime>=0.2.0.1"
+        )
+        return _mock_lime_values(feature_names)
+
+    explainer = LimeTabularExplainer(
+        X,
+        feature_names=feature_names,
+        class_names=["negative", "positive"],
+        mode="classification",
+    )
 
     explanation = explainer.explain_instance(
-        X_array[instance_idx],
-        predict_fn,
+        X[instance_index],
+        model.predict_proba,
         num_features=num_features,
     )
 
-    feature_weights = {
-        name: round(weight, 4)
-        for name, weight in explanation.as_list()
-    }
+    weights = {feat: round(weight, 4) for feat, weight in explanation.as_list()}
+    pred_class = int(model.predict(X[instance_index:instance_index + 1])[0])
 
-    logger.success(f"LIME complete for instance {instance_idx}.")
+    logger.success(
+        f"LIME computed for instance {instance_index}: "
+        f"{len(weights)} features explained."
+    )
 
     return {
-        "lime_explanation": explanation,
-        "feature_weights": feature_weights,
-        "status": "complete",
-        "instance_idx": instance_idx,
+        "lime_weights": weights,
+        "intercept": round(float(explanation.intercept[1]), 4),
+        "predicted_class": pred_class,
+        "local_accuracy": round(float(explanation.score), 4),
     }
 
 
-def train_diagnostic_model(df: pd.DataFrame) -> tuple:
-    """
-    Train a simple sklearn model on the synthetic medical dataset
-    for use with SHAP/LIME explanations.
-
-    Returns:
-        (model, X, y, feature_names, label_encoder)
-    """
-    from sklearn.ensemble import GradientBoostingClassifier
-    from sklearn.preprocessing import LabelEncoder
-
-    logger.info("Training diagnostic model on synthetic medical data...")
-
-    feature_cols = ["heart_rate_avg", "spo2_min", "wbc_count", "temperature"]
-
-    # Encode chest_imaging as numeric
-    imaging_map = {
-        "clear": 0, "normal": 1,
-        "right_lower_consolidation": 2, "bilateral_infiltrates": 3,
+def _mock_lime_values(feature_names: list[str]) -> dict:
+    """Return mock LIME values when library is unavailable."""
+    rng = random.Random(42)
+    weights = {name: round(rng.uniform(-0.3, 0.3), 4) for name in feature_names[:6]}
+    return {
+        "lime_weights": weights,
+        "intercept": 0.45,
+        "predicted_class": 1,
+        "local_accuracy": 0.92,
+        "note": "Mock LIME values (lime library not available).",
     }
-    df = df.copy()
-    df["chest_imaging_num"] = df["chest_imaging"].map(imaging_map).fillna(0)
-    feature_cols.append("chest_imaging_num")
-
-    X = df[feature_cols].copy()
-    le = LabelEncoder()
-    y = le.fit_transform(df["true_diagnosis"])
-
-    model = GradientBoostingClassifier(
-        n_estimators=50, max_depth=3, random_state=42
-    )
-    model.fit(X, y)
-
-    feature_names = feature_cols
-    logger.success(
-        f"Diagnostic model trained: {len(feature_names)} features, "
-        f"{len(le.classes_)} classes ({list(le.classes_)})."
-    )
-
-    return model, X, y, feature_names, le
 
 
 # ═══════════════════════════════════════════════════════════════════════════
-# Section 4.3 — Counterfactual Analysis (Chapter 12, p.27)
+# §4.3  Counterfactual Analysis
+# Ref: p.27, Minimal Counterfactual Theorem
 # ═══════════════════════════════════════════════════════════════════════════
 
 @graceful_fallback(
-    fallback_value={"counterfactual": None, "changes": {},
-                    "status": "counterfactual_failed"},
-    section_ref="Section 12 - Counterfactual Analysis (p.27)"
+    fallback_value={"counterfactual": {}, "changes": {},
+                    "note": "Counterfactual generation failed."},
+    section_ref="Section 12 — Counterfactual analysis (p.27)",
 )
 def generate_counterfactual(model, instance: np.ndarray,
-                            feature_names: list,
-                            target_class: int,
-                            feature_ranges: Optional[dict] = None,
-                            max_iterations: int = 100,
-                            step_size: float = 0.1) -> dict:
+                            feature_names: list[str],
+                            desired_class: int = 1,
+                            step_size: float = 0.1,
+                            max_iterations: int = 100) -> dict:
     """
-    Find the minimal feature changes to flip a model's decision.
-    See Chapter 12, p.27.
+    Find the minimal feature changes to flip a decision.
 
-    Uses a simple greedy search: for each feature, perturb in the
-    direction that moves the prediction toward the target class.
+    Implements the Minimal Counterfactual Theorem (p.27):
+    The optimal counterfactual x' for instance x minimizes d(x, x')
+    subject to f(x') = desired_class.
 
-    Args:
-        model: Trained sklearn classifier with predict_proba().
-        instance: 1D array of feature values to explain.
-        feature_names: Names corresponding to instance features.
-        target_class: Class index to flip toward.
-        feature_ranges: Optional {feature: (min, max)} constraints.
-        max_iterations: Maximum perturbation steps.
-        step_size: Fractional step per iteration.
+    Uses greedy feature perturbation: at each step, nudge the feature
+    with the highest gradient toward the desired class.
 
-    Returns:
-        dict with 'counterfactual', 'changes', 'status'.
+    Parameters
+    ----------
+    model : sklearn estimator
+        Trained classifier with predict() and predict_proba().
+    instance : np.ndarray
+        1-D array of feature values for the instance to explain.
+    feature_names : list[str]
+        Names of each feature.
+    desired_class : int
+        Target class for the counterfactual (default: 1 = positive).
+    step_size : float
+        Perturbation magnitude per iteration.
+    max_iterations : int
+        Maximum search iterations.
+
+    Returns
+    -------
+    dict
+        {'counterfactual': {feature: new_value},
+         'original': {feature: original_value},
+         'changes': {feature: delta},
+         'iterations': int, 'success': bool}
     """
-    logger.info(f"Generating counterfactual: target_class={target_class}")
-
-    current = instance.copy().astype(float)
-    original = instance.copy().astype(float)
-    feature_ranges = feature_ranges or {}
+    x = instance.copy().reshape(1, -1).astype(float)
+    original = {name: round(float(x[0, i]), 4) for i, name in enumerate(feature_names)}
 
     for iteration in range(max_iterations):
-        proba = model.predict_proba(current.reshape(1, -1))[0]
-        predicted = int(np.argmax(proba))
-
-        if predicted == target_class:
-            # Success — compute changes
-            changes = {}
-            for i, name in enumerate(feature_names):
-                diff = current[i] - original[i]
-                if abs(diff) > 1e-6:
-                    changes[name] = {
-                        "original": round(float(original[i]), 4),
-                        "counterfactual": round(float(current[i]), 4),
-                        "change": round(float(diff), 4),
-                    }
-
+        pred = model.predict(x)[0]
+        if int(pred) == desired_class:
+            cf = {name: round(float(x[0, i]), 4) for i, name in enumerate(feature_names)}
+            changes = {
+                name: round(cf[name] - original[name], 4)
+                for name in feature_names
+                if abs(cf[name] - original[name]) > 1e-6
+            }
             logger.success(
                 f"Counterfactual found in {iteration + 1} iterations. "
-                f"Changed {len(changes)} feature(s)."
+                f"{len(changes)} feature(s) changed."
             )
             return {
-                "counterfactual": current.tolist(),
+                "counterfactual": cf,
+                "original": original,
                 "changes": changes,
                 "iterations": iteration + 1,
-                "target_class": target_class,
-                "target_probability": round(float(proba[target_class]), 4),
-                "status": "found",
+                "success": True,
             }
 
-        # Greedy perturbation: find best feature to change
-        best_feature = -1
-        best_improvement = -1.0
+        # Estimate gradient via finite differences
+        proba = model.predict_proba(x)[0]
+        current_prob = proba[desired_class] if len(proba) > desired_class else proba[0]
+        gradients = np.zeros(x.shape[1])
 
-        for i in range(len(current)):
-            for direction in [+1, -1]:
-                candidate = current.copy()
-                delta = step_size * abs(original[i]) if abs(original[i]) > 0.01 else step_size
-                candidate[i] += direction * delta
+        for i in range(x.shape[1]):
+            x_perturbed = x.copy()
+            x_perturbed[0, i] += step_size
+            p_perturbed = model.predict_proba(x_perturbed)[0]
+            new_prob = p_perturbed[desired_class] if len(p_perturbed) > desired_class else p_perturbed[0]
+            gradients[i] = (new_prob - current_prob) / step_size
 
-                # Apply range constraints
-                name = feature_names[i]
-                if name in feature_ranges:
-                    lo, hi = feature_ranges[name]
-                    candidate[i] = np.clip(candidate[i], lo, hi)
+        # Nudge the feature with the highest gradient
+        best_feature = int(np.argmax(np.abs(gradients)))
+        direction = 1.0 if gradients[best_feature] > 0 else -1.0
+        x[0, best_feature] += direction * step_size
 
-                new_proba = model.predict_proba(candidate.reshape(1, -1))[0]
-                improvement = new_proba[target_class] - proba[target_class]
-
-                if improvement > best_improvement:
-                    best_improvement = improvement
-                    best_feature = i
-                    best_candidate = candidate.copy()
-
-        if best_feature >= 0 and best_improvement > 0:
-            current = best_candidate
-        else:
-            break
-
-    # Did not flip within iterations
-    logger.debug(f"Counterfactual not found within {max_iterations} iterations.")
-    changes = {}
-    for i, name in enumerate(feature_names):
-        diff = current[i] - original[i]
-        if abs(diff) > 1e-6:
-            changes[name] = {
-                "original": round(float(original[i]), 4),
-                "counterfactual": round(float(current[i]), 4),
-                "change": round(float(diff), 4),
-            }
-
+    # Did not converge
+    cf = {name: round(float(x[0, i]), 4) for i, name in enumerate(feature_names)}
+    changes = {
+        name: round(cf[name] - original[name], 4)
+        for name in feature_names
+        if abs(cf[name] - original[name]) > 1e-6
+    }
+    logger.info(
+        f"Counterfactual search did not converge in {max_iterations} iterations."
+    )
     return {
-        "counterfactual": current.tolist(),
+        "counterfactual": cf,
+        "original": original,
         "changes": changes,
         "iterations": max_iterations,
-        "target_class": target_class,
-        "status": "partial",
+        "success": False,
     }
 
 
 # ═══════════════════════════════════════════════════════════════════════════
-# Section 4.4 — ConfidenceAwareAgent (Chapter 12, p.28–29)
+# §4.4  ConfidenceAwareAgent
+# Ref: Confidence Communication Methods, p.28–29
 # ═══════════════════════════════════════════════════════════════════════════
 
 class TemperatureScaler:
     """
-    Mock Platt/temperature calibrator for confidence scores.
-    See Chapter 12, p.28-29.
+    Post-hoc calibration via temperature scaling.
 
-    In simulation mode: identity transform + Normal(0, 0.02) noise.
-    In live mode: would fit a LogisticRegression on validation logits.
+    Calibration means a confidence score does what it promises:
+    when the agent says '80% confident', ~80% of those predictions
+    should be correct. Ref: p.27
+
+    In simulation mode, applies identity + small noise.
     """
 
-    def __init__(self, seed: int = 42):
-        self._rng = np.random.RandomState(seed)
-        logger.debug("TemperatureScaler initialized (simulation: identity + noise).")
+    def __init__(self, temperature: float = 1.0):
+        self.temperature = temperature
 
     def calibrate(self, raw_score: float) -> float:
-        """Apply calibration to a raw confidence score."""
-        noise = self._rng.normal(0, 0.02)
-        calibrated = float(np.clip(raw_score + noise, 0.0, 1.0))
-        return round(calibrated, 4)
+        """Apply temperature scaling to a raw confidence score."""
+        # Platt-style sigmoid rescaling
+        logit = math.log(max(raw_score, 1e-8) / max(1.0 - raw_score, 1e-8))
+        scaled_logit = logit / max(self.temperature, 0.01)
+        calibrated = 1.0 / (1.0 + math.exp(-scaled_logit))
+        return round(max(0.0, min(1.0, calibrated)), 4)
 
 
 class ConfidenceAwareAgent:
     """
-    Agent that quantifies and communicates uncertainty.
-    See Chapter 12, p.28-29.
+    Agent that generates and ranks multiple hypotheses with
+    calibrated confidence scores.
 
-    Features:
-        - Multi-hypothesis generation with confidence scores.
-        - Temperature-scaled calibration.
-        - Qualifier mapping: >0.9 High, >0.7 Moderate, else Low.
-        - Epistemic vs. aleatoric uncertainty awareness.
+    Ref: p.28–29, ConfidenceAwareAgent
     """
 
-    QUALIFIER_MAP = {
-        (0.9, 1.01): "High confidence",
-        (0.7, 0.9): "Moderate confidence",
-        (0.0, 0.7): "Low confidence — human review recommended",
-    }
+    def __init__(self, n_hypotheses: int = 3):
+        self.n_hypotheses = n_hypotheses
+        self.calibrator = TemperatureScaler(temperature=1.0)
+        self._mock = MockLLM()
+        self._rng = random.Random(42)
+        logger.debug(
+            f"ConfidenceAwareAgent initialized (n_hypotheses={n_hypotheses})."
+        )
 
-    def __init__(self, seed: int = 42):
-        self._scaler = TemperatureScaler(seed=seed)
-        self._mock_llm = get_mock_llm() if is_simulation() else None
-        logger.info(f"ConfidenceAwareAgent initialized. Mode: {get_mode()}")
-
-    @staticmethod
-    def _get_qualifier(confidence: float) -> str:
-        """Map a confidence score to a human-readable qualifier (p.29)."""
-        if confidence > 0.9:
-            return "High confidence"
-        elif confidence > 0.7:
-            return "Moderate confidence"
-        else:
-            return "Low confidence — human review recommended"
+    @graceful_fallback(
+        fallback_value=[],
+        section_ref="Section 12 — ConfidenceAwareAgent.score_differentials() (p.28–29)",
+    )
+    def score_differentials(self, differentials: list[dict],
+                            evidence: dict | None = None) -> list[dict]:
+        """
+        Score each differential with calibrated confidence.
+        Ref: p.28–29
+        """
+        result = self._mock.invoke("confidence_scoring", {
+            "differentials": differentials,
+            "evidence": evidence or {},
+        })
+        return result.get("scored", [])
 
     @graceful_fallback(
         fallback_value=[{"answer": "unknown", "confidence": 0.5,
                          "qualifier": "Low confidence — human review recommended",
                          "evidence": {}}],
-        section_ref="Section 12 - Confidence Scoring (p.28-29)"
+        section_ref="Section 12 — ConfidenceAwareAgent.reason_with_confidence() (p.28–29)",
     )
-    def score_differentials(self, differentials: list[dict]) -> list[dict]:
+    def reason_with_confidence(self, query: str,
+                               context: dict | None = None) -> list[dict]:
         """
-        Calibrate raw differential scores and assign qualifiers.
-
-        Args:
-            differentials: List of {'diagnosis': str, 'raw_score': float}.
-
-        Returns:
-            List of {'answer', 'confidence', 'qualifier', 'evidence'} dicts.
-            Matches parity contract §3.3.
+        Generate multiple hypotheses with calibrated confidence.
+        Ref: p.28–29
         """
-        if self._mock_llm:
-            return self._mock_llm.invoke(
-                "confidence score_differentials calibrat",
-                differentials=differentials,
-            )
+        hypotheses = []
+        for i in range(self.n_hypotheses):
+            raw_score = max(0.1, 0.9 - i * 0.25 + self._rng.gauss(0, 0.03))
+            calibrated = self.calibrator.calibrate(raw_score)
 
-        scored = []
-        for diff in differentials:
-            raw = diff.get("raw_score", 0.5)
-            calibrated = self._scaler.calibrate(raw)
-            qualifier = self._get_qualifier(calibrated)
-
-            scored.append({
-                "answer": diff.get("diagnosis", "unknown"),
+            hypotheses.append({
+                "answer": f"Hypothesis {i + 1} for: {query[:50]}",
                 "confidence": calibrated,
-                "qualifier": qualifier,
-                "evidence": {"raw_score": raw},
+                "evidence": context or {},
             })
 
-        return scored
+        hypotheses.sort(key=lambda h: h["confidence"], reverse=True)
+        return hypotheses
 
-    @graceful_fallback(
-        fallback_value="Uncertainty information unavailable.",
-        section_ref="Section 12 - Uncertainty Communication (p.29)"
-    )
-    def communicate_uncertainty(self, scored_results: list[dict]) -> str:
+    def communicate_uncertainty(self, hypotheses: list[dict]) -> dict:
         """
-        Generate a natural-language summary of uncertainty. See p.29.
+        Format uncertainty for user consumption.
 
-        Distinguishes epistemic (reducible with more data) from
-        aleatoric (inherent) uncertainty.
+        Qualifier mapping (p.29):
+            >0.9  → 'High confidence'
+            >0.7  → 'Moderate confidence'
+            else  → 'Low confidence — human review recommended'
+
+        Ref: p.29, communicate_uncertainty()
         """
-        if not scored_results:
-            return "No results to communicate."
+        top = hypotheses[0] if hypotheses else {
+            "answer": "unknown", "confidence": 0.0, "evidence": {}
+        }
 
-        top = scored_results[0]
-        qualifier = top.get("qualifier", "Unknown")
-        confidence = top.get("confidence", 0.0)
-        answer = top.get("answer", "unknown")
-
-        # Determine uncertainty type
-        if confidence < 0.5:
-            uncertainty_type = "epistemic (could be reduced with additional data)"
-        elif confidence < 0.8:
-            uncertainty_type = "mixed epistemic and aleatoric"
+        conf = top.get("confidence", 0.0)
+        if conf > 0.9:
+            qualifier = "High confidence"
+        elif conf > 0.7:
+            qualifier = "Moderate confidence"
         else:
-            uncertainty_type = "primarily aleatoric (inherent variability)"
+            qualifier = "Low confidence — human review recommended"
 
-        summary = (
-            f"Primary assessment: {answer} ({qualifier}, {confidence:.0%}). "
-            f"Uncertainty type: {uncertainty_type}. "
-        )
-
-        if len(scored_results) > 1:
-            alternatives = [
-                f"{r['answer']} ({r['confidence']:.0%})"
-                for r in scored_results[1:3]
-            ]
-            summary += f"Alternatives considered: {', '.join(alternatives)}."
-
-        logger.info(f"Uncertainty communication: {qualifier}")
-        return summary
+        return {
+            "recommendation": top.get("answer", "unknown"),
+            "confidence_level": qualifier,
+            "confidence_score": round(conf, 2),
+            "supporting_evidence": top.get("evidence", {}),
+            "alternative_hypotheses": hypotheses[1:] if len(hypotheses) > 1 else [],
+        }
 
 
 # ═══════════════════════════════════════════════════════════════════════════
-# Section 4.5 — DiagnosticAssistant + Sub-Agents (Chapter 12, p.30–35)
+# §4.5  DiagnosticAssistant + ClinicalExplainer
+# Ref: Case Study — Medical Diagnosis Assistant, p.30–35, p.39
 # ═══════════════════════════════════════════════════════════════════════════
 
 class BiometricAnalyzer:
     """
-    Mock sub-agent: analyzes biometric/vital sign data.
-    See Chapter 12, p.32.
+    Analyzes aggregated biometric data from the edge processing layer.
+
+    Accepts a patient_data dict with a 'biometrics' field containing
+    rolling-window aggregated features. Raw sensor data never reaches
+    this component (p.31–32, edge computing for privacy).
+
+    Ref: p.30–31, Biometric agents
     """
 
-    # Normal ranges for flagging
-    NORMAL_RANGES = {
-        "heart_rate_avg": (60, 100),
-        "spo2_min": (95, 100),
-        "wbc_count": (4.5, 11.0),
-        "temperature": (36.1, 37.2),
-    }
-
     @graceful_fallback(
-        fallback_value={"flags": [], "summary": "Biometric analysis unavailable."},
-        section_ref="Section 12 - Biometric Analysis (p.32)"
+        fallback_value={"vitals": {}, "anomalies": [], "status": "fallback"},
+        section_ref="Section 12 — BiometricAnalyzer.analyze() (p.31–32)",
     )
-    def analyze(self, patient: dict) -> dict:
-        """
-        Analyze patient biometrics and flag abnormal values.
+    def analyze(self, patient_data: dict) -> dict:
+        """Analyze biometric data and return vitals report. Ref: p.32"""
+        vitals = {
+            "heart_rate_avg": patient_data.get("heart_rate_avg", 75.0),
+            "spo2_min": patient_data.get("spo2_min", 96.0),
+            "wbc_count": patient_data.get("wbc_count", 7.5),
+            "temperature": patient_data.get("temperature", 37.0),
+            "chest_imaging": patient_data.get("chest_imaging", "clear"),
+        }
 
-        Args:
-            patient: Dict with vital sign keys.
+        anomalies = []
+        if vitals["spo2_min"] < 90:
+            anomalies.append({"metric": "spo2_min", "value": vitals["spo2_min"],
+                              "threshold": 90, "alert": "CRITICAL"})
+        if vitals["wbc_count"] > 10:
+            anomalies.append({"metric": "wbc_count", "value": vitals["wbc_count"],
+                              "threshold": 10, "alert": "ELEVATED"})
+        if vitals["temperature"] > 38.0:
+            anomalies.append({"metric": "temperature", "value": vitals["temperature"],
+                              "threshold": 38.0, "alert": "FEVER"})
 
-        Returns:
-            dict with 'flags' and 'summary'.
-        """
-        flags = []
-        for vital, (lo, hi) in self.NORMAL_RANGES.items():
-            value = patient.get(vital)
-            if value is not None:
-                if value < lo:
-                    flags.append({
-                        "vital": vital,
-                        "value": value,
-                        "status": "LOW",
-                        "normal_range": f"{lo}-{hi}",
-                    })
-                elif value > hi:
-                    flags.append({
-                        "vital": vital,
-                        "value": value,
-                        "status": "HIGH",
-                        "normal_range": f"{lo}-{hi}",
-                    })
+        status = "abnormal" if anomalies else "normal"
+        logger.debug(
+            f"Biometrics analyzed: {status} "
+            f"({len(anomalies)} anomalies detected)."
+        )
 
-        if flags:
-            summary = f"{len(flags)} abnormal vital(s) detected."
-            logger.debug(f"Biometrics: {summary}")
-        else:
-            summary = "All vitals within normal range."
-            logger.debug(summary)
-
-        return {"flags": flags, "summary": summary}
+        return {"vitals": vitals, "anomalies": anomalies, "status": status}
 
 
 class SymptomInterpreter:
     """
-    Mock sub-agent: maps reported symptoms to SNOMED CT codes.
-    See Chapter 12, p.32-33.
+    Maps patient-reported symptoms to SNOMED CT concepts using
+    the MockLLM symptom lookup table.
+
+    Ref: p.31–33, Symptom analysis agents
     """
 
     def __init__(self):
-        self._mock_llm = get_mock_llm() if is_simulation() else None
+        self._mock = MockLLM()
 
     @graceful_fallback(
         fallback_value=[],
-        section_ref="Section 12 - Symptom Interpretation (p.32-33)"
+        section_ref="Section 12 — SymptomInterpreter.interpret() (p.32–33)",
     )
-    def interpret(self, symptoms: list[str]) -> list[dict]:
-        """
-        Interpret symptoms into structured SNOMED codes.
+    def interpret(self, reported_symptoms: list[str] | str) -> list[dict]:
+        """Map symptoms to SNOMED CT codes. Ref: p.32–33"""
+        if isinstance(reported_symptoms, list):
+            symptom_str = ", ".join(reported_symptoms)
+        else:
+            symptom_str = reported_symptoms
 
-        Args:
-            symptoms: List of symptom strings.
-
-        Returns:
-            [{'symptom': str, 'snomed_code': str, 'confidence': float}]
-        """
-        if self._mock_llm:
-            return self._mock_llm.invoke(
-                "interpret_symptoms snomed symptom",
-                symptoms=symptoms,
-            )
-
-        # Live mode would call actual NLP/LLM pipeline
-        return [{"symptom": s, "snomed_code": "SNOMED:LIVE", "confidence": 0.9}
-                for s in symptoms]
+        result = self._mock.invoke("symptom_interpretation", {
+            "reported_symptoms": symptom_str,
+        })
+        return result.get("symptoms", [])
 
 
 class DiagnosticCoordinator:
     """
-    Coordinates differential diagnosis generation.
-    See Chapter 12, p.33-34.
+    Integrates biometric and symptom data to generate ranked
+    differential diagnoses.
+
+    Ref: p.31, p.33–34, Coordinator agents
     """
 
     def __init__(self):
-        self._mock_llm = get_mock_llm() if is_simulation() else None
+        self._mock = MockLLM()
 
     @graceful_fallback(
         fallback_value=[{"diagnosis": "unknown", "raw_score": 0.5}],
-        section_ref="Section 12 - Differential Generation (p.33-34)"
+        section_ref="Section 12 — DiagnosticCoordinator.generate_differentials() (p.33–34)",
     )
-    def generate_differentials(self, patient: dict,
-                               biometrics: dict,
-                               symptoms: list[dict]) -> list[dict]:
-        """
-        Generate ranked differential diagnoses.
+    def generate_differentials(self, vitals: dict, symptoms: list[dict],
+                               history: list[str] | None = None) -> list[dict]:
+        """Generate ranked differential diagnoses. Ref: p.33–34"""
+        vitals_data = vitals.get("vitals", vitals)
+        result = self._mock.invoke("differential_generation", {
+            "vitals": vitals_data,
+            "symptoms": symptoms,
+            "history": history or [],
+        })
+        return result.get("differentials", [])
 
-        Args:
-            patient: Patient record dict.
-            biometrics: Output from BiometricAnalyzer.
-            symptoms: Output from SymptomInterpreter.
 
-        Returns:
-            [{'diagnosis': str, 'raw_score': float}]
-        """
-        if self._mock_llm:
-            return self._mock_llm.invoke(
-                "generate_differentials differential diagnosis",
-                wbc_count=patient.get("wbc_count", 7.5),
-                chest_imaging=patient.get("chest_imaging", "clear"),
-            )
+class ClinicalMemorySystem:
+    """
+    Memory architecture for the diagnostic assistant.
 
-        # Live mode would use actual diagnostic reasoning
-        return [{"diagnosis": "unknown", "raw_score": 0.5}]
+    Implements episodic, semantic, and working memory patterns
+    from Chapter 5. Ref: p.31
+    """
+
+    def __init__(self):
+        self._episodic: dict[str, list[dict]] = {}  # patient_id → encounters
+        self._semantic: dict[str, Any] = {}          # clinical knowledge
+
+    def retrieve_episodic(self, patient_id: str) -> list[dict]:
+        """Retrieve patient interaction history. Ref: p.31"""
+        return self._episodic.get(patient_id, [])
+
+    def store_episodic(self, patient_id: str, encounter: dict) -> None:
+        """Store a new patient encounter. Ref: p.31"""
+        self._episodic.setdefault(patient_id, []).append({
+            **encounter,
+            "stored_at": datetime.now(timezone.utc).isoformat(),
+        })
+
+    def retrieve_semantic(self, key: str) -> Any:
+        """Retrieve clinical knowledge. Ref: p.31"""
+        return self._semantic.get(key)
 
 
 class ClinicalExplainer:
     """
-    Generates audience-adapted explanations of diagnostic results.
-    See Chapter 12, p.34-35.
+    Generates audience-adapted clinical explanations.
 
-    Supports two audiences:
-        - 'clinician': Technical with SHAP values and clinical terminology.
-        - 'patient': Plain language with reassurance and next-steps.
+    Clinician template: structured assessment with SHAP contributions.
+    Patient template: plain-language summary.
+
+    Ref: p.34–35, p.39, ClinicalExplainer.generate()
     """
 
     def __init__(self):
-        self._mock_llm = get_mock_llm() if is_simulation() else None
+        self._mock = MockLLM()
+        self._trace: list[dict] = []
 
     @graceful_fallback(
-        fallback_value={"narrative": "Explanation unavailable (fallback).",
+        fallback_value={"narrative": "Explanation temporarily unavailable.",
                         "feature_contributions": {}, "trace": []},
-        section_ref="Section 12 - Clinical Explanation (p.34-35)"
+        section_ref="Section 12 — ClinicalExplainer.generate() (p.34–35)",
     )
-    def generate(self, diagnosis: str, confidence: float,
-                 shap_features: dict, audience: str = "clinician",
-                 trace: Optional[list] = None) -> dict:
+    def generate(self, scored_differentials: list[dict],
+                 audience: str = "clinician",
+                 evidence_sources: list[dict] | None = None,
+                 shap_values: dict | None = None) -> dict:
         """
-        Generate a narrative explanation.
+        Generate an audience-adapted clinical explanation.
 
-        Args:
-            diagnosis: Primary diagnosis string.
-            confidence: Confidence score (0-1).
-            shap_features: Feature importance dict.
-            audience: 'clinician' or 'patient'.
-            trace: Optional audit trail from earlier steps.
+        Three internal steps (p.39):
+            1. Select template based on audience
+            2. Format SHAP values into ranked contributing factors
+            3. NLG step to produce fluent narrative
 
-        Returns:
-            {'narrative': str, 'feature_contributions': dict, 'trace': list}
+        Ref: p.34–35, p.39
         """
-        if self._mock_llm:
-            return self._mock_llm.invoke(
-                "clinical_explanation explain narrative",
-                diagnosis=diagnosis,
-                confidence=confidence,
-                shap_features=shap_features,
-                audience=audience,
-            )
+        result = self._mock.invoke("explanation_generation", {
+            "audience": audience,
+            "scored_differentials": scored_differentials,
+            "shap_values": shap_values or {},
+        })
 
-        # Live mode would use actual LLM
+        self._trace = result.get("trace", [])
+
+        logger.success(
+            f"Clinical explanation generated for audience='{audience}'. "
+            f"Trace: {len(self._trace)} steps."
+        )
+
         return {
-            "narrative": f"Live explanation for {diagnosis}.",
-            "feature_contributions": shap_features,
-            "trace": trace or [],
+            "narrative": result["narrative"],
+            "feature_contributions": result["feature_contributions"],
+            "trace": self._trace,
+        }
+
+    def get_reasoning_trace(self) -> list[dict]:
+        """Expose reasoning trace for audit. Ref: p.34"""
+        return copy.deepcopy(self._trace)
+
+
+class DiagnosticReport:
+    """Structured output of the DiagnosticAssistant. Ref: p.34"""
+
+    def __init__(self, differentials: list[dict], explanation: dict,
+                 confidence_summary: dict, audit_trail: list[dict]):
+        self.differentials = differentials
+        self.explanation = explanation
+        self.confidence_summary = confidence_summary
+        self.audit_trail = audit_trail
+
+    def to_dict(self) -> dict:
+        return {
+            "differentials": self.differentials,
+            "explanation": self.explanation,
+            "confidence_summary": self.confidence_summary,
+            "audit_trail": self.audit_trail,
         }
 
 
 class DiagnosticAssistant:
     """
-    Full medical diagnosis pipeline orchestrator.
-    See Chapter 12, p.30-35.
+    Clinical decision support agent with multi-source evidence
+    integration and audience-adapted explanations.
 
-    Pipeline:
-        1. BiometricAnalyzer → vital sign flags
-        2. SymptomInterpreter → SNOMED codes
-        3. DiagnosticCoordinator → differential diagnoses
-        4. ConfidenceAwareAgent → calibrated scores + qualifiers
-        5. ClinicalExplainer → audience-adapted explanation
+    Architecture (p.30–35):
+        - BiometricAnalyzer: aggregated wearable features
+        - SymptomInterpreter: NLP → SNOMED CT mapping
+        - DiagnosticCoordinator: differential ranking
+        - ClinicalExplainer: SHAP-based audience-adapted output
+        - ConfidenceAwareAgent: calibrated uncertainty
+        - ClinicalMemorySystem: episodic, semantic, working memory
 
-    All sub-agents use @graceful_fallback. Sensor dropout (F7),
-    model failure (F10), and explanation failure (F5) are handled.
+    Ref: p.32–35, DiagnosticAssistant
     """
 
-    def __init__(self, seed: int = 42):
-        self._biometric = BiometricAnalyzer()
-        self._symptom = SymptomInterpreter()
-        self._coordinator = DiagnosticCoordinator()
-        self._confidence = ConfidenceAwareAgent(seed=seed)
-        self._explainer = ClinicalExplainer()
-        self._trace: list[dict] = []
-        logger.info(f"DiagnosticAssistant initialized. Mode: {get_mode()}")
-
-    def _log_step(self, step: str, data: dict, status: str = "complete") -> None:
-        self._trace.append({
-            "step": step,
-            "timestamp": datetime.now(timezone.utc).isoformat(),
-            "status": status,
-            "summary": str(data)[:200],
-        })
+    def __init__(self, n_hypotheses: int = 5):
+        self.biometric_agent = BiometricAnalyzer()
+        self.symptom_agent = SymptomInterpreter()
+        self.coordinator = DiagnosticCoordinator()
+        self.explainer = ClinicalExplainer()
+        self.confidence_engine = ConfidenceAwareAgent(n_hypotheses=n_hypotheses)
+        self.memory = ClinicalMemorySystem()
+        logger.debug("DiagnosticAssistant initialized with all sub-agents.")
 
     @graceful_fallback(
-        fallback_value={"status": "pipeline_failed", "diagnosis": "unknown"},
-        section_ref="Section 12 - Diagnostic Pipeline (p.30-35)"
+        fallback_value=DiagnosticReport(
+            differentials=[], explanation={},
+            confidence_summary={}, audit_trail=[],
+        ),
+        section_ref="Section 12 — DiagnosticAssistant.diagnose() (p.32–35)",
     )
-    def run_diagnosis(self, patient: dict,
-                      audience: str = "clinician") -> dict:
+    def diagnose(self, patient_data: dict,
+                 reported_symptoms: list[str] | str,
+                 audience: str = "clinician") -> DiagnosticReport:
         """
-        Execute the full diagnostic pipeline for a single patient.
+        Generate an explained, confidence-rated diagnosis.
 
-        Args:
-            patient: Patient record with vitals, symptoms, imaging.
-            audience: 'clinician' or 'patient' for explanation style.
+        Pipeline:
+            1. Gather evidence (biometrics, symptoms, history)
+            2. Generate ranked differentials
+            3. Score with calibrated confidence
+            4. Generate clinical explanation
+            5. Store encounter in episodic memory
 
-        Returns:
-            Complete diagnostic report with trace.
+        Ref: p.32–35
         """
-        self._trace = []
-        logger.info(
-            f"Starting diagnosis for patient "
-            f"{patient.get('patient_id', 'unknown')}..."
+        patient_id = patient_data.get("patient_id", "unknown")
+
+        # Gather evidence from multiple sources
+        vitals = self.biometric_agent.analyze(patient_data)
+        symptoms = self.symptom_agent.interpret(reported_symptoms)
+        history = self.memory.retrieve_episodic(patient_id)
+
+        # Generate ranked differential diagnoses
+        differentials = self.coordinator.generate_differentials(
+            vitals, symptoms,
+            history=patient_data.get("patient_history", []),
         )
 
-        # Step 1: Biometric analysis
-        biometrics = self._biometric.analyze(patient)
-        self._log_step("biometric_analysis", biometrics)
-
-        # Step 2: Symptom interpretation
-        symptoms_raw = patient.get("reported_symptoms", "")
-        if isinstance(symptoms_raw, str):
-            symptom_list = [s.strip() for s in symptoms_raw.split(",") if s.strip()]
-        else:
-            symptom_list = list(symptoms_raw)
-
-        symptoms = self._symptom.interpret(symptom_list)
-        self._log_step("symptom_interpretation", {"count": len(symptoms)})
-
-        # Step 3: Differential diagnosis
-        differentials = self._coordinator.generate_differentials(
-            patient, biometrics, symptoms
+        # Score each with calibrated confidence
+        scored = self.confidence_engine.score_differentials(
+            differentials,
+            evidence={
+                "vitals": vitals,
+                "symptoms": symptoms,
+                "history": history,
+            },
         )
-        self._log_step("differential_generation", {"count": len(differentials)})
 
-        # Step 4: Confidence calibration
-        scored = self._confidence.score_differentials(differentials)
-        self._log_step("confidence_calibration", {"top": scored[0] if scored else {}})
-
-        # Step 5: Explanation
-        primary = scored[0] if scored else {"answer": "unknown", "confidence": 0.5}
-        shap_features = {
-            "wbc_count": 0.31,
-            "chest_imaging": 0.28,
-            "temperature": 0.15,
-            "spo2_min": 0.12,
-            "heart_rate_avg": 0.08,
-        }
-
-        explanation = self._explainer.generate(
-            diagnosis=primary.get("answer", "unknown"),
-            confidence=primary.get("confidence", 0.5),
-            shap_features=shap_features,
+        # Generate clinical explanation
+        explanation = self.explainer.generate(
+            scored_differentials=scored if scored else differentials,
             audience=audience,
-            trace=self._trace,
+            evidence_sources=[vitals, {"symptoms": symptoms}],
         )
-        self._log_step("explanation_generation", {"audience": audience})
 
-        # Uncertainty summary
-        uncertainty = self._confidence.communicate_uncertainty(scored)
+        # Store encounter in episodic memory
+        self.memory.store_episodic(patient_id, {
+            "diagnoses": scored,
+            "evidence": [vitals, {"symptoms": symptoms}],
+            "explanation": explanation,
+        })
+
+        # Confidence summary
+        confidence_summary = self.confidence_engine.communicate_uncertainty(
+            scored if scored else []
+        )
+
+        report = DiagnosticReport(
+            differentials=scored if scored else differentials,
+            explanation=explanation,
+            confidence_summary=confidence_summary,
+            audit_trail=self.explainer.get_reasoning_trace(),
+        )
 
         logger.success(
-            f"Diagnosis complete: {primary.get('answer', 'unknown')} "
-            f"({primary.get('qualifier', 'N/A')})"
+            f"Diagnosis complete for patient {patient_id}. "
+            f"Top: {confidence_summary.get('recommendation', 'N/A')} "
+            f"({confidence_summary.get('confidence_level', 'N/A')})"
         )
 
-        return {
-            "patient_id": patient.get("patient_id", "unknown"),
-            "biometrics": biometrics,
-            "symptoms": symptoms,
-            "differentials": differentials,
-            "scored_differentials": scored,
-            "explanation": explanation,
-            "uncertainty_summary": uncertainty,
-            "trace": copy.deepcopy(self._trace),
-            "status": "complete",
-        }
-
-
-# ═══════════════════════════════════════════════════════════════════════════
-# Self-test
-# ═══════════════════════════════════════════════════════════════════════════
-
-if __name__ == "__main__":
-    from src.synthetic_data import generate_medical_dataset
-
-    # -- ExplainableAgent --
-    logger.info("=== ExplainableAgent Self-Test ===")
-    agent = ExplainableAgent(name="TestAgent")
-    result = agent.run_full_pipeline({"heart_rate": 88, "wbc": 12})
-    logger.success(f"Trace summary: {agent.get_trace_summary()}")
-
-    # -- ConfidenceAwareAgent --
-    logger.info("=== ConfidenceAwareAgent Self-Test ===")
-    ca = ConfidenceAwareAgent(seed=42)
-    diffs = [
-        {"diagnosis": "pneumonia", "raw_score": 0.87},
-        {"diagnosis": "bronchitis", "raw_score": 0.09},
-        {"diagnosis": "atelectasis", "raw_score": 0.04},
-    ]
-    scored = ca.score_differentials(diffs)
-    for s in scored:
-        logger.success(f"  {s['answer']}: {s['confidence']:.2f} ({s['qualifier']})")
-    uncertainty = ca.communicate_uncertainty(scored)
-    logger.success(f"Uncertainty: {uncertainty}")
-
-    # -- DiagnosticAssistant --
-    logger.info("=== DiagnosticAssistant Self-Test ===")
-    med_df = generate_medical_dataset(50, 42)
-    patient = med_df.iloc[0].to_dict()
-    assistant = DiagnosticAssistant(seed=42)
-
-    # Clinician audience
-    report_clinician = assistant.run_diagnosis(patient, audience="clinician")
-    logger.success(f"Clinician narrative: {report_clinician['explanation'].get('narrative', '')[:100]}...")
-
-    # Patient audience
-    report_patient = assistant.run_diagnosis(patient, audience="patient")
-    logger.success(f"Patient narrative: {report_patient['explanation'].get('narrative', '')[:100]}...")
-
-    logger.success("All ExplainabilityCore self-tests passed.")
+        return report

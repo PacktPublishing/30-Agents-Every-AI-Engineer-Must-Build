@@ -1,101 +1,113 @@
-"""
-Chapter 12: Ethical and Explainable Agents — Source Package
-
-Author: Imran Ahmad
-Book: 30 Agents Every AI Engineer Must Build, Chapter 12
-Publisher: Packt Publishing
-"""
+# src/__init__.py
+# Author: Imran Ahmad
+# Book: 30 Agents Every AI Engineer Must Build, Chapter 12
+# Description: Package exports for the Chapter 12 source modules.
 
 __version__ = "1.0.0"
-__author__ = "Imran Ahmad"
 
-# -- Utility layer ----------------------------------------------------------
+# --- Utilities (src/utils.py) ---
 from src.utils import (
     ColorLogger,
     graceful_fallback,
     resolve_api_key,
     get_mode,
     is_simulation,
+    logger,
 )
 
-# -- Mock layer --------------------------------------------------------------
-from src.mock_llm import MockLLM, get_mock_llm
+# --- Mock Layer (src/mock_llm.py) ---
+from src.mock_llm import MockLLM, strip_meta
 
-# -- Synthetic data -----------------------------------------------------------
-from src.synthetic_data import generate_hr_dataset, generate_medical_dataset
+# --- Synthetic Data (src/synthetic_data.py) ---
+from src.synthetic_data import (
+    generate_hr_dataset,
+    generate_medical_dataset,
+    summarize_hr_dataset,
+    summarize_medical_dataset,
+)
 
-# -- Ethical core --------------------------------------------------------------
+# --- Ethical Core (src/ethical_core.py) ---
 from src.ethical_core import (
     DeonticOperator,
     EthicalReasoningAgent,
     EUCompliantAgent,
+    BiasDetector,
+    BiasMonitoringPipeline,
+    FairHiringAgent,
+    FairnessEnforcer,
+    ResumeAnalyzer,
+    AuditLogger,
     DemographicParityMetric,
     EqualOpportunityMetric,
     DisparateImpactMetric,
-    BiasDetector,
-    BiasMonitoringPipeline,
-    ResumeAnalyzer,
-    FairnessEnforcer,
-    FairHiringAgent,
-    demonstrate_impossibility_theorem,
+    SlidingWindow,
 )
 
-# -- Explainability core -------------------------------------------------------
+# --- Explainability Core (src/explainability_core.py) ---
 from src.explainability_core import (
-    DecisionLogger,
     ExplainableAgent,
-    compute_shap_explanations,
-    compute_lime_explanations,
-    train_diagnostic_model,
-    generate_counterfactual,
-    TemperatureScaler,
+    DecisionLogger,
+    ExplanationGenerator,
     ConfidenceAwareAgent,
+    TemperatureScaler,
+    DiagnosticAssistant,
+    DiagnosticReport,
+    ClinicalExplainer,
     BiometricAnalyzer,
     SymptomInterpreter,
     DiagnosticCoordinator,
-    ClinicalExplainer,
-    DiagnosticAssistant,
+    ClinicalMemorySystem,
+    compute_shap_explanation,
+    compute_lime_explanation,
+    generate_counterfactual,
 )
 
-# -- Public API ---------------------------------------------------------------
 __all__ = [
-    # Utils
+    # Version
+    "__version__",
+    # Utilities
     "ColorLogger",
     "graceful_fallback",
     "resolve_api_key",
     "get_mode",
     "is_simulation",
+    "logger",
     # Mock
     "MockLLM",
-    "get_mock_llm",
+    "strip_meta",
     # Data
     "generate_hr_dataset",
     "generate_medical_dataset",
+    "summarize_hr_dataset",
+    "summarize_medical_dataset",
     # Ethical Core
     "DeonticOperator",
     "EthicalReasoningAgent",
     "EUCompliantAgent",
+    "BiasDetector",
+    "BiasMonitoringPipeline",
+    "FairHiringAgent",
+    "FairnessEnforcer",
+    "ResumeAnalyzer",
+    "AuditLogger",
     "DemographicParityMetric",
     "EqualOpportunityMetric",
     "DisparateImpactMetric",
-    "BiasDetector",
-    "BiasMonitoringPipeline",
-    "ResumeAnalyzer",
-    "FairnessEnforcer",
-    "FairHiringAgent",
-    "demonstrate_impossibility_theorem",
+    "SlidingWindow",
     # Explainability Core
-    "DecisionLogger",
     "ExplainableAgent",
-    "compute_shap_explanations",
-    "compute_lime_explanations",
-    "train_diagnostic_model",
-    "generate_counterfactual",
-    "TemperatureScaler",
+    "DecisionLogger",
+    "ExplanationGenerator",
     "ConfidenceAwareAgent",
+    "TemperatureScaler",
+    "DiagnosticAssistant",
+    "DiagnosticReport",
+    "ClinicalExplainer",
     "BiometricAnalyzer",
     "SymptomInterpreter",
     "DiagnosticCoordinator",
-    "ClinicalExplainer",
-    "DiagnosticAssistant",
+    "ClinicalMemorySystem",
+    "compute_shap_explanation",
+    "compute_lime_explanation",
+    "generate_counterfactual",
 ]

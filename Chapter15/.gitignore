@@ -1,0 +1,38 @@
+# ===========================================================================
+# .gitignore — Chapter 15: Education and Knowledge Agents
+# Book: 30 Agents Every AI Engineer Must Build (Packt Publishing)
+# Author: Imran Ahmad
+# ===========================================================================
+
+# --- Secrets (NEVER commit) ---
+.env
+
+# --- Python ---
+__pycache__/
+*.pyc
+*.pyo
+*.egg-info/
+dist/
+build/
+*.egg
+
+# --- Virtual Environments ---
+venv/
+.venv/
+ch15env/
+env/
+
+# --- Jupyter ---
+.ipynb_checkpoints/
+
+# --- OS Artifacts ---
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# --- IDE ---
+.vscode/
+.idea/
+*.swp
+*.swo
+*~

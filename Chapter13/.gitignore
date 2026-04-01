@@ -1,9 +1,11 @@
 # Chapter 13: Healthcare and Scientific Agents
 # Author: Imran Ahmad
 
-# Environment and secrets
+# Environment
 .env
-*.key
+.venv/
+venv/
+env/
 
 # Python
 __pycache__/
@@ -12,12 +14,6 @@ __pycache__/
 *.egg-info/
 dist/
 build/
-*.egg
-
-# Virtual environments
-.venv/
-venv/
-ENV/
 
 # Jupyter
 .ipynb_checkpoints/

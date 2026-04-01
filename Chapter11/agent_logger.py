@@ -1,116 +1,114 @@
-"""
-agent_logger.py — Color-Coded Logging Utility & Resilience Decorator
-=====================================================================
-Book:    30 Agents Every AI Engineer Must Build
-Author:  Imran Ahmad
-Chapter: 11 — Multi-Modal Perception Agents
-Ref:     Cross-cutting utility used by all three agent domains
-
-Provides:
-    - AgentLogger: Color-coded console logger (BLUE info, GREEN success, RED error)
-    - graceful_fallback: Decorator that catches exceptions, logs RED errors,
-      and returns a safe fallback value so notebooks never crash.
-"""
-
-from __future__ import annotations
+# agent_logger.py
+# Chapter 11: Multi-Modal Perception Agents
+# Book: 30 Agents Every AI Engineer Must Build
+# Author: Imran Ahmad | Publisher: Packt Publishing
+#
+# Color-coded logging utility and resilience decorator used across
+# all three agent domains (Vision-Language, Audio Processing,
+# Physical World Sensing).
+# Ref: Cross-cutting utility — all chapter sections
 
 import functools
-import sys
-from datetime import datetime
-from typing import Any, Callable
+import time
+import traceback
 
 
 class AgentLogger:
-    """Color-coded logger for multi-modal agent output.
-
-    Ref: Cross-cutting — used in all chapter sections.
-    Author: Imran Ahmad
+    """
+    Color-coded logger for multi-modal agent output.
 
     Color schema:
-        .info()    → BLUE   — Informational / status messages
-        .success() → GREEN  — Successful operation completion
-        .error()   → RED    — Errors, failures, critical alerts
+        BLUE  — informational messages (mode banners, initialization)
+        GREEN — successful completions (agent actions, tool results)
+        RED   — errors and failures (exceptions, fallback activations)
+
+    Ref: Cross-cutting utility for Chapter 11 agent demonstrations.
     """
 
     # ANSI escape codes
-    _BLUE = "\033[94m"
-    _GREEN = "\033[92m"
-    _RED = "\033[91m"
-    _BOLD = "\033[1m"
-    _RESET = "\033[0m"
+    BLUE = "\033[94m"
+    GREEN = "\033[92m"
+    RED = "\033[91m"
+    BOLD = "\033[1m"
+    RESET = "\033[0m"
 
-    # Set to False if your terminal does not render ANSI codes.
-    # See troubleshooting.md — Issue 7.
-    USE_ANSI: bool = True
+    # Set to False to disable ANSI codes (e.g., environments that
+    # render raw escape sequences). See troubleshooting.md Issue 7.
+    USE_ANSI = True
 
-    def __init__(self, name: str = "Agent") -> None:
-        self.name = name
+    @classmethod
+    def _fmt(cls, color: str, prefix: str, message: str) -> str:
+        if cls.USE_ANSI:
+            return f"{color}{cls.BOLD}[{prefix}]{cls.RESET}{color} {message}{cls.RESET}"
+        return f"[{prefix}] {message}"
 
-    def _timestamp(self) -> str:
-        return datetime.now().strftime("%H:%M:%S")
+    @classmethod
+    def info(cls, message: str) -> None:
+        """Blue informational message."""
+        print(cls._fmt(cls.BLUE, "INFO", message))
 
-    def _format(self, level: str, color: str, message: str) -> str:
-        ts = self._timestamp()
-        if self.USE_ANSI:
-            return (
-                f"{color}{self._BOLD}[{ts}] [{level}] "
-                f"[{self.name}]{self._RESET} {color}{message}{self._RESET}"
-            )
-        return f"[{ts}] [{level}] [{self.name}] {message}"
+    @classmethod
+    def success(cls, message: str) -> None:
+        """Green success message."""
+        print(cls._fmt(cls.GREEN, "SUCCESS", message))
 
-    def info(self, message: str) -> None:
-        """Log an informational message in BLUE."""
-        print(self._format("INFO", self._BLUE, message))
-
-    def success(self, message: str) -> None:
-        """Log a success message in GREEN."""
-        print(self._format("SUCCESS", self._GREEN, message))
-
-    def error(self, message: str) -> None:
-        """Log an error message in RED."""
-        print(self._format("ERROR", self._RED, message))
+    @classmethod
+    def error(cls, message: str) -> None:
+        """Red error message."""
+        print(cls._fmt(cls.RED, "ERROR", message))
 
 
-def graceful_fallback(
-    fallback_value: Any = None,
-    chapter_ref: str = "",
-) -> Callable:
-    """Decorator: catch exceptions, log RED error, return fallback value.
+def graceful_fallback(max_retries: int = 2, base_delay: float = 1.0):
+    """
+    Decorator that wraps agent inference methods with retry logic
+    and structured error reporting.
 
-    Ref: Cross-cutting resilience pattern.
-    Author: Imran Ahmad
-
-    Usage::
-
-        @graceful_fallback(fallback_value="N/A", chapter_ref="Building a Vision QA Agent")
-        def answer_question(self, image, question):
-            ...
+    Implements exponential backoff: delay doubles after each attempt.
+    On final failure, logs a RED error and returns a descriptive
+    fallback dictionary rather than raising an unhandled exception.
 
     Args:
-        fallback_value: Value returned when the wrapped function raises.
-        chapter_ref:    Chapter section cited in the error log.
+        max_retries: Maximum number of retry attempts before fallback.
+        base_delay: Initial delay in seconds between retries.
+
+    Returns:
+        Decorated function with resilience guarantees.
+
+    Ref: Cross-cutting resilience pattern for all Chapter 11 agents.
     """
-
-    def decorator(func: Callable) -> Callable:
+    def decorator(func):
         @functools.wraps(func)
-        def wrapper(*args: Any, **kwargs: Any) -> Any:
-            # Attempt to find an AgentLogger on the instance (first arg = self)
-            logger = None
-            if args and hasattr(args[0], "logger"):
-                logger = args[0].logger
-            if logger is None:
-                logger = AgentLogger(name=func.__qualname__)
+        def wrapper(*args, **kwargs):
+            delay = base_delay
+            last_exception = None
 
-            try:
-                return func(*args, **kwargs)
-            except Exception as exc:
-                ref_tag = f" [Ref: {chapter_ref}]" if chapter_ref else ""
-                logger.error(
-                    f"{func.__name__} failed: {type(exc).__name__}: {exc}. "
-                    f"Falling back to {fallback_value!r}.{ref_tag}"
-                )
-                return fallback_value
+            for attempt in range(1, max_retries + 1):
+                try:
+                    return func(*args, **kwargs)
+                except Exception as exc:
+                    last_exception = exc
+                    AgentLogger.error(
+                        f"{func.__name__} attempt {attempt}/{max_retries} "
+                        f"failed: {type(exc).__name__}: {exc}"
+                    )
+                    if attempt < max_retries:
+                        time.sleep(delay)
+                        delay *= 2  # Exponential backoff
 
+            # All retries exhausted — return structured fallback
+            AgentLogger.error(
+                f"{func.__name__} failed after {max_retries} attempts. "
+                f"Returning fallback response."
+            )
+            return {
+                "error": True,
+                "function": func.__name__,
+                "exception": str(last_exception),
+                "exception_type": type(last_exception).__name__,
+                "message": (
+                    f"{func.__name__} failed: {type(last_exception).__name__}. "
+                    f"Falling back."
+                ),
+            }
         return wrapper
-
     return decorator
