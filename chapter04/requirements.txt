@@ -1,0 +1,21 @@
+# Chapter 4: Agent Deployment and Responsible Development
+# From "Agents" by Imran Ahmad (Packt, 2026)
+#
+# Install: pip install -r requirements.txt
+
+# Core
+python-dotenv>=1.1.0
+jupyter>=1.0.0
+ipykernel>=6.29.0
+
+# Resilience (used in Section 4.3 circuit breaker — from book code p. 14)
+tenacity>=9.1.0
+httpx>=0.28.0
+
+# Data & Visualization
+pandas>=2.2.0
+numpy>=2.1.0
+matplotlib>=3.10.0
+
+# Optional: Live API mode (not required for Simulation Mode)
+# openai>=1.60.0

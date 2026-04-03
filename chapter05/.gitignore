@@ -1,0 +1,34 @@
+# Chapter 05 — Foundational Cognitive Architectures
+# Book: 30 Agents Every AI Engineer Must Build
+# Author: Imran Ahmad
+
+# Environment and secrets
+.env
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.egg-info/
+dist/
+build/
+
+# Virtual environments
+.venv/
+venv/
+env/
+
+# Jupyter
+.ipynb_checkpoints/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db

@@ -1,0 +1,26 @@
+# Chapter 8 — Data Analysis and Reasoning Agents
+# Book: "Agents" by Imran Ahmad (Packt, 2026)
+
+# Environment secrets
+.env
+
+# Python bytecode
+__pycache__/
+*.pyc
+*.pyo
+
+# Jupyter checkpoints
+.ipynb_checkpoints/
+
+# OS artifacts
+.DS_Store
+Thumbs.db
+
+# Virtual environments
+venv/
+.venv/
+ch08-env/
+
+# IDE
+.vscode/
+.idea/

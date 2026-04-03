@@ -1,0 +1,29 @@
+# Chapter 16: Embodied and Physical World Agents
+# Repository hygiene — excludes secrets, caches, and IDE artifacts
+
+# Secrets (Zero-Hardcode Policy)
+.env
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.egg-info/
+dist/
+build/
+
+# Jupyter
+.ipynb_checkpoints/
+
+# OS artifacts
+.DS_Store
+Thumbs.db
+
+# Node (if any tooling present)
+node_modules/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo

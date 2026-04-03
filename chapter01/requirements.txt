@@ -1,0 +1,19 @@
+# ============================================================
+# Requirements for Chapter 1: Foundations of Agent Engineering
+# Book: "AI Agents" by Imran Ahmad (Packt, 2026)
+# ============================================================
+# Install: pip install -r requirements.txt
+# ============================================================
+
+# Core LLM Client (used in LIVE mode only)
+openai>=1.52.0,<2.0.0
+
+# Environment & Secrets Management
+python-dotenv>=1.0.1,<2.0.0
+
+# Notebook Runtime
+jupyter>=1.1.0
+ipykernel>=6.29.0
+
+# Data Handling (used in case study simulations)
+dataclasses-json>=0.6.0,<1.0.0

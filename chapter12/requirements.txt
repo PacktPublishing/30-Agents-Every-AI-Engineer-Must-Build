@@ -1,0 +1,26 @@
+# Chapter 12: Ethical and Explainable Agents
+# Book: "30 Agents Every AI Engineer Must Build" by Imran Ahmad
+# ──────────────────────────────────────────────
+# Core LLM framework
+langchain>=0.2.16,<0.4.0
+langchain-openai>=0.1.23,<0.3.0
+openai>=1.40.0,<2.0.0
+
+# Explainability
+shap>=0.45.1,<0.47.0
+lime>=0.2.0.1,<0.3.0
+
+# Scientific computing
+numpy>=1.26.4,<2.1.0
+scikit-learn>=1.5.1,<1.7.0
+pandas>=2.1.0,<2.4.0
+
+# Environment & secrets
+python-dotenv>=1.0.1,<2.0.0
+
+# Visualization (notebooks)
+matplotlib>=3.8.0,<3.11.0
+seaborn>=0.13.0,<0.15.0
+
+# Notebook environment
+ipykernel>=6.29.0
