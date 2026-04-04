@@ -111,37 +111,37 @@ Apply the full range of agent architectures to transform professional domains wh
 ## The 30 Agents at a Glance
 
 | # | Agent | Chapter |
-|:---:|---|:---:|
-| 1 | The Autonomous Decision-Making Agent | 5 |
-| 2 | The Planning Agent | 5 |
-| 3 | The Memory-Augmented Agent | 5 |
-| 4 | The Knowledge Retrieval Agent | 6 |
-| 5 | The Document Intelligence Agent | 6 |
-| 6 | The Scientific Research Agent | 6 |
-| 7 | The Tool-Using Agent | 7 |
-| 8 | The Chain-of-Agents Orchestrator | 7 |
-| 9 | The Agentic Workflow System | 7 |
-| 10 | The Data Analysis Agent | 8 |
-| 11 | The Verification and Validation Agent | 8 |
-| 12 | The General Problem Solver | 8 |
-| 13 | The Code-Generation Agent | 9 |
-| 14 | The Security-Hardened Agent | 9 |
-| 15 | The Self-Improving Agent | 9 |
-| 16 | The Conversational Agent | 10 |
-| 17 | The Content Creation Agent | 10 |
-| 18 | The Recommendation Agent | 10 |
-| 19 | The Vision-Language Agent | 11 |
-| 20 | The Audio Processing Agent | 11 |
-| 21 | The Physical World Sensing Agent | 11 |
-| 22 | The Ethical Reasoning Agent | 12 |
-| 23 | The Explainable Agent | 12 |
-| 24 | The Healthcare Intelligence Agent | 13 |
-| 25 | The Scientific Discovery Agent | 13 |
-| 26 | The Financial Advisory Agent | 14 |
-| 27 | The Legal Intelligence Agent | 14 |
-| 28 | The Education Intelligence Agent | 15 |
-| 29 | The Collective Intelligence Agent | 15 |
-| 30 | The Embodied Intelligence Agent | 16 |
+|:---:|---|---|
+| 1 | The Autonomous Decision-Making Agent | Ch 5: Foundational Cognitive Architectures |
+| 2 | The Planning Agent | Ch 5: Foundational Cognitive Architectures |
+| 3 | The Memory-Augmented Agent | Ch 5: Foundational Cognitive Architectures |
+| 4 | The Knowledge Retrieval Agent | Ch 6: Information Retrieval & Knowledge Agents |
+| 5 | The Document Intelligence Agent | Ch 6: Information Retrieval & Knowledge Agents |
+| 6 | The Scientific Research Agent | Ch 6: Information Retrieval & Knowledge Agents |
+| 7 | The Tool-Using Agent | Ch 7: Tool Manipulation & Orchestration Agents |
+| 8 | The Chain-of-Agents Orchestrator | Ch 7: Tool Manipulation & Orchestration Agents |
+| 9 | The Agentic Workflow System | Ch 7: Tool Manipulation & Orchestration Agents |
+| 10 | The Data Analysis Agent | Ch 8: Data Analysis & Reasoning Agents |
+| 11 | The Verification and Validation Agent | Ch 8: Data Analysis & Reasoning Agents |
+| 12 | The General Problem Solver | Ch 8: Data Analysis & Reasoning Agents |
+| 13 | The Code-Generation Agent | Ch 9: Software Development Agents |
+| 14 | The Security-Hardened Agent | Ch 9: Software Development Agents |
+| 15 | The Self-Improving Agent | Ch 9: Software Development Agents |
+| 16 | The Conversational Agent | Ch 10: Conversational & Content Creation Agents |
+| 17 | The Content Creation Agent | Ch 10: Conversational & Content Creation Agents |
+| 18 | The Recommendation Agent | Ch 10: Conversational & Content Creation Agents |
+| 19 | The Vision-Language Agent | Ch 11: Multi-Modal Perception Agents |
+| 20 | The Audio Processing Agent | Ch 11: Multi-Modal Perception Agents |
+| 21 | The Physical World Sensing Agent | Ch 11: Multi-Modal Perception Agents |
+| 22 | The Ethical Reasoning Agent | Ch 12: Ethical & Explainable Agents |
+| 23 | The Explainable Agent | Ch 12: Ethical & Explainable Agents |
+| 24 | The Healthcare Intelligence Agent | Ch 13: Healthcare & Scientific Agents |
+| 25 | The Scientific Discovery Agent | Ch 13: Healthcare & Scientific Agents |
+| 26 | The Financial Advisory Agent | Ch 14: Financial & Legal Domain Agents |
+| 27 | The Legal Intelligence Agent | Ch 14: Financial & Legal Domain Agents |
+| 28 | The Education Intelligence Agent | Ch 15: Education & Knowledge Agents |
+| 29 | The Collective Intelligence Agent | Ch 15: Education & Knowledge Agents |
+| 30 | The Embodied Intelligence Agent | Ch 16: Embodied & Physical World Agents |
 
 ---
 
