@@ -81,7 +81,7 @@ Explore the fundamental agent architectures that serve as composable building bl
 | [Chapter 05](https://github.com/PacktPublishing/30-Agents-Every-AI-Engineer-Must-Build/blob/main/chapter05/README.md) | **Foundational Cognitive Architectures** | The Autonomous Decision-Making Agent · The Planning Agent (tree-of-thought reasoning) · The Memory-Augmented Agent (working, episodic, semantic memory) |
 | [Chapter 06](https://github.com/PacktPublishing/30-Agents-Every-AI-Engineer-Must-Build/blob/main/chapter06/README.md) | **Information Retrieval and Knowledge Agents** | The Knowledge Retrieval Agent (advanced RAG) · The Document Intelligence Agent · The Scientific Research Agent |
 | [Chapter 07](https://github.com/PacktPublishing/30-Agents-Every-AI-Engineer-Must-Build/blob/main/chapter07/README.md) | **Tool Manipulation and Orchestration Agents** | The Tool-Using Agent (function calling patterns) · The Chain-of-Agents Orchestrator · The Agentic Workflow System (human-in-the-loop) |
-| [Chapter 08](https://github.com/PacktPublishing/30-Agents-Every-AI-Engineer-Must-Build/blob/main/Chapter08/README.md) | **Data Analysis and Reasoning Agents** | The Data Analysis Agent · The Verification and Validation Agent · The General Problem Solver |
+| [Chapter 08](https://github.com/PacktPublishing/30-Agents-Every-AI-Engineer-Must-Build/blob/main/chapter08/README.md) | **Data Analysis and Reasoning Agents** | The Data Analysis Agent · The Verification and Validation Agent · The General Problem Solver |
 
 ### Part 3: Specialized Application Agents
 
@@ -89,10 +89,10 @@ Extend core architectures into domains with stringent requirements for reliabili
 
 | Chapter | Title | Agents Covered |
 |---|---|---|
-| [Chapter 09](https://github.com/PacktPublishing/30-Agents-Every-AI-Engineer-Must-Build/blob/main/Chapter09/README.md) | **Software Development Agents** | The Code-Generation Agent (program synthesis) · The Security-Hardened Agent · The Self-Improving Agent |
-| [Chapter 10](https://github.com/PacktPublishing/30-Agents-Every-AI-Engineer-Must-Build/blob/main/Chapter10/README.md) | **Conversational and Content Creation Agents** | The Conversational Agent (dialog management) · The Content Creation Agent (multi-modal) · The Recommendation Agent |
-| [Chapter 11](https://github.com/PacktPublishing/30-Agents-Every-AI-Engineer-Must-Build/blob/main/Chapter11/README.md) | **Multi-Modal Perception Agents** | The Vision-Language Agent · The Audio Processing Agent · The Physical World Sensing Agent (IoT/sensor fusion) |
-| [Chapter 12](https://github.com/PacktPublishing/30-Agents-Every-AI-Engineer-Must-Build/blob/main/Chapter12/README.md) | **Ethical and Explainable Agents** | The Ethical Reasoning Agent (value alignment) · The Explainable Agent (decision transparency) |
+| [Chapter 09](https://github.com/PacktPublishing/30-Agents-Every-AI-Engineer-Must-Build/blob/main/chapter09/README.md) | **Software Development Agents** | The Code-Generation Agent (program synthesis) · The Security-Hardened Agent · The Self-Improving Agent |
+| [Chapter 10](https://github.com/PacktPublishing/30-Agents-Every-AI-Engineer-Must-Build/blob/main/chapter10/README.md) | **Conversational and Content Creation Agents** | The Conversational Agent (dialog management) · The Content Creation Agent (multi-modal) · The Recommendation Agent |
+| [Chapter 11](https://github.com/PacktPublishing/30-Agents-Every-AI-Engineer-Must-Build/blob/main/chapter11/README.md) | **Multi-Modal Perception Agents** | The Vision-Language Agent · The Audio Processing Agent · The Physical World Sensing Agent (IoT/sensor fusion) |
+| [Chapter 12](https://github.com/PacktPublishing/30-Agents-Every-AI-Engineer-Must-Build/blob/main/chapter12/README.md) | **Ethical and Explainable Agents** | The Ethical Reasoning Agent (value alignment) · The Explainable Agent (decision transparency) |
 
 ### Part 4: Domain-Specific and Emerging Agent Systems
 
@@ -100,9 +100,9 @@ Apply the full range of agent architectures to transform professional domains wh
 
 | Chapter | Title | Agents Covered |
 |---|---|---|
-| [Chapter 13](https://github.com/PacktPublishing/30-Agents-Every-AI-Engineer-Must-Build/blob/main/Chapter13/README.md) | **Healthcare and Scientific Agents** | The Healthcare Intelligence Agent (clinical decision support) · The Scientific Discovery Agent |
-| [Chapter 14](https://github.com/PacktPublishing/30-Agents-Every-AI-Engineer-Must-Build/blob/main/Chapter14/README.md) | **Financial and Legal Domain Agents** | The Financial Advisory Agent (risk assessment) · The Legal Intelligence Agent (case analysis, contract review) |
-| [Chapter 15](https://github.com/PacktPublishing/30-Agents-Every-AI-Engineer-Must-Build/blob/main/Chapter15/README.md) | **Education and Knowledge Agents** | The Education Intelligence Agent (adaptive learning) · The Collective Intelligence Agent (multi-agent collaboration) |
+| [Chapter 13](https://github.com/PacktPublishing/30-Agents-Every-AI-Engineer-Must-Build/blob/main/chapter13/README.md) | **Healthcare and Scientific Agents** | The Healthcare Intelligence Agent (clinical decision support) · The Scientific Discovery Agent |
+| [Chapter 14](https://github.com/PacktPublishing/30-Agents-Every-AI-Engineer-Must-Build/blob/main/chapter14/README.md) | **Financial and Legal Domain Agents** | The Financial Advisory Agent (risk assessment) · The Legal Intelligence Agent (case analysis, contract review) |
+| [Chapter 15](https://github.com/PacktPublishing/30-Agents-Every-AI-Engineer-Must-Build/blob/main/chapter15/README.md) | **Education and Knowledge Agents** | The Education Intelligence Agent (adaptive learning) · The Collective Intelligence Agent (multi-agent collaboration) |
 | [Chapter 16](https://github.com/PacktPublishing/30-Agents-Every-AI-Engineer-Must-Build/blob/main/chapter16/README.md) | **Embodied and Physical World Agents** | The Embodied Intelligence Agent (robotics control) · The Domain-Transforming Integration Agent (smart city systems) |
 | Epilogue | **The Future of Intelligent Agents** | Autonomous agent evolution · Agent societies and emergent behaviors · Brain-inspired cognitive architectures · Strategic implementation roadmaps |
 
