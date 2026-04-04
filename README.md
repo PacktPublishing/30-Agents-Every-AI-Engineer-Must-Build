@@ -2,7 +2,7 @@
 
 # 30 Agents Every AI Engineer Must Build
 
-[![Book Cover](.assets/Title.jpg)](https://www.amazon.com/Agents-Every-Engineer-Must-Build/dp/1806109018/ref=sr_1_1?crid=1AESLY0JL95NZ&dib=eyJ2IjoiMSJ9.mmgKkt8jTbpK__ifx3V1MwRYgFwwZicYOQG3zZYSkklSgx7AL2WpW9XJ9No_EjMMnrvw8OQryZ432b8D35N_o84BC7Mffvcf3fI88nJjPu4_NKL1lKn6FE7YH2zZ71PN1kihNO2WOKVcRiyuOlqNq3aSsefSaNIAg7qd9mjbUdCWbdGHUG-onFrgY-wm1QiGhmh6euxsYyo3vBEcLCRWou75m8dIKBbtKDair4ZUe-w.aqhF37h6emt18J8IQQRJH5J3uwAR6q_cfeFlm12rTIA&dib_tag=se&keywords=30+agents+every+ai+engineer+must+build&qid=1775221676&sprefix=30+agent%2Caps%2C114&sr=8-1)
+<a href="https://www.amazon.com/Agents-Every-Engineer-Must-Build/dp/1806109018/ref=sr_1_1?crid=1AESLY0JL95NZ&dib=eyJ2IjoiMSJ9.mmgKkt8jTbpK__ifx3V1MwRYgFwwZicYOQG3zZYSkklSgx7AL2WpW9XJ9No_EjMMnrvw8OQryZ432b8D35N_o84BC7Mffvcf3fI88nJjPu4_NKL1lKn6FE7YH2zZ71PN1kihNO2WOKVcRiyuOlqNq3aSsefSaNIAg7qd9mjbUdCWbdGHUG-onFrgY-wm1QiGhmh6euxsYyo3vBEcLCRWou75m8dIKBbtKDair4ZUe-w.aqhF37h6emt18J8IQQRJH5J3uwAR6q_cfeFlm12rTIA&dib_tag=se&keywords=30+agents+every+ai+engineer+must+build&qid=1775221676&sprefix=30+agent%2Caps%2C114&sr=8-1"><img src=".assets/Title.jpg" alt="Book Cover" width="300" /></a>
 
 **Build production-ready agent systems using proven architectures and patterns**
 
