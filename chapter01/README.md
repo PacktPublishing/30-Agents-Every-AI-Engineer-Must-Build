@@ -13,9 +13,10 @@ Every code cell runs **without an API key** in Simulation Mode, powered by a `Mo
 ## Quickstart
 
 ```bash
-# 1. Clone and enter the repository
-git clone https://github.com/<your-org>/ch01-foundations-of-agent-engineering.git
-cd ch01-foundations-of-agent-engineering
+# 1. Clone the repository
+git clone https://github.com/PacktPublishing/30-Agents-Every-AI-Engineer-Must-Build.git
+cd ./30-Agents-Every-AI-Engineer-Must-Build/
+cd chapter01
 
 # 2. Create a virtual environment (recommended)
 python -m venv .venv

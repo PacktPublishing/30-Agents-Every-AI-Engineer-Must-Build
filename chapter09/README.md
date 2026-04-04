@@ -1,140 +1,112 @@
-# Chapter 9: Software Development Agents
+# Chapter 10: Conversational and Content Creation Agents
 
-**Book:** *Agents* by Imran Ahmad (Packt, 2026)
-**Chapter:** 9 — Software Development Agents
-**Pages:** 235–279
-
-> *"The art of programming is the art of organizing and mastering complexity."*
-> — Edsger Dijkstra
+**Book:** *30 Agents Every AI Engineer Must Build* by Imran Ahmad (Packt Publishing, 2026)
 
 ---
 
 ## Overview
 
-This repository contains the companion code for **Chapter 9** (pp. 235–279) of the book *Agents* by Imran Ahmad. The chapter explores how AI agents are reshaping software development through three distinct but interconnected capabilities:
+This repository is the executable companion to **Chapter 10** of *30 Agents Every AI Engineer Must Build*. It examines two agent architectures that operate at the boundary between algorithmic capability and human experience: the Empathetic Mental Health Support Agent (dual-memory hierarchy with SafetyLayer sentinel and PersonaEngine constraint layer) and the Marketing Content Assistant (multi-agent SMPA pipeline with specialist agents, CSP-based brand enforcement via EditorAgent, and adaptive feedback via AnalyticsEngine).
 
-- **Code-Generation Agents (§9.2, pp. 239–255)** — Transform natural language specifications into working, tested implementations using Test-Driven Generation (TDG) and multi-agent orchestration with LangGraph.
-- **Compliance-Driven Agents (§9.3, pp. 255–265)** — Embed security and policy awareness directly into the development workflow, enforcing PCI DSS, HIPAA, and organizational rules through a *scan → evaluate → remediate* loop.
-- **Self-Improving Agents (§9.4, pp. 265–278)** — Learn from operational feedback, evolving strategies through a closed-loop *execute → observe → learn → adapt* control system with human-in-the-loop checkpoints.
-
-The notebook demonstrates all three agent architectures end-to-end, with progressive examples that build from a single shipping calculator function to a full-stack user profile feature and production compliance pipelines.
-
----
-
-## Prerequisites
-
-- **Python 3.10+** (required for `TypedDict`, `Annotated` support)
-- **pip** package manager
-- **Jupyter Notebook** or **JupyterLab** (or VS Code with Jupyter extension)
-
-No external API key is required. The repository runs fully in **Simulation Mode** by default.
-
----
+Every code cell runs **without an API key** in Simulation Mode, powered by a `MockChatOpenAI` and `MockOpenAIEmbeddings` layer that returns chapter-derived responses. When an OpenAI API key is provided, the notebook seamlessly switches to Live Mode.
 
 ## Quickstart
 
 ```bash
 # 1. Clone the repository
-git clone https://github.com/PacktPublishing/Agents.git
-cd Agents/ch09-software-development-agents
+git clone https://github.com/PacktPublishing/30-Agents-Every-AI-Engineer-Must-Build.git
+cd ./30-Agents-Every-AI-Engineer-Must-Build/
+cd chapter10
 
 # 2. Create a virtual environment (recommended)
-python -m venv venv
-source venv/bin/activate  # Windows: venv\Scripts\activate
+python -m venv .venv
+source .venv/bin/activate   # Linux/Mac
+# .venv\Scripts\activate    # Windows
 
 # 3. Install dependencies
 pip install -r requirements.txt
 
-# 4. Run the notebook
-jupyter notebook ch09_software_dev_agents.ipynb
+# 4. (Optional) Add your OpenAI API key for Live Mode
+cp .env.template .env
+# Edit .env and add your key, or skip this step for Simulation Mode
+
+# 5. Launch the notebook
+jupyter notebook Chapter_10_Conversational_and_Content_Creation_Agents.ipynb
 ```
 
-All cells execute in **Simulation Mode** without any configuration. To use a live OpenAI API key, copy `.env.template` to `.env` and add your key.
+## Section Map
 
----
+The notebook is organized into cell groups that mirror the chapter's sections:
 
-## Simulation Mode
-
-The entire notebook is designed to run without an external API key. When no key is detected, the system automatically activates **Simulation Mode**, which uses `MockLLM` to return chapter-accurate mock responses for every agent interaction.
-
-The API key resolution chain follows a zero-hardcode policy:
-
-1. `.env` file (via python-dotenv)
-2. `OPENAI_API_KEY` environment variable
-3. Interactive `getpass` prompt
-4. **Simulation Mode** fallback (automatic if all above are empty)
-
-In Simulation Mode, every code-generation, compliance scan, and self-improvement cycle produces the same pedagogically meaningful output described in the chapter. Color-coded logging (Blue `[INFO]`, Green `[SUCCESS]`, Red `[HANDLED ERROR]`) is active throughout to make agent behavior visible.
-
----
-
-## Section-to-Cell Mapping
-
-| Notebook Section | Cells | Chapter Reference | Book Pages | Agent Architecture |
-|:---|:---:|:---|:---:|:---|
-| **Block A** — Setup & Configuration | 1–4 | Preamble | 235–236 | Environment, imports, mode detection |
-| **Block B** — Code-Generation Agents | 5–18 | §9.2 | 239–255 | TDG shipping calculator (Stages 1–6), full-stack user profile (T1/T2/T3), LangGraph StateGraph |
-| **Block C** — Compliance-Driven Agents | 19–27 | §9.3 | 255–265 | PolicyEngine, static validation, semantic analysis, PCI DSS case study, audit trail |
-| **Block D** — Self-Improving Agents | 28–37 | §9.4 | 265–278 | Sensing Layer, Critic Agent, Planner Agent, HITL checkpoint, customer support case study |
-| **Block E** — Summary & Metrics | 38–40 | Summary | 277–279 | Cross-section comparison, execution metrics |
-
----
-
-## Key Figures
-
-| Figure | Description | Book Page |
-|:---|:---|:---:|
-| Figure 9.1 | Agent ecosystem and tooling: four functional layers | 237 |
-| Figure 9.2 | Adoption maturity curve for AI coding agents | 239 |
-| Figure 9.3 | Three phases of the TDD agent workflow | 240 |
-| Figure 9.4 | LangGraph architecture: generate, test, refine loop | 243 |
-| Figure 9.5 | Self-improvement loop | 267 |
-| Figure 9.6 | Structured improvement record from the planner agent | 274 |
-
----
+| Cell Group | Chapter Section | Concept Demonstrated |
+|---|---|---|
+| **1** | Setup & Configuration | Imports, ColorLogger, API detection, LLM factory |
+| **2.1** | §10.1 — Safety Layer | Crisis sentinel with deterministic bypass |
+| **2.2** | §10.1 — Working Memory | `ContextManager` with `ConversationSummaryBufferMemory` |
+| **2.3** | §10.1 — Semantic Memory | FAISS vector store for long-term recall |
+| **2.4** | §10.1 — Persona Engine | `SystemMessage` persona as controlled bias |
+| **2.5–2.6** | §10.1 — Case Study | Multi-turn dialogue with memory recall and crisis demo |
+| **3.1** | §10.2 — SMPA Foundation | `Agent(ABC)` base class — Sense/Model/Plan/Act |
+| **3.2–3.3** | §10.2 — Brand Constraints | CSP validation with `BrandGuidelines` dataclass |
+| **3.4** | §10.2 — Editor Agent | Quality control layer with consistency scoring |
+| **3.5** | §10.2 — Multimodal Orchestration | `AssetRequest` + `dispatch_asset_request()` |
+| **3.6** | §10.2 — Adaptive Optimization | `AnalyticsEngine` with CTR-based feedback |
+| **3.7–3.9** | §10.2 — Campaign Demo | End-to-end campaign walkthrough with DataVault Pro brief |
+| **4** | Summary | Key takeaways and pointer to Chapter 11 |
 
 ## Repository Structure
 
 ```
-ch09-software-development-agents/
-├── ch09_software_dev_agents.ipynb   # Primary notebook (narrative spine)
-├── src/
-│   ├── __init__.py                  # Package marker
-│   ├── utils.py                     # Environment, ColorLog, @fail_gracefully
-│   ├── state_models.py              # Pydantic: Task, AgentState, ImprovementHypothesis
-│   ├── mock_llm.py                  # MockLLM (12 response entries), MockTestRunner
-│   ├── agent_nodes.py               # LangGraph node functions, build_workflow()
-│   ├── compliance_engine.py         # PolicyEngine, ComplianceScanner, AuditTrail
-│   └── self_improving.py            # SensingLayer, CriticAgent, PlannerAgent
-├── README.md                        # This file
-├── AGENTS.md                        # Agentic metadata (2026 standard)
-├── requirements.txt                 # Pinned dependencies
-├── troubleshooting.md               # 8 common issues with resolutions
-├── .env.template                    # API key template
-├── .gitignore                       # Excludes .env, __pycache__, checkpoints
-└── LICENSE                          # MIT License
+chapter10/
+│
+├── README.md                              # This file
+├── AGENTS.md                              # Agentic AI metadata
+├── LICENSE                                # MIT License
+├── requirements.txt                       # Pinned Python dependencies
+├── .env.template                          # API key template (zero-hardcode policy)
+├── .gitignore                             # Standard Python + .env exclusions
+├── TROUBLESHOOTING.md                     # Dependency conflict resolution guide
+│
+├── Chapter_10_Conversational_and_Content_Creation_Agents.ipynb   # Primary deliverable
+│
+└── mock_llm.py                            # MockChatOpenAI, MockOpenAIEmbeddings, MOCK_RESPONSES
 ```
 
----
+## Simulation Mode
 
-## Feedback Loop Reference
+When no API key is detected, the notebook activates **Simulation Mode**:
 
-Each agent class implements a characteristic feedback loop:
+- `MockChatOpenAI` replaces the OpenAI chat client transparently
+- `MockOpenAIEmbeddings` provides deterministic 256-dimensional hash-based embeddings for reproducible FAISS behavior
+- Context-aware mock responses cover both case studies
+- Every cell executes successfully with no external dependencies
 
-| Agent Class | Loop Pattern | Chapter Section | Book Pages |
-|:---|:---|:---|:---:|
-| Code-Generation | generate → test → refine | §9.2 | 239–255 |
-| Compliance-Driven | scan → evaluate → remediate | §9.3 | 255–265 |
-| Self-Improving | execute → observe → learn → adapt | §9.4 | 265–278 |
+API key detection follows a three-tier cascade: `.env` file → environment variable → interactive prompt → Simulation Mode.
 
----
+## Resilience Architecture
+
+All agent operations are wrapped in the `@fail_gracefully` decorator:
+
+- **On success:** `[INFO]` (blue) → `[SUCCESS]` (green)
+- **On failure:** `[INFO]` (blue) → `[HANDLED ERROR]` (red) → fallback value returned
+- **Guarantee:** No cell in the notebook will ever raise an unhandled exception
+
+Key architectural patterns include Dual-Memory Hierarchy, Safety-First Pipeline, Persona as Constraint, CSP Brand Enforcement, and the SMPA Cycle.
+
+## Requirements
+
+- **Python:** 3.10+ (recommended: 3.11 or 3.12)
+- **Dependencies:** See `requirements.txt`
+- **API Key:** Optional (Simulation Mode works without one)
+
+## Troubleshooting
+
+See [TROUBLESHOOTING.md](TROUBLESHOOTING.md) for solutions to common dependency conflicts and runtime issues.
 
 ## License
 
-This project is licensed under the MIT License. See [LICENSE](LICENSE) for details.
-
----
+This code is provided as educational companion material for *30 Agents Every AI Engineer Must Build* by Imran Ahmad (Packt Publishing, 2026). See the book for full terms of use.
 
 ## Author
 
-**Imran Ahmad** — Author of *Agents* (Packt, 2026)
+**Imran Ahmad** — Author of *30 Agents Every AI Engineer Must Build* (Packt Publishing, 2026)

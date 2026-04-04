@@ -1,85 +1,99 @@
 # Chapter 13: Healthcare and Scientific Agents
 
-**Book:** *30 Agents Every AI Engineer Must Build*
-**Author:** Imran Ahmad
-**Publisher:** Packt Publishing, 2026
-**Chapter:** 13 — Healthcare and Scientific Agents
-**Chapter Pages:** pp. 361–389
+**Book:** *30 Agents Every AI Engineer Must Build* by Imran Ahmad (Packt Publishing, 2026)
 
 ---
 
 ## Overview
 
-This repository contains the companion code for Chapter 13, which explores two agent architectures designed for high-stakes, information-intensive domains:
+This repository is the executable companion to **Chapter 13** of *30 Agents Every AI Engineer Must Build*. It explores two agent architectures for high-stakes, information-intensive domains: the Healthcare Intelligence Agent (four-layer architecture with data ingestion, clinical knowledge integration, Bayesian diagnostic reasoning, and audience-adapted explanation generation — including safety escalation, provenance tracking, and immutable audit trails) and the Scientific Discovery Agent (multi-phase pipeline for fault-tolerant literature synthesis, information-theoretic knowledge gap detection, abductive hypothesis generation, and closed-loop experimental feedback).
 
-- **Healthcare Intelligence Agent** — A four-layer architecture separating data ingestion, clinical knowledge integration, Bayesian diagnostic reasoning, and audience-adapted explanation generation. Includes safety escalation, provenance tracking, and immutable audit trails.
-
-- **Scientific Discovery Agent** — A multi-phase pipeline for fault-tolerant literature synthesis, information-theoretic knowledge gap detection, abductive hypothesis generation, and closed-loop experimental feedback.
-
-Both agents demonstrate that in domains where errors carry serious consequences, safety and compliance must be designed in as first-class architectural layers — not bolted on after the fact.
-
-## Repository Structure
-
-```
-chapter13-healthcare-scientific-agents/
-│
-├── chapter13_healthcare_scientific_agents.ipynb   # Single self-contained notebook
-├── AGENTS.md              # Agentic metadata and AI collaborator persona
-├── README.md              # This file
-├── requirements.txt       # Pinned dependencies with compatibility notes
-├── .env.template          # API key placeholders (all optional)
-└── troubleshooting.md     # Preemptive dependency conflict resolutions
-```
+Every code cell runs **without an API key** in Simulation Mode, powered by context-aware mock responses derived directly from Chapter 13 content. When an OpenAI API key is provided, the notebook seamlessly switches to Live Mode.
 
 ## Quickstart
 
 ```bash
 # 1. Clone the repository
 git clone https://github.com/PacktPublishing/30-Agents-Every-AI-Engineer-Must-Build.git
-cd 30-Agents-Every-AI-Engineer-Must-Build/chapter13
+cd ./30-Agents-Every-AI-Engineer-Must-Build/
+cd chapter13
 
 # 2. Create a virtual environment (recommended)
 python -m venv .venv
-source .venv/bin/activate  # Linux/macOS
-# .venv\Scripts\activate   # Windows
+source .venv/bin/activate   # Linux/Mac
+# .venv\Scripts\activate    # Windows
 
 # 3. Install dependencies
 pip install -r requirements.txt
 
-# 4. (Optional) Configure API keys
+# 4. (Optional) Add your OpenAI API key for Live Mode
 cp .env.template .env
-# Edit .env with your keys — or skip this step entirely
+# Edit .env and add your key, or skip this step for Simulation Mode
 
-# 5. Run the notebook
+# 5. Launch the notebook
 jupyter notebook chapter13_healthcare_scientific_agents.ipynb
+```
+
+## Section Map
+
+The notebook is organized into cell groups that mirror the chapter's sections:
+
+| Cell Group | Chapter Section | Concept Demonstrated |
+|---|---|---|
+| **0** | Setup | Setup and configuration, technical requirements |
+| **1** | Infrastructure | Simulation infrastructure (cross-cutting mock layer) |
+| **2** | §13.1–13.4 — Healthcare Intelligence Agent | Data ingestion, clinical knowledge, Bayesian reasoning, explanation generation |
+| **3** | §13.5–13.8 — Scientific Discovery Agent | Literature synthesis, knowledge gap detection, hypothesis generation, experimental feedback |
+| **4** | §13.9 — Cross-Domain Analysis | Integration patterns and shared architectural lessons |
+
+## Repository Structure
+
+```
+chapter13/
+│
+├── README.md                                          # This file
+├── AGENTS.md                                          # Agentic AI metadata
+├── LICENSE                                            # MIT License
+├── requirements.txt                                   # Pinned Python dependencies
+├── .env.template                                      # API key template (zero-hardcode policy)
+├── .gitignore                                         # Standard Python + .env exclusions
+├── troubleshooting.md                                 # Dependency conflict resolution guide
+│
+└── chapter13_healthcare_scientific_agents.ipynb        # Primary deliverable (self-contained)
 ```
 
 ## Simulation Mode
 
-**No API keys are required.** The notebook runs fully in Simulation Mode, using context-aware mock responses derived directly from Chapter 13 content. Every LLM call, database query, and external API request has a deterministic fallback that produces the same outputs discussed in the book.
+When no API key is detected, the notebook activates **Simulation Mode**:
 
-To enable live mode, add your OpenAI API key to `.env` or enter it when prompted.
+- All LLM calls, database queries, and external API requests have deterministic fallbacks
+- Mock responses are derived directly from Chapter 13 content
+- Every cell executes successfully with no external dependencies
+- Outputs match the examples discussed in the book
 
-## Technical Requirements
+API key detection follows a three-tier cascade: `.env` file → environment variable → interactive prompt → Simulation Mode.
 
-- Python 3.10 or later
-- Key packages: `numpy`, `langchain-core`, `langchain-community`, `fhir.resources`, `aiohttp`, `scipy`, `python-dotenv`
-- See `requirements.txt` for pinned version ranges
-- See `troubleshooting.md` for known dependency conflicts and fixes
+## Resilience Architecture
 
-## Notebook Sections
+All agent operations are wrapped in resilience decorators:
 
-| Section | Topic | Book Reference |
-|:--------|:------|:---------------|
-| 0 | Setup and Configuration | Technical Requirements (p. 362) |
-| 1 | Simulation Infrastructure | Cross-cutting |
-| 2 | Healthcare Intelligence Agent | §13.1–13.4 (pp. 362–375) |
-| 3 | Scientific Discovery Agent | §13.5–13.8 (pp. 375–387) |
-| 4 | Cross-Domain Analysis | §13.9 (pp. 387–389) |
+- **On success:** `[INFO]` (blue) → `[SUCCESS]` (green)
+- **On failure:** `[INFO]` (blue) → `[HANDLED ERROR]` (red) → fallback value returned
+- **Guarantee:** No cell in the notebook will ever raise an unhandled exception
+
+## Requirements
+
+- **Python:** 3.10+ (recommended: 3.11 or 3.12)
+- **Dependencies:** See `requirements.txt` (includes `numpy`, `langchain-core`, `fhir.resources`, `aiohttp`, `scipy`)
+- **API Key:** Optional (Simulation Mode works without one)
+
+## Troubleshooting
+
+See [troubleshooting.md](troubleshooting.md) for solutions to known dependency conflicts and fixes.
 
 ## License
 
-This project is provided as educational material accompanying the book. See the [Packt Publishing repository](https://github.com/PacktPublishing/30-Agents-Every-AI-Engineer-Must-Build) for license details.
+This code is provided as educational companion material for *30 Agents Every AI Engineer Must Build* by Imran Ahmad (Packt Publishing, 2026). See the book for full terms of use.
 
 ## Author
 

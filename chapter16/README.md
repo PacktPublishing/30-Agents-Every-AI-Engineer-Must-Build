@@ -1,123 +1,111 @@
 # Chapter 16: Embodied and Physical World Agents
 
-> From *30 Agents Every AI Engineer Must Build* by Imran Ahmad (Packt Publishing, 2026)
-> **Book pages 457–491**
+**Book:** *30 Agents Every AI Engineer Must Build* by Imran Ahmad (Packt Publishing, 2026)
+
+---
 
 ## Overview
 
-This repository implements the two complementary agent architectures from Chapter 16: the **Embodied Intelligence Agent** (depth: real-time single-domain control) and the **Domain-Transforming Integration Agent** (breadth: cross-domain coordination via knowledge graphs). A drone mission case study in Ottawa's winter conditions synthesizes both architectures into a composed system with a Unified Constraint Envelope.
+This repository is the executable companion to **Chapter 16** of *30 Agents Every AI Engineer Must Build*. It implements two complementary agent architectures: the Embodied Intelligence Agent (real-time single-domain control with millisecond precision, hard safety guarantees, and an asymmetric control loop separating high-latency LLM reasoning from low-latency deterministic control) and the Domain-Transforming Integration Agent (cross-domain coordination via typed knowledge graphs with weighted breadth-first influence propagation). A drone mission case study in Ottawa's winter conditions synthesizes both architectures into a composed system with a Unified Constraint Envelope.
 
-The chapter's central principle: **conservative constraint fusion** — autonomous systems must satisfy all constraints simultaneously, with safety enforced as a precondition for action rather than an afterthought.
+Every code cell runs **without an API key** in Simulation Mode, powered by `MockChatOpenAI` and `MockGraph` that return chapter-derived responses. When an OpenAI API key is provided, the notebook seamlessly switches to Live Mode.
 
 ## Quickstart
 
 ```bash
+# 1. Clone the repository
 git clone https://github.com/PacktPublishing/30-Agents-Every-AI-Engineer-Must-Build.git
+cd ./30-Agents-Every-AI-Engineer-Must-Build/
 cd chapter16
+
+# 2. Create a virtual environment (recommended)
+python -m venv .venv
+source .venv/bin/activate   # Linux/Mac
+# .venv\Scripts\activate    # Windows
+
+# 3. Install dependencies
 pip install -r requirements.txt
+
+# 4. (Optional) Add your OpenAI API key for Live Mode
+cp .env.template .env
+# Edit .env and add your key, or skip this step for Simulation Mode
+
+# 5. Launch the notebook
 jupyter notebook chapter16_embodied_agents.ipynb
 ```
 
-No API key required. The notebook auto-detects the absence of a key and activates **Simulation Mode** with chapter-accurate mock data.
+## Section Map
 
-## Architecture
+The notebook is organized into cell groups that mirror the chapter's sections:
+
+| Cell Group | Chapter Section | Concept Demonstrated |
+|---|---|---|
+| **0** | Setup | Imports, environment detection, Simulation Mode flag |
+| **1** | Listing 16.1 — Common Patterns | Shared interface stubs for embodied agents |
+| **2** | Listing 16.2 — Embodied Agent | 4-responsibility tool decomposition |
+| **3** | Listing 16.3 — Safety-Constrained Loop | Multi-rate perception-action integration with safety constraints |
+| **4** | Listing 16.4 — Knowledge Graph | Cross-domain knowledge graph construction |
+| **5** | Listing 16.5 — Influence Propagation | Weighted breadth-first traversal for impact estimation |
+| **6** | Listing 16.6 — Ottawa Case Study (Drone) | Embodied drone agent + mission execution |
+| **7** | Listing 16.7 — Constraint Assembler | Cross-domain constraint assembler + NOTAM integration |
+| **8** | Failure Scenarios | Wind RED, Battery RED, NOTAM active, API timeout demos |
+
+## Repository Structure
 
 ```
-┌─────────────────────────────────────────────────────────────┐
-│             chapter16_embodied_agents.ipynb                  │
-│                                                             │
-│  Cell 1: Imports & Environment Detection                    │
-│    └── reads .env → sets SIMULATION_MODE flag               │
-│    └── from src.mock_layer import get_llm                   │
-│    └── from src.resilience import fail_gracefully, logger   │
-│                                                             │
-│  Cells 3-8: Listings 16.1–16.5 (Generic Patterns)          │
-│    └── All @tool functions wrapped with @fail_gracefully    │
-│    └── All agents constructed with get_llm() output         │
-│                                                             │
-│  Cells 9-14: Listings 16.6–16.7 (Ottawa Case Study)        │
-│    └── Mission Supervisor + Constraint Assembler            │
-│    └── Composed execution with safety protocol              │
-│                                                             │
-│  Cells 15-17: Failure Scenario Demos                        │
-│    └── Wind RED, Battery RED, NOTAM active, API timeout     │
-└──────────────┬───────────────────────┬──────────────────────┘
-               │                       │
-       ┌───────▼───────┐       ┌───────▼───────┐
-       │ src/          │       │ src/          │
-       │ mock_layer.py │       │ resilience.py │
-       │               │       │               │
-       │ MockChatOpenAI│       │ ColorLogger   │
-       │ MockGraph     │       │ @fail_grace.  │
-       │ Edge          │       │ logger (inst) │
-       │ get_llm()     │       │               │
-       │ MOCK_* dicts  │       │               │
-       └───────────────┘       └───────────────┘
+chapter16/
+│
+├── README.md                              # This file
+├── AGENTS.md                              # Agentic AI metadata
+├── LICENSE                                # MIT License
+├── requirements.txt                       # Pinned Python dependencies
+├── .env.template                          # API key template (zero-hardcode policy)
+├── .gitignore                             # Standard Python + .env exclusions
+├── TROUBLESHOOTING.md                     # Dependency conflict resolution guide
+│
+├── chapter16_embodied_agents.ipynb        # Primary deliverable
+│
+├── __init__.py                            # Package init; exports get_llm(), ColorLogger
+├── mock_layer.py                          # MockChatOpenAI, MockGraph, synthetic sensor data
+└── resilience.py                          # @fail_gracefully decorator + color-coded logging
 ```
 
-## Files
+## Simulation Mode
 
-| File | Purpose |
-|------|---------|
-| `chapter16_embodied_agents.ipynb` | Complete walkthrough (Listings 16.1–16.7, failure demos) |
-| `src/mock_layer.py` | MockChatOpenAI + MockGraph + synthetic sensor/API data |
-| `src/resilience.py` | @fail_gracefully decorator + color-coded logging |
-| `src/__init__.py` | Package init; exports get_llm(), ColorLogger, SIMULATION_MODE |
-| `AGENTS.md` | AI assistant persona for this repository |
-| `TROUBLESHOOTING.md` | Dependency conflict resolutions (7 common issues) |
-| `.env.template` | API key template (Zero-Hardcode Policy) |
-| `requirements.txt` | Pinned dependencies matching the book |
-| `LICENSE` | MIT License |
+When no API key is detected, the notebook activates **Simulation Mode**:
 
-## Simulation Mode vs. Live Mode
+- `MockChatOpenAI` replaces the OpenAI client transparently
+- `MockGraph` provides synthetic sensor and API data
+- Safety thresholds are identical to Live Mode
+- Failure demos use pre-scripted RED scenarios
+- Every cell executes successfully with no external dependencies
 
-| Feature | Simulation Mode | Live Mode |
-|---------|----------------|-----------|
-| API Key Required | No | Yes (OpenAI gpt-4o) |
-| LLM Backend | MockChatOpenAI | ChatOpenAI |
-| Tool Responses | Chapter-accurate mock data | Real API calls |
-| Safety Thresholds | Identical | Identical |
-| Failure Demos | Pre-scripted RED scenarios | Live error handling |
-| Activation | Automatic (no .env file) | Create .env with key |
+API key detection follows a three-tier cascade: `.env` file → environment variable → interactive prompt → Simulation Mode.
 
-## Code Listings Cross-Reference
+## Resilience Architecture
 
-| Listing | Chapter Section | Description | Page |
-|---------|----------------|-------------|------|
-| 16.1 | Implementation: LangChain patterns | Common setup: shared interface stubs | pp. 468–469 |
-| 16.2 | Same | Embodied agent with 4-responsibility tool decomposition | pp. 469–470 |
-| 16.3 | Multi-rate perception-action integration | Safety-constrained action execution loop | pp. 470–472 |
-| 16.4 | LangChain integration agent patterns | Cross-domain knowledge graph construction | pp. 476–478 |
-| 16.5 | Influence propagation and impact estimation | Weighted breadth-first traversal | pp. 478–479 |
-| 16.6 | Case study implementation | Embodied drone agent + mission execution | pp. 482–485 |
-| 16.7 | Same | Cross-domain constraint assembler + NOTAM integration | pp. 485–488 |
+All agent operations are wrapped in the `@fail_gracefully` decorator:
 
-## Key Concepts
+- **On success:** `[INFO]` (blue) → `[SUCCESS]` (green)
+- **On failure:** `[INFO]` (blue) → `[HANDLED ERROR]` (red) → fallback value returned
+- **Guarantee:** No cell in the notebook will ever raise an unhandled exception
 
-- **Depth Problem:** Controlling a single physical system with millisecond precision and hard safety guarantees (Embodied Intelligence Agent)
-- **Breadth Problem:** Coordinating heterogeneous infrastructure systems with complex cross-domain dependencies (Domain-Transforming Integration Agent)
-- **Asymmetric Control Loop:** Separates high-latency LLM reasoning from low-latency deterministic control
-- **Admissible Action Set A_safe(s):** Safety is an explicit constraint, not an emergent property of planning
-- **Unified Constraint Envelope:** The intersection of Weather, Battery, Airspace, Parks, and Mission Geometry constraints — all must be GREEN before motors arm
-- **Influence Propagation:** Weighted BFS over a typed knowledge graph to estimate cascade impacts across domain boundaries
+The chapter's central engineering principle: **conservative constraint fusion** — autonomous systems must satisfy all constraints simultaneously, with safety enforced as a precondition for action rather than an afterthought.
 
-## Further Reading
+## Requirements
 
-- [AGENTS.md](AGENTS.md) — AI teaching assistant persona with behavioral directives
-- [TROUBLESHOOTING.md](TROUBLESHOOTING.md) — Solutions for 7 common dependency issues
+- **Python:** 3.10+ (recommended: 3.11 or 3.12)
+- **Dependencies:** See `requirements.txt`
+- **API Key:** Optional (Simulation Mode works without one)
+
+## Troubleshooting
+
+See [TROUBLESHOOTING.md](TROUBLESHOOTING.md) for solutions to 7 common dependency issues.
 
 ## License
 
-MIT — see [LICENSE](LICENSE).
+This code is provided as educational companion material for *30 Agents Every AI Engineer Must Build* by Imran Ahmad (Packt Publishing, 2026). See the book for full terms of use.
 
-## Citation
+## Author
 
-```bibtex
-@book{ahmad2026agents,
-  title     = {30 Agents Every AI Engineer Must Build},
-  author    = {Ahmad, Imran},
-  year      = {2026},
-  publisher = {Packt Publishing},
-  chapter   = {16: Embodied and Physical World Agents}
-}
-```
+**Imran Ahmad** — Author of *30 Agents Every AI Engineer Must Build* (Packt Publishing, 2026)

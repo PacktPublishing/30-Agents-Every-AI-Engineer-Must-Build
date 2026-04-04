@@ -1,123 +1,114 @@
 # Chapter 15: Education and Knowledge Agents
 
-> From *30 Agents Every AI Engineer Must Build* by **Imran Ahmad** (Packt Publishing, 2026)
-
-Two agent architectures that apply the cognitive loop to teaching and collective reasoning:
-
-1. **Education Intelligence Agent** — A POMDP-based adaptive tutor that maintains probabilistic mastery estimates, plans curricula via zone-of-proximal-development heuristics, traces knowledge with Bayesian updates, schedules spaced repetition, and generates targeted feedback through a two-stage misconception detector.
-
-2. **Collective Intelligence Agent** — A multi-agent collaboration pattern where role-specialized agents propose, critique, and synthesize solutions through weighted consensus with adversarial critic rotation and cross-pollination for emergent insight.
+**Book:** *30 Agents Every AI Engineer Must Build* by Imran Ahmad (Packt Publishing, 2026)
 
 ---
+
+## Overview
+
+This repository is the executable companion to **Chapter 15** of *30 Agents Every AI Engineer Must Build*. It implements two agent architectures that apply the cognitive loop to teaching and collective reasoning: the Education Intelligence Agent (POMDP-based adaptive tutor with probabilistic mastery estimates, zone-of-proximal-development curriculum planning, Bayesian Knowledge Tracing, SM-2 spaced repetition, and two-stage misconception detection) and the Collective Intelligence Agent (multi-agent collaboration with role-specialized agents performing propose/critique/synthesize through weighted consensus with adversarial critic rotation and cross-pollination).
+
+Every code cell runs **without an API key** in Simulation Mode, powered by a `MockLLM` engine with a 9-key section-mapped response registry. When an OpenAI API key is provided, the notebook seamlessly switches to Live Mode.
 
 ## Quickstart
 
 ```bash
-git clone <repo-url> && cd chapter15
-python -m venv ch15env && source ch15env/bin/activate
+# 1. Clone the repository
+git clone https://github.com/PacktPublishing/30-Agents-Every-AI-Engineer-Must-Build.git
+cd ./30-Agents-Every-AI-Engineer-Must-Build/
+cd chapter15
+
+# 2. Create a virtual environment (recommended)
+python -m venv .venv
+source .venv/bin/activate   # Linux/Mac
+# .venv\Scripts\activate    # Windows
+
+# 3. Install dependencies
 pip install -r requirements.txt
-cp .env.template .env   # Optional: add your OpenAI API key
+
+# 4. (Optional) Add your OpenAI API key for Live Mode
+cp .env.template .env
+# Edit .env and add your key, or skip this step for Simulation Mode
+
+# 5. Launch the notebook
 jupyter notebook chapter15_education_and_knowledge_agents.ipynb
 ```
 
-**No API key?** The notebook runs fully in **Simulation Mode** with pre-authored mock responses that are educationally accurate and mapped to specific chapter sections. No external dependency is required.
+## Section Map
 
----
+The notebook is organized into cell groups that mirror the chapter's sections:
+
+| Cell Group | Chapter Section | Concept Demonstrated |
+|---|---|---|
+| **0** | Setup | Imports, API key detection, Simulation Mode switch |
+| **1** | Dataclasses | 12 supporting type definitions |
+| **2** | §15.1 — Knowledge Graph | DAG curriculum with 10 Python learning objectives |
+| **3** | §15.2 — Student Model | Per-student probabilistic mastery state |
+| **4** | §15.3 — Curriculum Planner | ZPD-aligned Gaussian expected-gain objective selection |
+| **5** | §15.4 — Placement Test | IRT 2PL adaptive diagnostics with Fisher information |
+| **6** | §15.5 — BKT Update | Bayesian Knowledge Tracing (posterior + transition) |
+| **7** | §15.6 — Spaced Repetition | SM-2 algorithm with overdue priority scoring |
+| **8** | §15.7 — Feedback Generator | Two-stage misconception detection + pedagogical nudge |
+| **9** | §15.8 — Case Study "Alex" | End-to-end: Placement → BKT → Feedback → Review |
+| **10** | §15.9 — Collaborative Agent | Propose/critique dual pathway with confidence metadata |
+| **11** | §15.10 — Consensus Engine | Weighted multi-round consensus with adversarial rotation |
+| **12** | §15.11 — Rubric Case Study | Three-agent rubric design + emergent intelligence |
+| **13** | Summary | Key takeaways and further reading |
 
 ## Repository Structure
 
 ```
 chapter15/
-├── chapter15_education_and_knowledge_agents.ipynb   # Primary notebook (all domain logic inline)
-├── utils/
-│   ├── __init__.py              # Package exports
-│   ├── mock_llm.py              # MockLLM + 9-key section-mapped response registry
-│   └── resilience.py            # ColorLogger + @graceful_fallback decorator
-├── requirements.txt             # Pinned dependencies (Ch.15, p. 421)
-├── .env.template                # API key placeholder (3-tier resolution)
-├── .gitignore                   # Repository hygiene
-├── README.md                    # This file
-├── AGENTS.md                    # Agentic metadata (2026 standard)
-├── TROUBLESHOOTING.md           # Dependency, platform, and runtime guide
-└── LICENSE                      # MIT License
+│
+├── README.md                                              # This file
+├── AGENTS.md                                              # Agentic AI metadata
+├── LICENSE                                                # MIT License
+├── requirements.txt                                       # Pinned Python dependencies
+├── .env.template                                          # API key template (zero-hardcode policy)
+├── .gitignore                                             # Standard Python + .env exclusions
+├── TROUBLESHOOTING.md                                     # Dependency conflict resolution guide
+│
+├── chapter15_education_and_knowledge_agents.ipynb          # Primary deliverable
+│
+├── __init__.py                                            # Package exports
+├── mock_llm.py                                            # MockLLM + 9-key section-mapped response registry
+└── resilience.py                                          # ColorLogger + @graceful_fallback decorator
 ```
 
----
+## Simulation Mode
 
-## Notebook Section Map
+When no API key is detected, the notebook activates **Simulation Mode**:
 
-| Section | Cell Group | Chapter Pages | Key Concept |
-|---|---|---|---|
-| **Setup** | Cells 1–3 | p. 421 | Imports, API key detection, Simulation Mode switch |
-| **Dataclasses** | Cells 4–5 | pp. 425–427 | Supporting type definitions (12 dataclasses) |
-| **Part I, §1: Knowledge Graph** | Cells 6–8 | pp. 423–426 | DAG curriculum with 10 Python learning objectives |
-| **Part I, §2: Student Model** | Cells 9–11 | pp. 425–427 | Per-student probabilistic mastery state |
-| **Part I, §3: Curriculum Planner** | Cells 12–15 | pp. 426–429 | ZPD-aligned Gaussian expected-gain objective selection |
-| **Part I, §4: Placement Test** | Cells 16–20 | pp. 428–431 | IRT 2PL adaptive diagnostics with Fisher information |
-| **Part I, §5: BKT Update** | Cells 21–24 | pp. 431–434 | Bayesian Knowledge Tracing (posterior + transition) |
-| **Part I, §6: Spaced Repetition** | Cells 25–28 | pp. 435–437 | SM-2 algorithm with overdue priority scoring |
-| **Part I, §7: Feedback Generator** | Cells 29–32 | pp. 438–440 | Two-stage misconception detection + pedagogical nudge |
-| **Part I, §8: Case Study "Alex"** | Cells 33–35 | pp. 440–441 | End-to-end demo: Placement → BKT → Feedback → Review |
-| **Part II, §9: Collaborative Agent** | Cells 36–39 | pp. 442–444 | Propose/critique dual pathway with confidence metadata |
-| **Part II, §10: Consensus Engine** | Cells 40–45 | pp. 445–450 | Weighted multi-round consensus with adversarial rotation |
-| **Part II, §11: Rubric Case Study** | Cells 46–52 | pp. 450–453 | Three-agent rubric design + emergent intelligence |
-| **Summary** | Final cell | p. 453 | Key takeaways and further reading |
+- `MockLLM` replaces the OpenAI client transparently
+- Pre-authored, section-mapped mock responses are educationally accurate
+- All mathematical models (BKT, IRT, SM-2) run full computation using pure math
+- Consensus protocol runs all rounds with mock proposals
+- Every cell executes successfully with no external dependencies
 
----
+API key detection follows a three-tier cascade: `.env` file → environment variable → interactive prompt → Simulation Mode.
 
-## Mathematical Foundations
+## Resilience Architecture
 
-The notebook implements five core mathematical models from the chapter:
+All agent operations are wrapped in the `@graceful_fallback` decorator:
 
-| Formula | Location | Purpose |
-|---|---|---|
-| `G(m,d) = α·exp(-(d-m-δ)²/(2σ²))` | p. 423 | ZPD Gaussian expected learning gain |
-| `P(correct\|θ,a,b) = 1/(1+exp(-a(θ-b)))` | p. 428 | 2PL Item Response Theory probability |
-| BKT posterior + learning transition | pp. 431–432 | Bayesian mastery belief-state update |
-| `ease = max(1.3, ease + 0.1 - (5-q)*(0.08+(5-q)*0.02))` | p. 436 | SM-2 spaced repetition scheduling |
-| `Score(p_j) = Σ_i [w_i · relevance_i · score_ij]` | p. 445 | Expertise-weighted consensus aggregation |
+- **On success:** `[INFO]` (blue) → `[SUCCESS]` (green)
+- **On failure:** `[INFO]` (blue) → `[HANDLED ERROR]` (red) → fallback value returned
+- **Guarantee:** No cell in the notebook will ever raise an unhandled exception
 
----
-
-## Simulation Mode vs. Live Mode
-
-| Feature | Simulation Mode | Live Mode |
-|---|---|---|
-| API key required | No | Yes (OpenAI gpt-4o) |
-| LLM responses | Pre-authored, section-mapped mocks | Generative (model-produced) |
-| BKT / IRT / SM-2 | Full computation (pure math) | Full computation (pure math) |
-| Feedback quality | Illustrative (educationally accurate) | Generative (contextually dynamic) |
-| Consensus protocol | Runs all rounds with mock proposals | Runs all rounds with LLM proposals |
-
-The `@graceful_fallback` decorator ensures that even in Live Mode, any API failure (timeout, rate limit, invalid key) is caught, logged in red, and the system continues with mock responses.
-
----
-
-## Visual Logging Schema
-
-All notebook output uses color-coded logging for clear execution tracing:
-
-| Level | Color | Prefix | Use Case |
-|---|---|---|---|
-| INFO | 🔵 Blue | `[INFO]` | Agent initialization, state transitions |
-| SUCCESS | 🟢 Green | `[SUCCESS]` | Completed steps, mastery threshold crossed |
-| WARN | 🟡 Yellow | `[WARN]` | Degraded responses, low confidence |
-| ERROR | 🔴 Red | `[HANDLED ERROR]` | API failures, fallback activation |
-
----
-
-## Technical Requirements
-
-From Chapter 15, p. 421:
+## Requirements
 
 - **Python:** 3.10+ (tested up to 3.12)
-- **Core packages:** `openai==1.40.0`, `numpy==1.26.4`, `networkx==3.3`, `python-dotenv==1.0.1`
-- **Runtime:** Jupyter Notebook or JupyterLab
+- **Dependencies:** See `requirements.txt` (includes `openai`, `numpy`, `networkx`, `python-dotenv`)
+- **API Key:** Optional (Simulation Mode works without one)
+
+## Troubleshooting
 
 See [TROUBLESHOOTING.md](TROUBLESHOOTING.md) for dependency conflicts, platform-specific issues, and common runtime problems.
 
----
-
 ## License
 
-MIT License. See [LICENSE](LICENSE) for details.
+This code is provided as educational companion material for *30 Agents Every AI Engineer Must Build* by Imran Ahmad (Packt Publishing, 2026). See the book for full terms of use.
+
+## Author
+
+**Imran Ahmad** — Author of *30 Agents Every AI Engineer Must Build* (Packt Publishing, 2026)

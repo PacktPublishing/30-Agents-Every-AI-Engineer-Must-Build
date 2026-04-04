@@ -1,121 +1,109 @@
 # Chapter 11: Multi-Modal Perception Agents
 
-**Book:** *30 Agents Every AI Engineer Must Build*
-**Author:** Imran Ahmad
-**Publisher:** Packt Publishing
-**Chapter:** 11 — Multi-Modal Perception Agents (pp. 307–327)
+**Book:** *30 Agents Every AI Engineer Must Build* by Imran Ahmad (Packt Publishing, 2026)
 
 ---
 
 ## Overview
 
-This repository contains the complete companion code for Chapter 11, which explores how intelligent agents perceive and act upon information beyond text — including images, audio waveforms, and physical sensor streams. The chapter implements three distinct agent domains:
+This repository is the executable companion to **Chapter 11** of *30 Agents Every AI Engineer Must Build*. It explores how intelligent agents perceive and act upon information beyond text — including images, audio waveforms, and physical sensor streams. Three distinct agent domains are implemented: Vision-Language Agents (visual encoder paired with LLM for joint reasoning using Chain-of-Thought prompting), Audio Processing Agents (speech transcription with mode-aware normalization and vocal emotion analysis via the VAD model), and Physical World Sensing Agents (heterogeneous sensor fusion, anomaly detection via pattern matching, and proportional control with deadband hysteresis).
 
-1. **Vision-Language Agents** — Pair a visual encoder with a large language model to reason jointly over images and natural language questions. Demonstrates Chain-of-Thought prompting for systematic visual analysis.
-
-2. **Audio Processing Agents** — Transcribe speech with mode-aware normalization (verbatim vs. clean), and analyze vocal emotion using the Valence-Arousal-Dominance (VAD) model through prosodic feature extraction.
-
-3. **Physical World Sensing Agents** — Fuse heterogeneous sensor streams (temperature, CO2, occupancy) into coherent zone state, detect anomalies via pattern matching, and issue proportional control commands with deadband hysteresis.
-
-All three domains follow the **Sense-Model-Plan-Act** loop introduced in Chapter 1.
-
----
+Every code cell runs **without an API key** in Simulation Mode, powered by mock backends (`MockVLM`, `MockWhisperBackend`, `MockSensorStream`) that return chapter-derived responses. When a Hugging Face token and CUDA GPU are available, the notebook seamlessly switches to Live Mode.
 
 ## Quickstart
 
 ```bash
-# 1. Clone and enter the repository
+# 1. Clone the repository
 git clone https://github.com/PacktPublishing/30-Agents-Every-AI-Engineer-Must-Build.git
-cd 30-Agents-Every-AI-Engineer-Must-Build/chapter11
+cd ./30-Agents-Every-AI-Engineer-Must-Build/
+cd chapter11
 
-# 2. Install dependencies
+# 2. Create a virtual environment (recommended)
+python -m venv .venv
+source .venv/bin/activate   # Linux/Mac
+# .venv\Scripts\activate    # Windows
+
+# 3. Install dependencies
 pip install -r requirements.txt
 
-# 3. Run the notebook (Simulation Mode — no GPU or API key required)
+# 4. (Optional) Add your Hugging Face token for Live Mode
+cp .env.template .env
+# Edit .env and add your token, or skip this step for Simulation Mode
+
+# 5. Launch the notebook
 jupyter notebook chapter_11_multimodal_agents.ipynb
 ```
 
-The notebook auto-detects your environment and activates **Simulation Mode** if no Hugging Face token or CUDA GPU is found. Every cell runs successfully in Simulation Mode.
+## Section Map
 
----
+The notebook is organized into cell groups that mirror the chapter's sections:
 
-## Simulation Mode vs. Live Mode
-
-| Aspect | Simulation Mode | Live Mode |
-|--------|----------------|-----------|
-| **GPU required** | No | Yes (16+ GB VRAM) |
-| **API token required** | No | Yes (Hugging Face) |
-| **Activated when** | No `.env` token or no CUDA GPU detected | Valid token + CUDA GPU present |
-| **Backend used** | `mock_backends.py` (chapter-accurate responses) | `transformers` + `torch` (real inference) |
-| **Output quality** | Deterministic, pre-built responses | Full model inference |
-| **Purpose** | Learning, code review, CI/CD testing | Production experimentation |
-
-To switch to Live Mode:
-1. Copy `.env.template` to `.env`
-2. Add your Hugging Face token
-3. Uncomment the GPU dependencies in `requirements.txt`
-4. Install: `pip install -r requirements.txt`
-
----
+| Cell Group | Chapter Section | Concept Demonstrated |
+|---|---|---|
+| **0** | Setup | Imports, environment detection, Simulation Mode activation |
+| **1** | §11.1 — Vision-Language Architecture | Visual encoder (ViT), alignment mechanism, cross-modal attention |
+| **2** | §11.1 — Vision QA Agent | LLaVA 1.5, Chain-of-Thought prompting, structured output parsing |
+| **3** | §11.1 — Integration Patterns | Adapter-based, cross-attention, early fusion; latency management |
+| **4** | §11.2 — Audio Architecture | STFT, spectrograms, Whisper encoder architecture |
+| **5** | §11.2 — Speech Recognition | TranscriptionMode (verbatim/clean/normalized), RMS normalization |
+| **6** | §11.2 — Voice Sentiment | Prosodic features, VAD model, emotion profile matching |
+| **7** | §11.3 — Smart Building Architecture | ZoneConfig/ZoneState separation, digital twin concept |
+| **8** | §11.3 — Event Detection | EventPattern with lambda conditions, severity levels |
+| **9** | §11.3 — Control Management | Proportional control, deadband hysteresis, short-cycling prevention |
+| **10** | §11.3 — Sensor Fusion | Temporal averaging, 5-minute fusion window, process_zone loop |
 
 ## Repository Structure
 
 ```
 chapter11/
-├── README.md                              # This file
-├── AGENTS.md                              # Agentic metadata and AI persona definition
-├── requirements.txt                       # Pinned dependencies (core + optional GPU)
-├── .env.template                          # Token template — copy to .env for Live Mode
-├── .gitignore                             # Excludes .env, __pycache__, checkpoints
-├── LICENSE                                # MIT License
 │
-├── chapter_11_multimodal_agents.ipynb     # Primary notebook — all 3 agent domains
+├── README.md                              # This file
+├── AGENTS.md                              # Agentic AI metadata
+├── LICENSE                                # MIT License
+├── requirements.txt                       # Pinned Python dependencies
+├── .env.template                          # Token template (zero-hardcode policy)
+├── .gitignore                             # Standard Python + .env exclusions
+├── troubleshooting.md                     # Dependency conflict resolution guide
+│
+├── chapter_11_multimodal_agents.ipynb     # Primary deliverable
 │
 ├── mock_backends.py                       # MockVLM, MockWhisperBackend, MockSensorStream
-├── agent_logger.py                        # Color-coded logging + @graceful_fallback decorator
-│
-├── troubleshooting.md                     # 8 common issues with fixes + compatibility matrix
-│
-└── assets/
-    └── (generated at runtime)             # sample_workspace.png created by notebook
+└── agent_logger.py                        # Color-coded logging + @graceful_fallback decorator
 ```
 
----
+## Simulation Mode
 
-## Chapter Sections Covered
+When no Hugging Face token or CUDA GPU is detected, the notebook activates **Simulation Mode**:
 
-| Section | Book Pages | Notebook Part | Key Concepts |
-|---------|-----------|--------------|-------------|
-| Architecture of Vision-Language Agents | pp. 308–310 | Part 1 | Visual encoder (ViT), alignment mechanism, cross-modal attention |
-| Building a Vision Question-Answering Agent | pp. 310–312 | Part 1 | LLaVA 1.5, Chain-of-Thought prompting, structured output parsing |
-| Integration Patterns and Production Considerations | pp. 311–312 | Part 1 | Adapter-based, cross-attention, early fusion; latency management |
-| Architecture of Audio Processing Agents | pp. 312–313 | Part 2 | STFT, spectrograms, Whisper encoder architecture |
-| Building a Speech Recognition Agent | pp. 316–319 | Part 2 | TranscriptionMode (verbatim/clean/normalized), RMS normalization |
-| Voice Sentiment Analysis | pp. 319–320 | Part 2 | Prosodic features, VAD model, emotion profile matching |
-| Smart Building Management Architecture | pp. 321–322 | Part 3 | ZoneConfig/ZoneState separation, digital twin concept |
-| Event Detection Through Pattern Matching | p. 323 | Part 3 | EventPattern with lambda conditions, severity levels |
-| Control Management and Feedback Loops | pp. 324–325 | Part 3 | Proportional control, deadband hysteresis, short-cycling prevention |
-| Smart Building Agent Integration and Sensor Fusion | pp. 325–326 | Part 3 | Temporal averaging, 5-minute fusion window, process_zone loop |
+- `MockVLM`, `MockWhisperBackend`, and `MockSensorStream` replace live backends transparently
+- All responses are pre-authored from Chapter 11 content
+- Every cell executes successfully with no GPU or external dependencies
+- Outputs are deterministic and chapter-accurate
 
----
+## Resilience Architecture
 
-## Prerequisites
+All agent operations are wrapped in the `@graceful_fallback` decorator:
 
-**For Simulation Mode (default):**
-- Python 3.10 or later
-- `numpy`, `Pillow`, `python-dotenv` (installed via `requirements.txt`)
+- **On success:** `[INFO]` (blue) → `[SUCCESS]` (green)
+- **On failure:** `[INFO]` (blue) → `[HANDLED ERROR]` (red) → fallback value returned
+- **Guarantee:** No cell in the notebook will ever raise an unhandled exception
 
-**For Live Mode (optional):**
-- CUDA-capable GPU with 16+ GB VRAM
-- Hugging Face account with LLaVA 1.5 access
-- `torch>=2.2.0`, `transformers>=4.40.0`, `accelerate>=0.28.0`
+## Requirements
 
-See [troubleshooting.md](troubleshooting.md) for environment-specific guidance.
+- **Python:** 3.10+ (recommended: 3.11 or 3.12)
+- **Dependencies:** See `requirements.txt`
+- **API Key / GPU:** Optional (Simulation Mode works without either)
 
----
+For Live Mode: CUDA-capable GPU with 16+ GB VRAM and a Hugging Face account with LLaVA 1.5 access.
+
+## Troubleshooting
+
+See [troubleshooting.md](troubleshooting.md) for environment-specific guidance, compatibility matrix, and solutions to common issues.
 
 ## License
 
-This project is licensed under the MIT License. See [LICENSE](LICENSE) for details.
+This code is provided as educational companion material for *30 Agents Every AI Engineer Must Build* by Imran Ahmad (Packt Publishing, 2026). See the book for full terms of use.
 
-*Part of the companion code for "30 Agents Every AI Engineer Must Build" by Imran Ahmad (Packt Publishing, 2026).*
+## Author
+
+**Imran Ahmad** — Author of *30 Agents Every AI Engineer Must Build* (Packt Publishing, 2026)

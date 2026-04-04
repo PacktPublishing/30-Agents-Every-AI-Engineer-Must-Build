@@ -1,162 +1,126 @@
 # Chapter 12: Ethical and Explainable Agents
 
-**Book:** *30 Agents Every AI Engineer Must Build*
-**Author:** Imran Ahmad
-**Publisher:** Packt Publishing (2026)
-**Chapter:** 12 — Ethical and Explainable Agents
+**Book:** *30 Agents Every AI Engineer Must Build* by Imran Ahmad (Packt Publishing, 2026)
 
 ---
 
 ## Overview
 
-This repository contains the complete companion code for Chapter 12, which builds two complementary agent architectures:
+This repository is the executable companion to **Chapter 12** of *30 Agents Every AI Engineer Must Build*. It builds two complementary agent architectures: the Ethical Reasoning Agent (value alignment, deontic logic constraints, bias detection and mitigation with a three-layer fairness architecture, and EU AI Act compliance) and the Explainable Agent (structured explanation frameworks using LIME, SHAP, and counterfactual analysis with audience-adapted output and calibrated confidence communication). Case studies include a Fair HR Assistant and a Medical Diagnosis Assistant.
 
-1. **Ethical Reasoning Agent** — Integrates value alignment, ethical decision-making, and bias mitigation directly into the agent's reasoning pipeline. Every candidate action is evaluated against deontic logic constraints, fairness metrics, and regulatory requirements before execution. Includes a full HR Assistant case study with a three-layer fairness architecture (anonymization → bias detection → enforcement).
+Every code cell runs **without an API key** in Simulation Mode, powered by a `MockLLM` engine that returns chapter-derived responses. When an OpenAI API key is provided, the notebooks seamlessly switch to Live Mode.
 
-2. **Explainable Agent** — Makes internal reasoning visible to users, auditors, and regulators through structured explanation frameworks and calibrated confidence communication. Implements LIME, SHAP, and counterfactual analysis with audience-adapted output. Includes a Medical Diagnosis Assistant case study with multi-source evidence integration.
-
-Both architectures are grounded in the IEEE Ethically Aligned Design framework, the EU AI Act compliance requirements, and the Impossibility Theorem for fairness metric selection.
-
-## Architecture
-
-```mermaid
-graph TD
-    subgraph "Notebook Layer"
-        NB1["01_ethical_reasoning_agent.ipynb"]
-        NB2["02_explainable_agent.ipynb"]
-    end
-
-    subgraph "Logic Layer (src/)"
-        EC["ethical_core.py<br/>EthicalReasoningAgent<br/>BiasDetector<br/>FairHiringAgent<br/>FairnessEnforcer<br/>EUCompliantAgent"]
-        XC["explainability_core.py<br/>ExplainableAgent<br/>DiagnosticAssistant<br/>ConfidenceAwareAgent<br/>ClinicalExplainer"]
-        UT["utils.py<br/>ColorLogger<br/>@graceful_fallback<br/>resolve_api_key()"]
-        ML["mock_llm.py<br/>MockLLM"]
-        SD["synthetic_data.py<br/>generate_hr_dataset()<br/>generate_medical_dataset()"]
-    end
-
-    NB1 --> EC
-    NB1 --> UT
-    NB1 --> SD
-    NB2 --> XC
-    NB2 --> UT
-    NB2 --> SD
-    EC --> UT
-    EC --> ML
-    XC --> UT
-    XC --> ML
-    UT --> ML
-```
-
-## Setup
-
-### Prerequisites
-
-- Python 3.10 or later
-- pip package manager
-
-### Installation
+## Quickstart
 
 ```bash
-# Clone the repository
+# 1. Clone the repository
 git clone https://github.com/PacktPublishing/30-Agents-Every-AI-Engineer-Must-Build.git
+cd ./30-Agents-Every-AI-Engineer-Must-Build/
 cd chapter12
 
-# Create a virtual environment (recommended)
+# 2. Create a virtual environment (recommended)
 python -m venv .venv
-source .venv/bin/activate  # Linux/macOS
-# .venv\Scripts\activate   # Windows
+source .venv/bin/activate   # Linux/Mac
+# .venv\Scripts\activate    # Windows
 
-# Install dependencies
+# 3. Install dependencies
 pip install -r requirements.txt
-```
 
-### API Key Configuration (Optional)
-
-The repository runs in **Simulation Mode** by default — no API key is required. All outputs use chapter-derived mock data with deterministic results.
-
-To enable **Live Mode** with OpenAI's gpt-4o model:
-
-```bash
+# 4. (Optional) Add your OpenAI API key for Live Mode
 cp .env.template .env
-# Edit .env and add your key: OPENAI_API_KEY=sk-...
+# Edit .env and add your key, or skip this step for Simulation Mode
+
+# 5. Launch the notebooks
+jupyter notebook 01_ethical_reasoning_agent.ipynb
+jupyter notebook 02_explainable_agent.ipynb
 ```
 
-### Running the Notebooks
+## Section Map
 
-```bash
-# Launch Jupyter
-jupyter notebook notebooks/
+This chapter uses **two notebooks** that mirror the chapter's two major sections:
 
-# Or run in VS Code with the Jupyter extension
+### Notebook 1: Ethical Reasoning Agent
+
+| Cell Group | Chapter Section | Concept Demonstrated |
+|---|---|---|
+| **0** | Setup | Imports, API key detection, mode selection |
+| **1** | §12.1 — Deontic Logic | Obligation, permission, prohibition operators with three axioms |
+| **2** | §12.1 — Ethical Consistency | Formal permissibility criterion for agent actions |
+| **3** | §12.2 — IEEE Ethically Aligned Design | Modular validators for human rights, well-being, accountability |
+| **4** | §12.3 — EU AI Act Compliance | Seven-requirement compliance control plane |
+| **5** | §12.4 — Impossibility Theorem | Statistical parity, equal opportunity, predictive parity constraints |
+| **6** | §12.5 — Bias Detection Pipeline | Demographic parity, disparate impact with four-fifths rule |
+| **7** | Case Study | FairHiringAgent HR Assistant with three-layer fairness architecture |
+
+### Notebook 2: Explainable Agent
+
+| Cell Group | Chapter Section | Concept Demonstrated |
+|---|---|---|
+| **0** | Setup | Imports, API key detection, mode selection |
+| **1** | §12.6 — Reasoning Transparency | Structured explanation frameworks |
+| **2** | §12.7 — LIME and SHAP | Local and global model-agnostic explanations |
+| **3** | §12.8 — Counterfactual Analysis | Minimal change explanations for recourse generation |
+| **4** | §12.9 — Confidence Calibration | Epistemic vs. aleatoric uncertainty with temperature scaling |
+| **5** | §12.10 — Audience Adaptation | Clinician vs. patient explanation templates |
+| **6** | Case Study | DiagnosticAssistant medical case study with multi-source evidence |
+
+## Repository Structure
+
+```
+chapter12/
+│
+├── README.md                              # This file
+├── AGENTS.md                              # Agentic AI metadata
+├── LICENSE                                # MIT License
+├── requirements.txt                       # Pinned Python dependencies
+├── .env.template                          # API key template (zero-hardcode policy)
+├── .gitignore                             # Standard Python + .env exclusions
+├── TROUBLESHOOTING.md                     # Dependency conflict resolution guide
+│
+├── 01_ethical_reasoning_agent.ipynb        # Ethical Reasoning Agent notebook
+├── 02_explainable_agent.ipynb             # Explainable Agent notebook
+│
+├── __init__.py                            # Package exports
+├── ethical_core.py                        # EthicalReasoningAgent, BiasDetector, FairHiringAgent
+├── explainability_core.py                 # ExplainableAgent, DiagnosticAssistant, ClinicalExplainer
+├── mock_llm.py                            # Context-aware MockLLM for Simulation Mode
+├── synthetic_data.py                      # generate_hr_dataset(), generate_medical_dataset()
+└── utils.py                               # ColorLogger, @graceful_fallback, resolve_api_key()
 ```
 
 ## Simulation Mode
 
-When no valid OpenAI API key is detected, the repository automatically activates Simulation Mode. In this mode:
+When no API key is detected, the notebooks activate **Simulation Mode**:
 
-- All LLM calls are routed to `MockLLM`, which returns chapter-derived responses
+- All LLM calls are routed to `MockLLM`, returning chapter-derived responses
 - Synthetic datasets are generated deterministically (seed=42)
 - All fairness metrics, SHAP values, and explanations match the chapter examples
-- Color-coded logs display in blue to indicate simulation status
+- Every cell executes successfully with no external dependencies
 
-This ensures every notebook cell executes without error and produces meaningful, educational output regardless of API access.
+API key detection follows a three-tier cascade: `.env` file → environment variable → interactive prompt → Simulation Mode.
 
-## Notebooks
+## Resilience Architecture
 
-| Notebook | Chapter Sections | Key Topics |
-|---|---|---|
-| `01_ethical_reasoning_agent.ipynb` | p.331–346 | Deontic logic, value alignment, Impossibility Theorem, bias detection and mitigation, FairHiringAgent HR case study |
-| `02_explainable_agent.ipynb` | p.346–360 | Reasoning transparency, LIME/SHAP, counterfactual analysis, confidence calibration, DiagnosticAssistant medical case study |
+All agent operations are wrapped in the `@graceful_fallback` decorator:
 
-## Project Structure
+- **On success:** `[INFO]` (blue) → `[SUCCESS]` (green)
+- **On failure:** `[INFO]` (blue) → `[HANDLED ERROR]` (red) → fallback value returned
+- **Guarantee:** No cell in either notebook will ever raise an unhandled exception
 
-```
-chapter12-ethical-explainable-agents/
-├── README.md                          # This file
-├── AGENTS.md                          # Agentic metadata and persona definition
-├── LICENSE                            # MIT License
-├── requirements.txt                   # Pinned dependencies
-├── .env.template                      # API key placeholder
-├── .gitignore                         # Git exclusions
-├── notebooks/
-│   ├── 01_ethical_reasoning_agent.ipynb  # Ethical Reasoning Agent walkthrough
-│   └── 02_explainable_agent.ipynb       # Explainable Agent walkthrough
-├── src/
-│   ├── __init__.py                    # Package exports
-│   ├── mock_llm.py                    # Context-aware mock LLM for Simulation Mode
-│   ├── ethical_core.py                # Ethical reasoning classes and bias pipeline
-│   ├── explainability_core.py         # Explanation frameworks and diagnostic assistant
-│   ├── utils.py                       # ColorLogger, decorators, mode detection
-│   └── synthetic_data.py             # Deterministic dataset generators
-├── data/
-│   └── .gitkeep                       # Generated datasets stored here
-└── docs/
-    └── TROUBLESHOOTING.md             # Dependency and runtime issue resolution
-```
+## Requirements
 
-## Key Concepts Covered
-
-- **Deontic Logic** — Obligation, permission, and prohibition operators with three axioms (p.332–333)
-- **Ethical Consistency Theorem** — Formal permissibility criterion for agent actions (p.333)
-- **IEEE Ethically Aligned Design** — Modular validators for human rights, well-being, accountability (p.334–335)
-- **EU AI Act Compliance** — Seven-requirement compliance control plane (p.336)
-- **Impossibility Theorem** — Mathematical proof that statistical parity, equal opportunity, and predictive parity cannot all hold simultaneously (p.337–338)
-- **Bias Detection Pipeline** — Demographic parity, equal opportunity, disparate impact with four-fifths rule (p.339–343)
-- **LIME and SHAP** — Local and global model-agnostic explanation frameworks (p.349)
-- **Counterfactual Analysis** — Minimal change explanations for recourse generation (p.349)
-- **Confidence Calibration** — Epistemic vs. aleatoric uncertainty with temperature scaling (p.350–352)
-- **Audience-Adapted Explanations** — Clinician vs. patient explanation templates (p.356)
+- **Python:** 3.10+ (recommended: 3.11 or 3.12)
+- **Dependencies:** See `requirements.txt`
+- **API Key:** Optional (Simulation Mode works without one)
 
 ## Troubleshooting
 
-See [docs/TROUBLESHOOTING.md](docs/TROUBLESHOOTING.md) for solutions to common dependency conflicts and runtime issues.
+See [TROUBLESHOOTING.md](TROUBLESHOOTING.md) for solutions to common dependency conflicts and runtime issues.
 
 ## License
 
-This project is licensed under the MIT License. See [LICENSE](LICENSE) for details.
+This code is provided as educational companion material for *30 Agents Every AI Engineer Must Build* by Imran Ahmad (Packt Publishing, 2026). See the book for full terms of use.
 
 ## Author
 
-**Imran Ahmad** — Packt Publishing, 2026
-
-For the complete book, visit: [30 Agents Every AI Engineer Must Build](https://github.com/PacktPublishing/30-Agents-Every-AI-Engineer-Must-Build)
+**Imran Ahmad** — Author of *30 Agents Every AI Engineer Must Build* (Packt Publishing, 2026)
