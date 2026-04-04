@@ -92,7 +92,7 @@ python autonomous_decision_agent.py
 | **Python** | 3.10 or later |
 | **GPU** | NVIDIA GPU with CUDA 12+ (recommended, not required) |
 | **Tools** | git, terminal, virtual environment tool (venv, conda, or uv) |
-| **API Keys** | OpenAI, Anthropic, or Hugging Face (varies by chapter) |
+| **API Keys** | **None required** — every chapter runs in Simulation Mode with built-in MockLLM responses. Optional: OpenAI, Anthropic, or Hugging Face keys unlock Live Mode (varies by chapter) |
 
 ---
 
