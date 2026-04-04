@@ -180,20 +180,6 @@ Dr. Ahmad holds a visiting professorship at Carleton University in Ottawa and is
 
 ---
 
-## Related Books by Packt
-
-If you enjoyed this book, you may also find the following Packt books useful:
-
-- **[Context Engineering for Multi-Agent Systems](https://www.packtpub.com/en-us/product/context-engineering-for-multi-agent-systems-9781807304188)**  
-  *Denis Rothman*  
-  Move beyond prompting to build a Context Engine — a transparent architecture of context and reasoning. Covers semantic blueprints, multi-agent orchestration with MCP, high-fidelity RAG pipelines, and safeguards for production deployment.
-
-- **[Agentic Architectural Patterns for Building Multi-Agent Systems](https://www.packtpub.com/en-us/product/agentic-architectural-patterns-for-building-multi-agent-systems-9781806029563)**  
-  *Dr. Ali Arsanjani, Juan Pablo Bustos*  
-  Transform GenAI experiments into production-ready intelligent agents with scalable architectural patterns, frameworks, and responsible AI governance best practices. Covers the GenAI maturity model, RAG, fine-tuning, LLMOps, and the Agent-to-Agent (A2A) protocol.
-
----
-
 ## Get in Touch
 
 - **General feedback:** Email [customercare@packt.com](mailto:customercare@packt.com) with the book title in the subject line.
