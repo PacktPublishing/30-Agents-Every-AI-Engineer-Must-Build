@@ -4,6 +4,7 @@
 **Author:** Imran Ahmad
 **Publisher:** Packt Publishing, 2026
 **Chapter:** 13 — Healthcare and Scientific Agents
+**Chapter Pages:** pp. 361–389
 
 ---
 
@@ -70,11 +71,11 @@ To enable live mode, add your OpenAI API key to `.env` or enter it when prompted
 
 | Section | Topic | Book Reference |
 |:--------|:------|:---------------|
-| 0 | Setup and Configuration | Technical Requirements (p. 2) |
+| 0 | Setup and Configuration | Technical Requirements (p. 362) |
 | 1 | Simulation Infrastructure | Cross-cutting |
-| 2 | Healthcare Intelligence Agent | §13.1–13.4 (pp. 2–17) |
-| 3 | Scientific Discovery Agent | §13.5–13.8 (pp. 18–33) |
-| 4 | Cross-Domain Analysis | §13.9 (pp. 33–35) |
+| 2 | Healthcare Intelligence Agent | §13.1–13.4 (pp. 362–375) |
+| 3 | Scientific Discovery Agent | §13.5–13.8 (pp. 375–387) |
+| 4 | Cross-Domain Analysis | §13.9 (pp. 387–389) |
 
 ## License
 

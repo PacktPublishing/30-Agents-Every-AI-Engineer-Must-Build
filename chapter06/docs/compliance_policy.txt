@@ -1,0 +1,47 @@
+Acme Corporation — Corporate Compliance and Data Governance Policy
+Effective Date: January 1, 2026
+Document Classification: Internal — All Employees
+
+1. Data Retention
+
+All financial records, including invoices, receipts, tax filings, and audit logs, must be
+retained for a minimum of seven (7) years from the date of creation. General business
+correspondence, including internal emails and memoranda, must be retained for a minimum
+of three (3) years. Automated deletion policies may be applied after the mandated retention
+period, provided that deletion schedules are documented, approved by the Compliance
+Officer, and auditable at all times. Departments are responsible for ensuring that retention
+schedules are enforced within their document management systems.
+
+2. Subscription Refund Policy
+
+Customers enrolled in recurring subscription plans are entitled to a full refund if they
+cancel within fourteen (14) calendar days of their most recent renewal date. Refund requests
+submitted after the 14-day window will be prorated based on the remaining unused portion
+of the subscription period. Prorated refunds are calculated as follows: the daily rate
+(annual subscription cost divided by 365) multiplied by the number of remaining days in
+the billing cycle. Refund processing takes 5 to 10 business days. No refunds will be issued
+for promotional or discounted subscriptions unless required by applicable law.
+
+3. Billing Terms and Dispute Resolution
+
+All invoices are due within thirty (30) calendar days of issuance (Net-30). Late payments
+are subject to a 1.5% monthly interest charge on the outstanding balance. Customers who
+wish to dispute an invoice must submit a written dispute within fifteen (15) business days
+of the invoice date. The Finance Department will acknowledge receipt of the dispute within
+two (2) business days and provide a resolution within ten (10) business days. Disputed
+amounts are not subject to late payment interest during the resolution period.
+
+4. Access Controls and Data Security
+
+Access to customer financial data is restricted to authorized personnel on a need-to-know
+basis. All access events are logged and subject to quarterly audit review. Employees must
+complete annual data protection training. Violations of this policy may result in disciplinary
+action up to and including termination. External data sharing requires written approval
+from the Chief Information Security Officer (CISO) and must comply with all applicable
+data protection regulations, including GDPR and CCPA where applicable.
+
+5. Policy Amendments
+
+This policy is reviewed annually by the Compliance Committee. Amendments take effect
+thirty (30) days after publication to the corporate intranet. All employees will be notified
+of material changes via email and are required to acknowledge receipt.

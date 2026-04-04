@@ -33,7 +33,7 @@ chapter15/
 │   ├── __init__.py              # Package exports
 │   ├── mock_llm.py              # MockLLM + 9-key section-mapped response registry
 │   └── resilience.py            # ColorLogger + @graceful_fallback decorator
-├── requirements.txt             # Pinned dependencies (Ch.15, p. 2)
+├── requirements.txt             # Pinned dependencies (Ch.15, p. 421)
 ├── .env.template                # API key placeholder (3-tier resolution)
 ├── .gitignore                   # Repository hygiene
 ├── README.md                    # This file
@@ -48,20 +48,20 @@ chapter15/
 
 | Section | Cell Group | Chapter Pages | Key Concept |
 |---|---|---|---|
-| **Setup** | Cells 1–3 | p. 2 | Imports, API key detection, Simulation Mode switch |
-| **Dataclasses** | Cells 4–5 | pp. 6–7 | Supporting type definitions (12 dataclasses) |
-| **Part I, §1: Knowledge Graph** | Cells 6–8 | pp. 4–6 | DAG curriculum with 10 Python learning objectives |
-| **Part I, §2: Student Model** | Cells 9–11 | pp. 6–7 | Per-student probabilistic mastery state |
-| **Part I, §3: Curriculum Planner** | Cells 12–15 | pp. 8–9 | ZPD-aligned Gaussian expected-gain objective selection |
-| **Part I, §4: Placement Test** | Cells 16–20 | pp. 10–13 | IRT 2PL adaptive diagnostics with Fisher information |
-| **Part I, §5: BKT Update** | Cells 21–24 | pp. 13–16 | Bayesian Knowledge Tracing (posterior + transition) |
-| **Part I, §6: Spaced Repetition** | Cells 25–28 | pp. 18–20 | SM-2 algorithm with overdue priority scoring |
-| **Part I, §7: Feedback Generator** | Cells 29–32 | pp. 22–24 | Two-stage misconception detection + pedagogical nudge |
-| **Part I, §8: Case Study "Alex"** | Cells 33–35 | pp. 24–25 | End-to-end demo: Placement → BKT → Feedback → Review |
-| **Part II, §9: Collaborative Agent** | Cells 36–39 | pp. 27–29 | Propose/critique dual pathway with confidence metadata |
-| **Part II, §10: Consensus Engine** | Cells 40–45 | pp. 30–35 | Weighted multi-round consensus with adversarial rotation |
-| **Part II, §11: Rubric Case Study** | Cells 46–52 | pp. 36–39 | Three-agent rubric design + emergent intelligence |
-| **Summary** | Final cell | p. 40 | Key takeaways and further reading |
+| **Setup** | Cells 1–3 | p. 421 | Imports, API key detection, Simulation Mode switch |
+| **Dataclasses** | Cells 4–5 | pp. 425–427 | Supporting type definitions (12 dataclasses) |
+| **Part I, §1: Knowledge Graph** | Cells 6–8 | pp. 423–426 | DAG curriculum with 10 Python learning objectives |
+| **Part I, §2: Student Model** | Cells 9–11 | pp. 425–427 | Per-student probabilistic mastery state |
+| **Part I, §3: Curriculum Planner** | Cells 12–15 | pp. 426–429 | ZPD-aligned Gaussian expected-gain objective selection |
+| **Part I, §4: Placement Test** | Cells 16–20 | pp. 428–431 | IRT 2PL adaptive diagnostics with Fisher information |
+| **Part I, §5: BKT Update** | Cells 21–24 | pp. 431–434 | Bayesian Knowledge Tracing (posterior + transition) |
+| **Part I, §6: Spaced Repetition** | Cells 25–28 | pp. 435–437 | SM-2 algorithm with overdue priority scoring |
+| **Part I, §7: Feedback Generator** | Cells 29–32 | pp. 438–440 | Two-stage misconception detection + pedagogical nudge |
+| **Part I, §8: Case Study "Alex"** | Cells 33–35 | pp. 440–441 | End-to-end demo: Placement → BKT → Feedback → Review |
+| **Part II, §9: Collaborative Agent** | Cells 36–39 | pp. 442–444 | Propose/critique dual pathway with confidence metadata |
+| **Part II, §10: Consensus Engine** | Cells 40–45 | pp. 445–450 | Weighted multi-round consensus with adversarial rotation |
+| **Part II, §11: Rubric Case Study** | Cells 46–52 | pp. 450–453 | Three-agent rubric design + emergent intelligence |
+| **Summary** | Final cell | p. 453 | Key takeaways and further reading |
 
 ---
 
@@ -71,11 +71,11 @@ The notebook implements five core mathematical models from the chapter:
 
 | Formula | Location | Purpose |
 |---|---|---|
-| `G(m,d) = α·exp(-(d-m-δ)²/(2σ²))` | p. 5 | ZPD Gaussian expected learning gain |
-| `P(correct\|θ,a,b) = 1/(1+exp(-a(θ-b)))` | p. 10 | 2PL Item Response Theory probability |
-| BKT posterior + learning transition | pp. 14–15 | Bayesian mastery belief-state update |
-| `ease = max(1.3, ease + 0.1 - (5-q)*(0.08+(5-q)*0.02))` | p. 19 | SM-2 spaced repetition scheduling |
-| `Score(p_j) = Σ_i [w_i · relevance_i · score_ij]` | p. 30 | Expertise-weighted consensus aggregation |
+| `G(m,d) = α·exp(-(d-m-δ)²/(2σ²))` | p. 423 | ZPD Gaussian expected learning gain |
+| `P(correct\|θ,a,b) = 1/(1+exp(-a(θ-b)))` | p. 428 | 2PL Item Response Theory probability |
+| BKT posterior + learning transition | pp. 431–432 | Bayesian mastery belief-state update |
+| `ease = max(1.3, ease + 0.1 - (5-q)*(0.08+(5-q)*0.02))` | p. 436 | SM-2 spaced repetition scheduling |
+| `Score(p_j) = Σ_i [w_i · relevance_i · score_ij]` | p. 445 | Expertise-weighted consensus aggregation |
 
 ---
 
@@ -108,7 +108,7 @@ All notebook output uses color-coded logging for clear execution tracing:
 
 ## Technical Requirements
 
-From Chapter 15, p. 2:
+From Chapter 15, p. 421:
 
 - **Python:** 3.10+ (tested up to 3.12)
 - **Core packages:** `openai==1.40.0`, `numpy==1.26.4`, `networkx==3.3`, `python-dotenv==1.0.1`

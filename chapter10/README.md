@@ -1,8 +1,9 @@
 # Chapter 10: Conversational and Content Creation Agents
 
-**Book:** 30 Agents Every AI Engineer Must Build
+**Book:** *30 Agents Every AI Engineer Must Build*
 **Author:** Imran Ahmad
-**Publisher:** Packt Publishing
+**Publisher:** Packt Publishing, 2026
+**Chapter Pages:** pp. 281–306
 **License:** MIT
 
 ---
@@ -14,14 +15,14 @@ This repository contains the complete companion code for **Chapter 10** of
 architectures that operate at the boundary between algorithmic capability
 and human experience:
 
-1. **The Empathetic Mental Health Support Agent** (Section 10.1) — A
+1. **The Empathetic Mental Health Support Agent** (Section 10.1, pp. 282–293) — A
    safety-aware conversational agent with a dual-memory hierarchy (working
    memory via `ConversationSummaryBufferMemory` and semantic long-term
    recall via FAISS), a deterministic `SafetyLayer` sentinel, and a
    `PersonaEngine` that enforces empathetic, non-directive behavior as a
    constraint layer.
 
-2. **The Marketing Content Assistant** (Section 10.2) — A multi-agent
+2. **The Marketing Content Assistant** (Section 10.2, pp. 293–305) — A multi-agent
    content creation pipeline built on the SMPA (Sense-Model-Plan-Act)
    paradigm. Specialist agents (Email, SEO, Ad Creative) produce
    brand-constrained drafts validated by an `EditorAgent` using a CSP
@@ -90,24 +91,24 @@ chapter10-conversational-content-agents/
 
 ## Chapter Section Index
 
-| Notebook Section | Chapter Reference | Key Concepts |
-|:---|:---|:---|
-| Cell 1.1–1.4 | Technical requirements | Imports, ColorLogger, API detection, LLM factory |
-| Cell 2.1 | Implementing the vertical pipeline | `SafetyLayer` — crisis sentinel with deterministic bypass |
-| Cell 2.2 | Memory hierarchy in practice — working memory | `ContextManager` with `ConversationSummaryBufferMemory` |
-| Cell 2.3 | Memory hierarchy in practice — semantic memory | `SemanticMemory` with FAISS vector store |
-| Cell 2.4 | The persona engine as a constraint layer | `SystemMessage` persona — "controlled bias" |
-| Cell 2.5 | Case study: Empathetic mental health support agent | `MentalHealthAgent` — full vertical pipeline |
-| Cell 2.6 | Full Section 10.1 integration | Multi-turn dialogue with memory recall and crisis demo |
-| Cell 3.1 | The SMPA foundation | `Agent(ABC)` base class — Sense/Model/Plan/Act |
-| Cell 3.2 | Implementing brand constraints as a CSP | `BrandGuidelines` dataclass with `validate_content()` |
-| Cell 3.3 | Brand consistency as a constraint satisfaction problem | `validate_against_brand()` — Editor pre-check |
-| Cell 3.4 | The editor agent: The quality control layer | `EditorAgent` — consistency score C = 1/n × Σ φ(Aᵢ, G) |
-| Cell 3.5 | Multimodal orchestration via function calling | `AssetRequest` + `dispatch_asset_request()` |
-| Cell 3.6 | The adaptive optimization cycle | `AnalyticsEngine` — CTR-based feedback, J(θ) formulation |
-| Cell 3.7–3.8 | End-to-end campaign walkthrough | `CampaignBrief`, `CampaignAssets`, `execute_campaign()` |
-| Cell 3.9 | Full Section 10.2 integration | Campaign demo with DataVault Pro brief |
-| Cell 4.1–4.2 | Summary | Key takeaways and pointer to Chapter 11 |
+| Notebook Section | Chapter Reference | Book Pages | Key Concepts |
+|:---|:---|:---|:---|
+| Cell 1.1–1.4 | Technical requirements | pp. 281–282 | Imports, ColorLogger, API detection, LLM factory |
+| Cell 2.1 | Implementing the vertical pipeline | p. 289 | `SafetyLayer` — crisis sentinel with deterministic bypass |
+| Cell 2.2 | Memory hierarchy in practice — working memory | p. 290 | `ContextManager` with `ConversationSummaryBufferMemory` |
+| Cell 2.3 | Memory hierarchy in practice — semantic memory | pp. 290–291 | `SemanticMemory` with FAISS vector store |
+| Cell 2.4 | The persona engine as a constraint layer | p. 293 | `SystemMessage` persona — "controlled bias" |
+| Cell 2.5 | Case study: Empathetic mental health support agent | pp. 287–292 | `MentalHealthAgent` — full vertical pipeline |
+| Cell 2.6 | Full Section 10.1 integration | pp. 282–293 | Multi-turn dialogue with memory recall and crisis demo |
+| Cell 3.1 | The SMPA foundation | p. 299 | `Agent(ABC)` base class — Sense/Model/Plan/Act |
+| Cell 3.2 | Implementing brand constraints as a CSP | p. 300 | `BrandGuidelines` dataclass with `validate_content()` |
+| Cell 3.3 | Brand consistency as a constraint satisfaction problem | pp. 294–296 | `validate_against_brand()` — Editor pre-check |
+| Cell 3.4 | The editor agent: The quality control layer | p. 300 | `EditorAgent` — consistency score C = 1/n × Σ φ(Aᵢ, G) |
+| Cell 3.5 | Multimodal orchestration via function calling | p. 301 | `AssetRequest` + `dispatch_asset_request()` |
+| Cell 3.6 | The adaptive optimization cycle | pp. 298, 302 | `AnalyticsEngine` — CTR-based feedback, J(θ) formulation |
+| Cell 3.7–3.8 | End-to-end campaign walkthrough | pp. 302–305 | `CampaignBrief`, `CampaignAssets`, `execute_campaign()` |
+| Cell 3.9 | Full Section 10.2 integration | pp. 293–305 | Campaign demo with DataVault Pro brief |
+| Cell 4.1–4.2 | Summary | pp. 305–306 | Key takeaways and pointer to Chapter 11 |
 
 ---
 

@@ -1,0 +1,18 @@
+# requirements.txt
+# Chapter 3: The Art of Agent Prompting
+# Author: Imran Ahmad
+# Tested on Python 3.11+
+
+# Core LLM framework
+langchain-core>=0.3.0,<0.4.0
+langchain-openai>=0.3.0,<0.4.0
+
+# Environment and secrets
+python-dotenv>=1.1.0,<2.0.0
+
+# Jupyter
+jupyter>=1.0.0
+ipykernel>=6.29.0
+
+# Utilities (used in demonstrations)
+pydantic>=2.9.0,<3.0.0

@@ -3,7 +3,7 @@
 **Book:** *30 Agents Every AI Engineer Must Build*
 **Author:** Imran Ahmad
 **Publisher:** Packt Publishing
-**Chapter:** 11 — Multi-Modal Perception Agents
+**Chapter:** 11 — Multi-Modal Perception Agents (pp. 307–327)
 
 ---
 
@@ -84,18 +84,18 @@ chapter11/
 
 ## Chapter Sections Covered
 
-| Section | Notebook Part | Key Concepts |
-|---------|--------------|-------------|
-| Architecture of Vision-Language Agents | Part 1 | Visual encoder (ViT), alignment mechanism, cross-modal attention |
-| Building a Vision Question-Answering Agent | Part 1 | LLaVA 1.5, Chain-of-Thought prompting, structured output parsing |
-| Integration Patterns and Production Considerations | Part 1 | Adapter-based, cross-attention, early fusion; latency management |
-| Architecture of Audio Processing Agents | Part 2 | STFT, spectrograms, Whisper encoder architecture |
-| Building a Speech Recognition Agent | Part 2 | TranscriptionMode (verbatim/clean/normalized), RMS normalization |
-| Voice Sentiment Analysis | Part 2 | Prosodic features, VAD model, emotion profile matching |
-| Smart Building Management Architecture | Part 3 | ZoneConfig/ZoneState separation, digital twin concept |
-| Event Detection Through Pattern Matching | Part 3 | EventPattern with lambda conditions, severity levels |
-| Control Management and Feedback Loops | Part 3 | Proportional control, deadband hysteresis, short-cycling prevention |
-| Smart Building Agent Integration and Sensor Fusion | Part 3 | Temporal averaging, 5-minute fusion window, process_zone loop |
+| Section | Book Pages | Notebook Part | Key Concepts |
+|---------|-----------|--------------|-------------|
+| Architecture of Vision-Language Agents | pp. 308–310 | Part 1 | Visual encoder (ViT), alignment mechanism, cross-modal attention |
+| Building a Vision Question-Answering Agent | pp. 310–312 | Part 1 | LLaVA 1.5, Chain-of-Thought prompting, structured output parsing |
+| Integration Patterns and Production Considerations | pp. 311–312 | Part 1 | Adapter-based, cross-attention, early fusion; latency management |
+| Architecture of Audio Processing Agents | pp. 312–313 | Part 2 | STFT, spectrograms, Whisper encoder architecture |
+| Building a Speech Recognition Agent | pp. 316–319 | Part 2 | TranscriptionMode (verbatim/clean/normalized), RMS normalization |
+| Voice Sentiment Analysis | pp. 319–320 | Part 2 | Prosodic features, VAD model, emotion profile matching |
+| Smart Building Management Architecture | pp. 321–322 | Part 3 | ZoneConfig/ZoneState separation, digital twin concept |
+| Event Detection Through Pattern Matching | p. 323 | Part 3 | EventPattern with lambda conditions, severity levels |
+| Control Management and Feedback Loops | pp. 324–325 | Part 3 | Proportional control, deadband hysteresis, short-cycling prevention |
+| Smart Building Agent Integration and Sensor Fusion | pp. 325–326 | Part 3 | Temporal averaging, 5-minute fusion window, process_zone loop |
 
 ---
 

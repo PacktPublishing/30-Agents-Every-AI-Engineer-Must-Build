@@ -105,8 +105,8 @@ This ensures every notebook cell executes without error and produces meaningful,
 
 | Notebook | Chapter Sections | Key Topics |
 |---|---|---|
-| `01_ethical_reasoning_agent.ipynb` | p.3–23 | Deontic logic, value alignment, Impossibility Theorem, bias detection and mitigation, FairHiringAgent HR case study |
-| `02_explainable_agent.ipynb` | p.23–39 | Reasoning transparency, LIME/SHAP, counterfactual analysis, confidence calibration, DiagnosticAssistant medical case study |
+| `01_ethical_reasoning_agent.ipynb` | p.331–346 | Deontic logic, value alignment, Impossibility Theorem, bias detection and mitigation, FairHiringAgent HR case study |
+| `02_explainable_agent.ipynb` | p.346–360 | Reasoning transparency, LIME/SHAP, counterfactual analysis, confidence calibration, DiagnosticAssistant medical case study |
 
 ## Project Structure
 
@@ -136,16 +136,16 @@ chapter12-ethical-explainable-agents/
 
 ## Key Concepts Covered
 
-- **Deontic Logic** — Obligation, permission, and prohibition operators with three axioms (p.5–7)
-- **Ethical Consistency Theorem** — Formal permissibility criterion for agent actions (p.7)
-- **IEEE Ethically Aligned Design** — Modular validators for human rights, well-being, accountability (p.8–9)
-- **EU AI Act Compliance** — Seven-requirement compliance control plane (p.10–11)
-- **Impossibility Theorem** — Mathematical proof that statistical parity, equal opportunity, and predictive parity cannot all hold simultaneously (p.12–13)
-- **Bias Detection Pipeline** — Demographic parity, equal opportunity, disparate impact with four-fifths rule (p.14–19)
-- **LIME and SHAP** — Local and global model-agnostic explanation frameworks (p.26)
-- **Counterfactual Analysis** — Minimal change explanations for recourse generation (p.27)
-- **Confidence Calibration** — Epistemic vs. aleatoric uncertainty with temperature scaling (p.27–30)
-- **Audience-Adapted Explanations** — Clinician vs. patient explanation templates (p.34–35)
+- **Deontic Logic** — Obligation, permission, and prohibition operators with three axioms (p.332–333)
+- **Ethical Consistency Theorem** — Formal permissibility criterion for agent actions (p.333)
+- **IEEE Ethically Aligned Design** — Modular validators for human rights, well-being, accountability (p.334–335)
+- **EU AI Act Compliance** — Seven-requirement compliance control plane (p.336)
+- **Impossibility Theorem** — Mathematical proof that statistical parity, equal opportunity, and predictive parity cannot all hold simultaneously (p.337–338)
+- **Bias Detection Pipeline** — Demographic parity, equal opportunity, disparate impact with four-fifths rule (p.339–343)
+- **LIME and SHAP** — Local and global model-agnostic explanation frameworks (p.349)
+- **Counterfactual Analysis** — Minimal change explanations for recourse generation (p.349)
+- **Confidence Calibration** — Epistemic vs. aleatoric uncertainty with temperature scaling (p.350–352)
+- **Audience-Adapted Explanations** — Clinician vs. patient explanation templates (p.356)
 
 ## Troubleshooting
 

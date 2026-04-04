@@ -1,0 +1,22 @@
+# Environment & secrets
+.env
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.egg-info/
+dist/
+build/
+
+# Jupyter
+.ipynb_checkpoints/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Vector store artifacts (generated at runtime)
+faiss_index/
+*.faiss
+*.pkl

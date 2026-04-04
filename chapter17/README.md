@@ -1,6 +1,6 @@
 # Chapter 17: Epilogue — The Future of Intelligent Agents
 
-**Book:** *AI Agents* by Imran Ahmad (Packt, 2025)
+**Book:** *AI Agents* by Imran Ahmad (Packt, 2026)
 
 ## Overview
 
@@ -12,11 +12,11 @@ entirely in Simulation Mode — no API key required.
 
 | # | Simulation | Chapter Section | Pages |
 |---|---|---|---|
-| 1 | Self-Architecting Agent | Autonomous agent evolution and adaptation | 1-2 |
-| 2 | Emergent Agent Society | Agent societies and emergent behaviors | 2-3 |
-| 3 | Ethical Circuit Breaker | Agent governance and self-regulation | 3-4 |
-| 4 | Memory Consolidation | Brain-inspired cognitive architectures | 4-6 |
-| 5 | Collaboration Spectrum | Strategic implementation | 6-8 |
+| 1 | Self-Architecting Agent | Autonomous agent evolution and adaptation | 493–494 |
+| 2 | Emergent Agent Society | Agent societies and emergent behaviors | 494–495 |
+| 3 | Ethical Circuit Breaker | Agent governance and self-regulation | 495–496 |
+| 4 | Memory Consolidation | Brain-inspired cognitive architectures | 496–498 |
+| 5 | Collaboration Spectrum | Strategic implementation | 498–499 |
 
 ## Quick Start
 
@@ -75,7 +75,7 @@ The notebook uses a visual logging system for clear execution tracing:
 
 ## Author
 
-**Imran Ahmad** — *AI Agents* (Packt, 2025)
+**Imran Ahmad** — *AI Agents* (Packt, 2026)
 
 ## License
 

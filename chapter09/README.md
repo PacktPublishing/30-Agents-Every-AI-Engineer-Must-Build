@@ -2,6 +2,7 @@
 
 **Book:** *Agents* by Imran Ahmad (Packt, 2026)
 **Chapter:** 9 — Software Development Agents
+**Pages:** 235–279
 
 > *"The art of programming is the art of organizing and mastering complexity."*
 > — Edsger Dijkstra
@@ -10,11 +11,11 @@
 
 ## Overview
 
-This repository contains the companion code for **Chapter 9** of the book *Agents* by Imran Ahmad. The chapter explores how AI agents are reshaping software development through three distinct but interconnected capabilities:
+This repository contains the companion code for **Chapter 9** (pp. 235–279) of the book *Agents* by Imran Ahmad. The chapter explores how AI agents are reshaping software development through three distinct but interconnected capabilities:
 
-- **Code-Generation Agents (§9.2)** — Transform natural language specifications into working, tested implementations using Test-Driven Generation (TDG) and multi-agent orchestration with LangGraph.
-- **Compliance-Driven Agents (§9.3)** — Embed security and policy awareness directly into the development workflow, enforcing PCI DSS, HIPAA, and organizational rules through a *scan → evaluate → remediate* loop.
-- **Self-Improving Agents (§9.4)** — Learn from operational feedback, evolving strategies through a closed-loop *execute → observe → learn → adapt* control system with human-in-the-loop checkpoints.
+- **Code-Generation Agents (§9.2, pp. 239–255)** — Transform natural language specifications into working, tested implementations using Test-Driven Generation (TDG) and multi-agent orchestration with LangGraph.
+- **Compliance-Driven Agents (§9.3, pp. 255–265)** — Embed security and policy awareness directly into the development workflow, enforcing PCI DSS, HIPAA, and organizational rules through a *scan → evaluate → remediate* loop.
+- **Self-Improving Agents (§9.4, pp. 265–278)** — Learn from operational feedback, evolving strategies through a closed-loop *execute → observe → learn → adapt* control system with human-in-the-loop checkpoints.
 
 The notebook demonstrates all three agent architectures end-to-end, with progressive examples that build from a single shipping calculator function to a full-stack user profile feature and production compliance pipelines.
 
@@ -69,13 +70,26 @@ In Simulation Mode, every code-generation, compliance scan, and self-improvement
 
 ## Section-to-Cell Mapping
 
-| Notebook Section | Cells | Chapter Reference | Agent Architecture |
-|:---|:---:|:---|:---|
-| **Block A** — Setup & Configuration | 1–4 | Preamble | Environment, imports, mode detection |
-| **Block B** — Code-Generation Agents | 5–18 | §9.2 | TDG shipping calculator (Stages 1–6), full-stack user profile (T1/T2/T3), LangGraph StateGraph |
-| **Block C** — Compliance-Driven Agents | 19–27 | §9.3 | PolicyEngine, static validation, semantic analysis, PCI DSS case study, audit trail |
-| **Block D** — Self-Improving Agents | 28–37 | §9.4 | Sensing Layer, Critic Agent, Planner Agent, HITL checkpoint, customer support case study |
-| **Block E** — Summary & Metrics | 38–40 | Summary | Cross-section comparison, execution metrics |
+| Notebook Section | Cells | Chapter Reference | Book Pages | Agent Architecture |
+|:---|:---:|:---|:---:|:---|
+| **Block A** — Setup & Configuration | 1–4 | Preamble | 235–236 | Environment, imports, mode detection |
+| **Block B** — Code-Generation Agents | 5–18 | §9.2 | 239–255 | TDG shipping calculator (Stages 1–6), full-stack user profile (T1/T2/T3), LangGraph StateGraph |
+| **Block C** — Compliance-Driven Agents | 19–27 | §9.3 | 255–265 | PolicyEngine, static validation, semantic analysis, PCI DSS case study, audit trail |
+| **Block D** — Self-Improving Agents | 28–37 | §9.4 | 265–278 | Sensing Layer, Critic Agent, Planner Agent, HITL checkpoint, customer support case study |
+| **Block E** — Summary & Metrics | 38–40 | Summary | 277–279 | Cross-section comparison, execution metrics |
+
+---
+
+## Key Figures
+
+| Figure | Description | Book Page |
+|:---|:---|:---:|
+| Figure 9.1 | Agent ecosystem and tooling: four functional layers | 237 |
+| Figure 9.2 | Adoption maturity curve for AI coding agents | 239 |
+| Figure 9.3 | Three phases of the TDD agent workflow | 240 |
+| Figure 9.4 | LangGraph architecture: generate, test, refine loop | 243 |
+| Figure 9.5 | Self-improvement loop | 267 |
+| Figure 9.6 | Structured improvement record from the planner agent | 274 |
 
 ---
 
@@ -107,11 +121,11 @@ ch09-software-development-agents/
 
 Each agent class implements a characteristic feedback loop:
 
-| Agent Class | Loop Pattern | Chapter Section |
-|:---|:---|:---|
-| Code-Generation | generate → test → refine | §9.2 |
-| Compliance-Driven | scan → evaluate → remediate | §9.3 |
-| Self-Improving | execute → observe → learn → adapt | §9.4 |
+| Agent Class | Loop Pattern | Chapter Section | Book Pages |
+|:---|:---|:---|:---:|
+| Code-Generation | generate → test → refine | §9.2 | 239–255 |
+| Compliance-Driven | scan → evaluate → remediate | §9.3 | 255–265 |
+| Self-Improving | execute → observe → learn → adapt | §9.4 | 265–278 |
 
 ---
 

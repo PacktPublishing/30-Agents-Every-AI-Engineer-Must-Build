@@ -1,0 +1,33 @@
+# Chapter 6 — Information Retrieval and Knowledge Agents
+# Author: Imran Ahmad
+# Python >= 3.10 required
+#
+# Install: pip install -r requirements.txt
+
+# Core
+python-dotenv>=1.1.0
+numpy>=1.26.0,<2.1
+pandas>=2.2.0
+
+# §6.1 — Knowledge Retrieval Agent (RAG pipeline)
+langchain>=0.3.0
+langchain-openai>=0.3.0
+langchain-community>=0.3.0
+langchain-text-splitters>=0.3.0
+faiss-cpu>=1.9.0
+
+# §6.2 — Document Intelligence Agent (OCR + extraction)
+Pillow>=10.4.0
+pytesseract>=0.3.13
+pdf2image>=1.17.0
+rapidfuzz>=3.10.0
+
+# §6.3 — Scientific Research Agent (literature synthesis)
+arxiv>=2.1.0
+sentence-transformers>=3.3.0
+scikit-learn>=1.5.0
+nltk>=3.9.0
+
+# Notebook
+jupyter>=1.0.0
+ipykernel>=6.29.0

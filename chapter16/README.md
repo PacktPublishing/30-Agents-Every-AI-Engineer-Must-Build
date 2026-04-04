@@ -1,6 +1,7 @@
 # Chapter 16: Embodied and Physical World Agents
 
 > From *30 Agents Every AI Engineer Must Build* by Imran Ahmad (Packt Publishing, 2026)
+> **Book pages 457–491**
 
 ## Overview
 
@@ -83,13 +84,13 @@ No API key required. The notebook auto-detects the absence of a key and activate
 
 | Listing | Chapter Section | Description | Page |
 |---------|----------------|-------------|------|
-| 16.1 | Implementation: LangChain patterns | Common setup: shared interface stubs | pp. 14–15 |
-| 16.2 | Same | Embodied agent with 4-responsibility tool decomposition | pp. 15–16 |
-| 16.3 | Multi-rate perception-action integration | Safety-constrained action execution loop | pp. 17–18 |
-| 16.4 | LangChain integration agent patterns | Cross-domain knowledge graph construction | pp. 23–24 |
-| 16.5 | Influence propagation and impact estimation | Weighted breadth-first traversal | pp. 25–26 |
-| 16.6 | Case study implementation | Embodied drone agent + mission execution | pp. 31–34 |
-| 16.7 | Same | Cross-domain constraint assembler + NOTAM integration | pp. 34–38 |
+| 16.1 | Implementation: LangChain patterns | Common setup: shared interface stubs | pp. 468–469 |
+| 16.2 | Same | Embodied agent with 4-responsibility tool decomposition | pp. 469–470 |
+| 16.3 | Multi-rate perception-action integration | Safety-constrained action execution loop | pp. 470–472 |
+| 16.4 | LangChain integration agent patterns | Cross-domain knowledge graph construction | pp. 476–478 |
+| 16.5 | Influence propagation and impact estimation | Weighted breadth-first traversal | pp. 478–479 |
+| 16.6 | Case study implementation | Embodied drone agent + mission execution | pp. 482–485 |
+| 16.7 | Same | Cross-domain constraint assembler + NOTAM integration | pp. 485–488 |
 
 ## Key Concepts
 

@@ -1,16 +1,19 @@
 # Chapter 7: Tool Manipulation and Orchestration Agents
 
-**Book:** *Agents* by Imran Ahmad (Packt, 2026 — B34135)
+**Book:** *30 Agents Every AI Engineer Must Build*
+**Author:** Imran Ahmad
+**Publisher:** Packt Publishing, 2026
+**Chapter Pages:** pp. 173–201
 
 ---
 
 ## Overview
 
-This repository is the companion code for **Chapter 7** of *Agents*. It teaches three progressive architectural patterns for building production-ready AI agent systems:
+This repository is the companion code for **Chapter 7** of *30 Agents Every AI Engineer Must Build*. It teaches three progressive architectural patterns for building production-ready AI agent systems:
 
-1. **Tool-Using Agents** — A single agent extends its reasoning by invoking external functions through a Think/Plan/Act cycle (Sections 7.1–7.3).
-2. **Chain-of-Agents Orchestrators** — Multiple specialized agents collaborate under a cooperation protocol with shared memory and conflict resolution (Sections 7.4–7.6).
-3. **Agentic Workflow Systems** — Stateful business processes modeled as state machines with human-in-the-loop checkpoints and guard conditions (Section 7.7).
+1. **Tool-Using Agents** (Sections 7.1–7.3, pp. 174–186) — A single agent extends its reasoning by invoking external functions through a Think/Plan/Act cycle.
+2. **Chain-of-Agents Orchestrators** (Sections 7.4–7.6, pp. 186–194) — Multiple specialized agents collaborate under a cooperation protocol with shared memory and conflict resolution.
+3. **Agentic Workflow Systems** (Section 7.7, pp. 195–201) — Stateful business processes modeled as state machines with human-in-the-loop checkpoints and guard conditions.
 
 The repository is built around a **Fail-Gracefully architecture**: if no API key is present, the system automatically enters **Simulation Mode**, returning chapter-derived mock data through a context-aware `MockLLM` class. Every agent action produces color-coded log output. Every tool invocation is wrapped in defensive logic. The notebook always runs to completion.
 
@@ -20,8 +23,8 @@ The repository is built around a **Fail-Gracefully architecture**: if no API key
 
 ```bash
 # 1. Clone the repository
-git clone https://github.com/<your-org>/chapter-07-tool-orchestration-agents.git
-cd chapter-07-tool-orchestration-agents
+git clone https://github.com/PacktPublishing/30-Agents-Every-AI-Engineer-Must-Build.git
+cd chapter07
 
 # 2. Create a virtual environment (recommended)
 python -m venv .venv
@@ -45,7 +48,7 @@ jupyter notebook Chapter_07_Tool_Orchestration.ipynb
 ## Repository Structure
 
 ```
-chapter-07-tool-orchestration-agents/
+chapter07-tool-orchestration-agents/
 │
 ├── README.md                              # This file
 ├── AGENTS.md                              # Agentic metadata and AI persona prompt
@@ -72,61 +75,19 @@ chapter-07-tool-orchestration-agents/
 
 ---
 
-## Component Architecture
-
-```
-┌──────────────────────────────────────────────────────────┐
-│            Chapter_07_Tool_Orchestration.ipynb            │
-│                                                          │
-│  Sec 0: Setup & Configuration                            │
-│  Sec 1: The Tool-Using Agent              ┐              │
-│  Sec 2: Tool Discovery & Selection        │              │
-│  Sec 3: Error Handling & Resilience       │  imports     │
-│  Sec 4: Chain-of-Agents Orchestrator      │              │
-│  Sec 5: Conflict Resolution               │              │
-│  Sec 6: Agentic Workflow (E-Commerce)     │              │
-│  Sec 7: Agentic Workflow (Insurance)      │              │
-│  Sec 8: Summary                           │              │
-└───────────────────┬───────────────────────┘              │
-                    │                                      │
-       ┌────────────┼────────────┐                         │
-       ▼            ▼            ▼                         │
-┌────────────┐┌───────────┐┌──────────────┐                │
-│color_logger││resilience ││  mock_llm    │◄───────────────┘
-│            ││           ││              │
-│ log_info() ││ @graceful ││ MockLLM      │
-│ log_success││ _fallback ││  .generate() │
-│ log_error()││           ││  Routes R1-R6│
-│ log_warning││ safe_     ││              │
-│ log_mock() ││ invoke()  ││              │
-│ log_step() ││           ││              │
-└──────┬─────┘└─────┬─────┘└──────────────┘
-       │            │
-       │◄───────────┘  resilience.py imports color_logger
-       │
-       ▼
-┌──────────────┐
-│ data/        │
-│ sample_ad_   │
-│ campaign.csv │
-└──────────────┘
-```
-
----
-
 ## Notebook Sections
 
-| Section | Chapter Reference | What It Demonstrates |
-|:---|:---|:---|
-| **0. Setup and Configuration** | — | Imports, `.env` loading, `getpass` fallback, Simulation Mode detection |
-| **1. The Tool-Using Agent** | Section 7.1 | Tool chest functions (`load_csv`, `group_by_and_aggregate`, `plot_bar_chart`, `plot_line_chart`), tool registry, data-viz pipeline |
-| **2. Tool Discovery and Selection** | Section 7.2 | `parse_query` intent classifier, selection funnel demonstration |
-| **3. Error Handling and Resilience** | Section 7.3 | `data_viz_agent` orchestrator, `@graceful_fallback` in action, deliberate failure scenarios |
-| **4. Chain-of-Agents Orchestrator** | Sections 7.4–7.5 | `NewsAgent`, `FinancialAgent`, `SentimentAgent`, manager agent, shared episodic memory |
-| **5. Conflict Resolution** | Section 7.6 | `ManagerAgent._synthesize_report()` with `conflict_score` detection |
-| **6. Agentic Workflow: E-Commerce** | Section 7.7 | `workflow_manager_agent`, `llm_analyst_agent`, HITL simulation with 3 test orders |
-| **7. Agentic Workflow: Insurance Claims** | Section 7.7b | State machine with 5 agents, guard conditions, CLM-4821 walkthrough, 3 test claims |
-| **8. Summary and Key Takeaways** | Summary | Recap of all three architectural patterns, pointers to Chapter 8 |
+| Section | Chapter Reference | Book Pages | What It Demonstrates |
+|:---|:---|:---|:---|
+| **0. Setup and Configuration** | — | pp. 173–174 | Imports, `.env` loading, `getpass` fallback, Simulation Mode detection |
+| **1. The Tool-Using Agent** | Section 7.1 | pp. 174–179 | Tool chest functions (`load_csv`, `group_by_and_aggregate`, `plot_bar_chart`, `plot_line_chart`), tool registry, data-viz pipeline |
+| **2. Tool Discovery and Selection** | Section 7.2 | pp. 179–183 | `parse_query` intent classifier, selection funnel demonstration |
+| **3. Error Handling and Resilience** | Section 7.3 | pp. 183–186 | `data_viz_agent` orchestrator, `@graceful_fallback` in action, deliberate failure scenarios |
+| **4. Chain-of-Agents Orchestrator** | Sections 7.4–7.5 | pp. 186–191 | `NewsAgent`, `FinancialAgent`, `SentimentAgent`, manager agent, shared episodic memory |
+| **5. Conflict Resolution** | Section 7.6 | pp. 191–194 | `ManagerAgent._synthesize_report()` with `conflict_score` detection |
+| **6. Agentic Workflow: E-Commerce** | Section 7.7 | pp. 195–197 | `workflow_manager_agent`, `llm_analyst_agent`, HITL simulation with 3 test orders |
+| **7. Agentic Workflow: Insurance Claims** | Section 7.7b | pp. 198–200 | State machine with 5 agents, guard conditions, CLM-4821 walkthrough, 3 test claims |
+| **8. Summary and Key Takeaways** | Summary | pp. 200–201 | Recap of all three architectural patterns, pointers to Chapter 8 |
 
 ---
 
@@ -145,43 +106,17 @@ The notebook supports two operating modes:
 - LLM calls go to the OpenAI API via `openai>=1.60`.
 - HITL prompts use real `input()` for interactive decisions.
 
-The mode is detected automatically at startup:
-
-```
-Simulation Mode startup banner:
-[MOCK] ╔══════════════════════════════════════════════════════════╗
-[MOCK] ║  SIMULATION MODE ACTIVE                                 ║
-[MOCK] ║  All LLM calls return chapter-derived mock responses.   ║
-[MOCK] ║  To use a live API, create .env from .env.template      ║
-[MOCK] ╚══════════════════════════════════════════════════════════╝
-```
-
----
-
-## Visual Logging
-
-All agent actions produce color-coded output for clear observability:
-
-| Badge | Color | Meaning |
-|:---|:---|:---|
-| `[INFO]` | Blue | General informational messages |
-| `[SUCCESS]` | Green | Tool or agent step completed |
-| `[ERROR]` | Red | Exception caught, fallback activated |
-| `[WARNING]` | Yellow | Threshold breached or escalation triggered |
-| `[MOCK]` | Cyan | Simulation Mode data returned |
-| `[Section X \| Step N]` | Blue | Pedagogical step marker with section reference |
-
 ---
 
 ## Case Studies
 
 The notebook implements three complete case studies from the chapter:
 
-**1. Data Visualization Assistant** (Sections 7.1–7.3) — A single Tool-Using agent that parses natural language queries, selects visualization tools via a selection funnel, and orchestrates a multi-step data pipeline with error recovery. Powered by `data/sample_ad_campaign.csv`.
+**1. Data Visualization Assistant** (Sections 7.1–7.3, pp. 174–186) — A single Tool-Using agent that parses natural language queries, selects visualization tools via a selection funnel, and orchestrates a multi-step data pipeline with error recovery. Powered by `data/sample_ad_campaign.csv`.
 
-**2. Market Intelligence Platform** (Sections 7.4–7.6) — A chain-of-agents orchestrator where `NewsAgent`, `FinancialAgent`, and `SentimentAgent` contribute findings to shared episodic memory. A `ManagerAgent` synthesizes a final report with conflict detection.
+**2. Market Intelligence Platform** (Sections 7.4–7.6, pp. 186–194) — A chain-of-agents orchestrator where `NewsAgent`, `FinancialAgent`, and `SentimentAgent` contribute findings to shared episodic memory. A `ManagerAgent` synthesizes a final report with conflict detection.
 
-**3. E-Commerce & Insurance Workflows** (Section 7.7) — Agentic workflow systems modeled as state machines with guard conditions, HITL checkpoints, and audit trails. Includes the CLM-4821 insurance claim walkthrough from the book.
+**3. E-Commerce & Insurance Workflows** (Section 7.7, pp. 195–201) — Agentic workflow systems modeled as state machines with guard conditions, HITL checkpoints, and audit trails. Includes the CLM-4821 insurance claim walkthrough from the book.
 
 ---
 
@@ -193,7 +128,7 @@ See [TROUBLESHOOTING.md](TROUBLESHOOTING.md) for solutions to common dependency 
 
 ## Author
 
-**Imran Ahmad** — Author of *Agents* (Packt, 2026).
+**Imran Ahmad** — Author of *30 Agents Every AI Engineer Must Build* (Packt Publishing, 2026).
 
 This repository accompanies Chapter 7: Tool Manipulation and Orchestration Agents. For the full text, figures, and theoretical foundations, refer to the book.
 

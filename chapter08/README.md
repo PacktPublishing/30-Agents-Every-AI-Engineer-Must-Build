@@ -2,7 +2,7 @@
 
 **Book:** *Agents* by Imran Ahmad (Packt Publishing, 2026)
 **Author:** Imran Ahmad
-**Chapter:** 8 — Data Analysis and Reasoning Agents
+**Chapter:** 8 — Data Analysis and Reasoning Agents (pp. 203–233)
 
 ---
 
@@ -52,15 +52,15 @@ chapter-accurate mock outputs. See the section below for live-mode instructions.
 
 ## Section Map
 
-| Notebook Section | Chapter Ref | Topic |
-|:---|:---|:---|
-| Section 0 | — | Environment setup, API key resolution, Simulation Mode |
-| Section 1 | §8.1, §8.1.1, §8.1.2 | Data Analysis Agent: visualization recommender, OLS regression, anomaly detection |
-| Section 2 | §8.2–§8.2.5 | V&V Agent: theory narrative, BART-MNLI NLI demo |
-| Section 3 | §8.3–§8.3.4 | General Problem Solver: theory, pseudocode class |
-| Section 4 | §8.4 | Case Study 1: News fact-checking assistant |
-| Section 5 | §8.5 | Case Study 2: Cross-disciplinary GPS hypothesis engine |
-| Section 6 | §8.6 | Tri-Agent Pipeline integration demo |
+| Notebook Section | Chapter Ref | Book Pages | Topic |
+|:---|:---|:---|:---|
+| Section 0 | — | — | Environment setup, API key resolution, Simulation Mode |
+| Section 1 | §8.1, §8.1.1, §8.1.2 | pp. 204–211 | Data Analysis Agent: visualization recommender, OLS regression, anomaly detection |
+| Section 2 | §8.2–§8.2.5 | pp. 211–215 | V&V Agent: theory narrative, BART-MNLI NLI demo |
+| Section 3 | §8.3–§8.3.4 | pp. 215–219 | General Problem Solver: theory, pseudocode class |
+| Section 4 | §8.4 | pp. 220–226 | Case Study 1: News fact-checking assistant |
+| Section 5 | §8.5 | pp. 226–231 | Case Study 2: Cross-disciplinary GPS hypothesis engine |
+| Section 6 | §8.6 | pp. 231–232 | Tri-Agent Pipeline integration demo |
 
 ---
 

@@ -111,7 +111,7 @@ chapter14-financial-legal-agents/
 │   ├── MOCK_CLIENT_PROFILES                  ← Moderate and conservative investors
 │   ├── MOCK_LEGAL_CASES                      ← 6 cases (including 1 fabricated)
 │   ├── MOCK_CONTRACT                         ← 8-clause MSA with risk areas
-│   └── MOCK_INTER_AGENT_MESSAGE              ← Inter-agent JSON protocol (p.19)
+│   └── MOCK_INTER_AGENT_MESSAGE              ← Inter-agent JSON protocol (p.407)
 │
 └── troubleshooting.md                        ← Solutions for 10 common issues
 ```
@@ -169,18 +169,18 @@ simulated services — each is detected independently.
 
 | Cells | Section | Chapter Reference |
 |:------|:--------|:------------------|
-| 0 | Setup and Configuration | Technical Requirements (p.2) |
-| 1–2 | Supervisor Architecture and Market Data Agent | Section 14.1.1, Figure 14.1 |
-| 3–4 | Finnhub Integration and News Agent | Section 14.1.1 |
-| 5 | StateGraph Assembly and Streaming | Section 14.1, p.7–9 |
-| 6 | Risk Assessment (VaR, Volatility, Drawdown) | Section 14.1.2, p.10–14 |
-| 7 | Personalized Planning and Compliance Gate | Section 14.1.3, p.14–18 |
-| 8 | RetailAdvisor Case Study | Section 14.1.4, p.18–20 |
-| 9 | Legal Knowledge Base (Hybrid Retrieval) | Section 14.2.1, p.20–23 |
-| 10 | Precedent Finding (3-Stage Pipeline) | Section 14.2.2, Figure 14.2, p.23–27 |
-| 11 | Contract Analysis (5-Stage Pipeline) | Section 14.2.3, Figure 14.3, p.27–30 |
-| 12 | LegalBrief Case Study (Citation Verification) | Section 14.2.4, p.31–33 |
-| 13 | Summary and Extensions | Summary, p.33–34 |
+| 0 | Setup and Configuration | Technical Requirements (p.392) |
+| 1–2 | Supervisor Architecture and Market Data Agent | Section 14.1.1, Figure 14.1, p.393–395 |
+| 3–4 | Finnhub Integration and News Agent | Section 14.1.1, p.396–397 |
+| 5 | StateGraph Assembly and Streaming | Section 14.1, pp. 397–399 |
+| 6 | Risk Assessment (VaR, Volatility, Drawdown) | Section 14.1.2, p.399–404 |
+| 7 | Personalized Planning and Compliance Gate | Section 14.1.3, p.403–408 |
+| 8 | RetailAdvisor Case Study | Section 14.1.4, p.406–410 |
+| 9 | Legal Knowledge Base (Hybrid Retrieval) | Section 14.2.1, p.408–410 |
+| 10 | Precedent Finding (3-Stage Pipeline) | Section 14.2.2, Figure 14.2, p.410–414 |
+| 11 | Contract Analysis (5-Stage Pipeline) | Section 14.2.3, Figure 14.3, p.414–416 |
+| 12 | LegalBrief Case Study (Citation Verification) | Section 14.2.4, p.416–419 |
+| 13 | Summary and Extensions | Summary, p.419–420 |
 
 ---
 

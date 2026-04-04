@@ -48,13 +48,13 @@ cp .env.template .env
 | Cell | Section | Topic | Chapter Reference |
 |:-----|:--------|:------|:------------------|
 | 0 | Setup | Environment detection, Simulation Mode banner | Preamble |
-| 1 | 4.1 | Agent Typology Simulator — infrastructure profiles for reactive, deliberative, hybrid, and multi-agent systems | Figure 4.1, pp. 3–6 |
-| 2 | 4.2 | Cost-Aware Model Router — tiered routing, caching, budget enforcement | Figure 4.2, pp. 7–10 |
-| 3 | 4.3 | Circuit Breaker and Resilience — tenacity-based breaker with state transitions and fallback | Table 4.1, pp. 11–15 |
-| 4 | 4.4 | Microservice Pipeline Simulation — five-service chain from Planner to Response Synthesizer | Table 4.2, p. 13 |
-| 5 | 4.5 | Threat Detection and Zero Trust — adversarial input classification across nine attack vectors | Tables 4.3a/b, pp. 18–21 |
-| 6 | 4.6 | Fairness and Bias Audit — demographic parity and equalized opportunity with pre/post-mitigation comparison | Figure 4.3, p. 24 |
-| 7 | Ref | Toolchain Reference Explorer — formatted display of all tools cited in the chapter | Table 4.5, pp. 27–29 |
+| 1 | 4.1 | Agent Typology Simulator — infrastructure profiles for reactive, deliberative, hybrid, and multi-agent systems | Figure 4.1, pp. 95–98 |
+| 2 | 4.2 | Cost-Aware Model Router — tiered routing, caching, budget enforcement | Figure 4.2, pp. 97–102 |
+| 3 | 4.3 | Circuit Breaker and Resilience — tenacity-based breaker with state transitions and fallback | Table 4.1, pp. 101–107 |
+| 4 | 4.4 | Microservice Pipeline Simulation — five-service chain from Planner to Response Synthesizer | Table 4.2, p. 103 |
+| 5 | 4.5 | Threat Detection and Zero Trust — adversarial input classification across nine attack vectors | Tables 4.3a/b, pp. 106–109 |
+| 6 | 4.6 | Fairness and Bias Audit — demographic parity and equalized opportunity with pre/post-mitigation comparison | Figure 4.3, p. 110 |
+| 7 | Ref | Toolchain Reference Explorer — formatted display of all tools cited in the chapter | Table 4.5, pp. 113–114 |
 | 8 | Summary | Cost Dashboard and section completion status | All sections |
 
 ---
@@ -91,7 +91,7 @@ chapter-04-agent-deployment/
 - `AgentLogger` — Color-coded ANSI logging (Blue for info, Green for success, Red for handled errors)
 - `@fail_gracefully` — Resilience decorator that catches exceptions and returns fallback values
 - `CostTracker` — Per-call cost accounting with configurable budget ceiling and degradation
-- `CircuitBreaker` — State-machine breaker (closed → open → half_open) extending the book's code from pp. 14–15
+- `CircuitBreaker` — State-machine breaker (closed → open → half_open) extending the book's code from pp. 103–104
 - `InputValidator` — Prompt sanitisation against attack patterns from Tables 4.3a/b
 
 **`src/mock_llm.py`** — Simulation engine:

@@ -2,7 +2,7 @@
 
 **Book:** *30 Agents Every AI Engineer Must Build*
 **Author:** Imran Ahmad
-**Publisher:** Packt Publishing
+**Publisher:** Packt Publishing, 2026
 **Repository:** [PacktPublishing/30-Agents-Every-AI-Engineer-Must-Build](https://github.com/PacktPublishing/30-Agents-Every-AI-Engineer-Must-Build)
 
 ---
@@ -20,9 +20,9 @@ real-world problems with increasing sophistication.
 
 | Agent Type | Focus | Chapter Section |
 |---|---|---|
-| **Autonomous Decision-Making Agent** | Real-time perception → cognition → action loop | Section 5.1, pp. 3-16 |
-| **Planning Agent** | Hierarchical task decomposition and dynamic execution | Section 5.2, pp. 17-21 |
-| **Memory-Augmented Agent** | Working, episodic, and semantic memory for continuity | Section 5.3, pp. 22-28 |
+| **Autonomous Decision-Making Agent** | Real-time perception → cognition → action loop | Section 5.1, pp. 118–132 |
+| **Planning Agent** | Hierarchical task decomposition and dynamic execution | Section 5.2, pp. 131–137 |
+| **Memory-Augmented Agent** | Working, episodic, and semantic memory for continuity | Section 5.3, pp. 135–144 |
 
 ---
 
@@ -133,13 +133,13 @@ Working through this notebook, you will implement and understand:
 
 2. **Strategy Scoring** — A weighted multi-axis decision framework
    that selects between full autonomous resolution, immediate
-   escalation, and guided resolution (pp. 5-6).
+   escalation, and guided resolution (pp. 121–122).
 
 3. **Task DAGs** — Dependency-aware task graphs for billing issues,
-   service outages, and generic workflows (pp. 7-8).
+   service outages, and generic workflows (pp. 123–124).
 
 4. **Safety Checks & Escalation** — Five-factor escalation scoring
-   with configurable thresholds (pp. 14-15).
+   with configurable thresholds (pp. 128–131).
 
 5. **Hierarchical Decomposition** — Breaking high-level goals into
    phased, actionable subtasks with monitoring (Figure 5.2).
@@ -156,7 +156,7 @@ Working through this notebook, you will implement and understand:
 ## Engineering Patterns
 
 Every agent tool call in this repository follows two core patterns
-from the book's Engineering Best Practices (pp. 31-33):
+from the book's Engineering Best Practices (pp. 142–144):
 
 - **Observability:** All execution is traced through `color_logger.py`
   with timestamped, color-coded output (blue for info, green for

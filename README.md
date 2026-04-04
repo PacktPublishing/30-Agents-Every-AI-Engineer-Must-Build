@@ -37,7 +37,7 @@ git clone https://github.com/PacktPublishing/30-Agents-Every-AI-Engineer-Must-Bu
 cd 30-Agents-Every-AI-Engineer-Must-Build
 
 # Navigate to a chapter
-cd Chapter05
+cd chapter05
 
 # Install dependencies
 pip install -r requirements.txt
@@ -67,10 +67,10 @@ Build the conceptual and practical foundation for designing, developing, and dep
 
 | Chapter | Title | Topics |
 |---|---|---|
-| [Chapter 01](Chapter01/README.md) | **Foundations of Agent Engineering** | Evolution from rule-based to LLM-powered agents · Cognitive architecture of intelligent agents · Agent Development Lifecycle · Agentic AI Progression Framework · Hybrid symbolic-neural approaches |
-| [Chapter 02](Chapter02/README.md) | **The Agent Engineer's Toolkit** | LangChain, LlamaIndex, AutoGPT framework analysis · LLM selection and fine-tuning guidelines · Vector databases · Tool integration frameworks · Evaluation and benchmarking tools · Cloud-native development platforms |
-| [Chapter 03](Chapter03/README.md) | **The Art of Agent Prompting** | System prompts for agent cognition · Role definition and persona construction · Agent-to-agent communication protocols · Chain-of-thought reasoning · Iterative prompt development and version control |
-| [Chapter 04](Chapter04/README.md) | **Agent Deployment and Responsible Development** | Infrastructure scaling and cost management · Prompt injection defenses · Data privacy and sandboxing · Bias detection and mitigation · Transparency and regulatory compliance |
+| [Chapter 01](https://github.com/PacktPublishing/30-Agents-Every-AI-Engineer-Must-Build/blob/main/chapter01/README.md) | **Foundations of Agent Engineering** | Evolution from rule-based to LLM-powered agents · Cognitive architecture of intelligent agents · Agent Development Lifecycle · Agentic AI Progression Framework · Hybrid symbolic-neural approaches |
+| [Chapter 02](https://github.com/PacktPublishing/30-Agents-Every-AI-Engineer-Must-Build/blob/main/chapter02/README.md) | **The Agent Engineer's Toolkit** | LangChain, LlamaIndex, AutoGPT framework analysis · LLM selection and fine-tuning guidelines · Vector databases · Tool integration frameworks · Evaluation and benchmarking tools · Cloud-native development platforms |
+| [Chapter 03](https://github.com/PacktPublishing/30-Agents-Every-AI-Engineer-Must-Build/blob/main/chapter03/README.md) | **The Art of Agent Prompting** | System prompts for agent cognition · Role definition and persona construction · Agent-to-agent communication protocols · Chain-of-thought reasoning · Iterative prompt development and version control |
+| [Chapter 04](https://github.com/PacktPublishing/30-Agents-Every-AI-Engineer-Must-Build/blob/main/chapter04/README.md) | **Agent Deployment and Responsible Development** | Infrastructure scaling and cost management · Prompt injection defenses · Data privacy and sandboxing · Bias detection and mitigation · Transparency and regulatory compliance |
 
 ### Part 2: Core Agent Architectures
 
@@ -78,10 +78,10 @@ Explore the fundamental agent architectures that serve as composable building bl
 
 | Chapter | Title | Agents Covered |
 |---|---|---|
-| [Chapter 05](Chapter05/README.md) | **Foundational Cognitive Architectures** | The Autonomous Decision-Making Agent · The Planning Agent (tree-of-thought reasoning) · The Memory-Augmented Agent (working, episodic, semantic memory) |
-| [Chapter 06](Chapter06/README.md) | **Information Retrieval and Knowledge Agents** | The Knowledge Retrieval Agent (advanced RAG) · The Document Intelligence Agent · The Scientific Research Agent |
-| [Chapter 07](Chapter07/README.md) | **Tool Manipulation and Orchestration Agents** | The Tool-Using Agent (function calling patterns) · The Chain-of-Agents Orchestrator · The Agentic Workflow System (human-in-the-loop) |
-| [Chapter 08](Chapter08/README.md) | **Data Analysis and Reasoning Agents** | The Data Analysis Agent · The Verification and Validation Agent · The General Problem Solver |
+| [Chapter 05](https://github.com/PacktPublishing/30-Agents-Every-AI-Engineer-Must-Build/blob/main/chapter05/README.md) | **Foundational Cognitive Architectures** | The Autonomous Decision-Making Agent · The Planning Agent (tree-of-thought reasoning) · The Memory-Augmented Agent (working, episodic, semantic memory) |
+| [Chapter 06](https://github.com/PacktPublishing/30-Agents-Every-AI-Engineer-Must-Build/blob/main/chapter06/README.md) | **Information Retrieval and Knowledge Agents** | The Knowledge Retrieval Agent (advanced RAG) · The Document Intelligence Agent · The Scientific Research Agent |
+| [Chapter 07](https://github.com/PacktPublishing/30-Agents-Every-AI-Engineer-Must-Build/blob/main/chapter07/README.md) | **Tool Manipulation and Orchestration Agents** | The Tool-Using Agent (function calling patterns) · The Chain-of-Agents Orchestrator · The Agentic Workflow System (human-in-the-loop) |
+| [Chapter 08](https://github.com/PacktPublishing/30-Agents-Every-AI-Engineer-Must-Build/blob/main/Chapter08/README.md) | **Data Analysis and Reasoning Agents** | The Data Analysis Agent · The Verification and Validation Agent · The General Problem Solver |
 
 ### Part 3: Specialized Application Agents
 
@@ -89,10 +89,10 @@ Extend core architectures into domains with stringent requirements for reliabili
 
 | Chapter | Title | Agents Covered |
 |---|---|---|
-| [Chapter 09](Chapter09/README.md) | **Software Development Agents** | The Code-Generation Agent (program synthesis) · The Security-Hardened Agent · The Self-Improving Agent |
-| [Chapter 10](Chapter10/README.md) | **Conversational and Content Creation Agents** | The Conversational Agent (dialog management) · The Content Creation Agent (multi-modal) · The Recommendation Agent |
-| [Chapter 11](Chapter11/README.md) | **Multi-Modal Perception Agents** | The Vision-Language Agent · The Audio Processing Agent · The Physical World Sensing Agent (IoT/sensor fusion) |
-| [Chapter 12](Chapter12/README.md) | **Ethical and Explainable Agents** | The Ethical Reasoning Agent (value alignment) · The Explainable Agent (decision transparency) |
+| [Chapter 09](https://github.com/PacktPublishing/30-Agents-Every-AI-Engineer-Must-Build/blob/main/Chapter09/README.md) | **Software Development Agents** | The Code-Generation Agent (program synthesis) · The Security-Hardened Agent · The Self-Improving Agent |
+| [Chapter 10](https://github.com/PacktPublishing/30-Agents-Every-AI-Engineer-Must-Build/blob/main/Chapter10/README.md) | **Conversational and Content Creation Agents** | The Conversational Agent (dialog management) · The Content Creation Agent (multi-modal) · The Recommendation Agent |
+| [Chapter 11](https://github.com/PacktPublishing/30-Agents-Every-AI-Engineer-Must-Build/blob/main/Chapter11/README.md) | **Multi-Modal Perception Agents** | The Vision-Language Agent · The Audio Processing Agent · The Physical World Sensing Agent (IoT/sensor fusion) |
+| [Chapter 12](https://github.com/PacktPublishing/30-Agents-Every-AI-Engineer-Must-Build/blob/main/Chapter12/README.md) | **Ethical and Explainable Agents** | The Ethical Reasoning Agent (value alignment) · The Explainable Agent (decision transparency) |
 
 ### Part 4: Domain-Specific and Emerging Agent Systems
 
@@ -100,11 +100,11 @@ Apply the full range of agent architectures to transform professional domains wh
 
 | Chapter | Title | Agents Covered |
 |---|---|---|
-| [Chapter 13](Chapter13/README.md) | **Healthcare and Scientific Agents** | The Healthcare Intelligence Agent (clinical decision support) · The Scientific Discovery Agent |
-| [Chapter 14](Chapter14/README.md) | **Financial and Legal Domain Agents** | The Financial Advisory Agent (risk assessment) · The Legal Intelligence Agent (case analysis, contract review) |
-| [Chapter 15](Chapter15/README.md) | **Education and Knowledge Agents** | The Education Intelligence Agent (adaptive learning) · The Collective Intelligence Agent (multi-agent collaboration) |
-| [Chapter 16](Chapter16/README.md) | **Embodied and Physical World Agents** | The Embodied Intelligence Agent (robotics control) · The Domain-Transforming Integration Agent (smart city systems) |
-| [Epilogue](Epilogue/README.md) | **The Future of Intelligent Agents** | Autonomous agent evolution · Agent societies and emergent behaviors · Brain-inspired cognitive architectures · Strategic implementation roadmaps |
+| [Chapter 13](https://github.com/PacktPublishing/30-Agents-Every-AI-Engineer-Must-Build/blob/main/Chapter13/README.md) | **Healthcare and Scientific Agents** | The Healthcare Intelligence Agent (clinical decision support) · The Scientific Discovery Agent |
+| [Chapter 14](https://github.com/PacktPublishing/30-Agents-Every-AI-Engineer-Must-Build/blob/main/Chapter14/README.md) | **Financial and Legal Domain Agents** | The Financial Advisory Agent (risk assessment) · The Legal Intelligence Agent (case analysis, contract review) |
+| [Chapter 15](https://github.com/PacktPublishing/30-Agents-Every-AI-Engineer-Must-Build/blob/main/Chapter15/README.md) | **Education and Knowledge Agents** | The Education Intelligence Agent (adaptive learning) · The Collective Intelligence Agent (multi-agent collaboration) |
+| [Chapter 16](https://github.com/PacktPublishing/30-Agents-Every-AI-Engineer-Must-Build/blob/main/chapter16/README.md) | **Embodied and Physical World Agents** | The Embodied Intelligence Agent (robotics control) · The Domain-Transforming Integration Agent (smart city systems) |
+| Epilogue | **The Future of Intelligent Agents** | Autonomous agent evolution · Agent societies and emergent behaviors · Brain-inspired cognitive architectures · Strategic implementation roadmaps |
 
 ---
 
@@ -177,6 +177,20 @@ This book accommodates three distinct reading approaches:
 **Imran Ahmad, PhD** is a data scientist at the Advanced Analytics Solution Center (A2SC) within the Canadian Federal Government, where he builds and deploys machine learning systems for mission-critical applications. In his 2010 doctoral thesis, he introduced a linear programming-based algorithm for optimal resource assignment in large-scale cloud computing environments. In 2017, he pioneered the development of StreamSensing, a real-time analytics framework that has become the foundation of several research papers on processing multimedia data within machine learning paradigms.
 
 Dr. Ahmad holds a visiting professorship at Carleton University in Ottawa and is an authorized instructor for Google Cloud and Microsoft Azure. He is the author of the bestselling *[50 Algorithms Every Programmer Should Know](https://www.amazon.com/Algorithms-Every-Programmer-Should-Know/dp/1803247762)* (Packt Publishing, Second Edition 2023), which has been widely adopted in both academic curricula and industry training programs. Every pattern in this book has been tested against the production realities of latency, cost, reliability, and security that define real-world deployments.
+
+---
+
+## Related Books by Packt
+
+If you enjoyed this book, you may also find the following Packt books useful:
+
+- **[Context Engineering for Multi-Agent Systems](https://www.packtpub.com/en-us/product/context-engineering-for-multi-agent-systems-9781807304188)**  
+  *Denis Rothman*  
+  Move beyond prompting to build a Context Engine — a transparent architecture of context and reasoning. Covers semantic blueprints, multi-agent orchestration with MCP, high-fidelity RAG pipelines, and safeguards for production deployment.
+
+- **[Agentic Architectural Patterns for Building Multi-Agent Systems](https://www.packtpub.com/en-us/product/agentic-architectural-patterns-for-building-multi-agent-systems-9781806029563)**  
+  *Dr. Ali Arsanjani, Juan Pablo Bustos*  
+  Transform GenAI experiments into production-ready intelligent agents with scalable architectural patterns, frameworks, and responsible AI governance best practices. Covers the GenAI maturity model, RAG, fine-tuning, LLMOps, and the Agent-to-Agent (A2A) protocol.
 
 ---
 
