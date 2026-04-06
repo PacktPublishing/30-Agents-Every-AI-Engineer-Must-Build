@@ -104,7 +104,7 @@ class ServiceConfig:
             key = os.getenv(env_var, "")
             if not key:
                 key = self._try_getpass(env_var, label)
-            is_live = bool(key and key.strip())
+            is_live = bool(key and key.strip() and "your-key" not in key and "your_key" not in key)
             self.status[env_var] = is_live
             self.keys[env_var] = key if is_live else ""
 
