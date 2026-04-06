@@ -1,0 +1,22 @@
+cat >> .gitignore << 'EOF'
+
+# Local environment files
+.env
+.envs/
+__pycache__/
+*.pyc
+.ipynb_checkpoints/
+*.egg-info/
+dist/
+build/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# VS Code
+.vscode/
+
+# Jupyter runtime
+.local/
+EOF
