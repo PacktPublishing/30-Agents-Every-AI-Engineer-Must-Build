@@ -54,6 +54,12 @@ The notebook is organized into cell groups that mirror the chapter's sections:
 | **3.7–3.9** | §10.2 — Campaign Demo | End-to-end campaign walkthrough with DataVault Pro brief |
 | **4** | Summary | Key takeaways and pointer to Chapter 11 |
 
+## Real-World Use Case: MindBridge Health
+
+What happens when a campus wellness platform scales from 3 universities to 8 and both the chatbot and content engine start breaking? The companion case study follows **MindBridge Health** — a healthtech startup serving 31,000 students — as they deploy the SafetyLayer crisis protocol, dual-memory conversation architecture, and CSP-validated content generation to restore student trust and eliminate brand compliance violations.
+
+Read the full case study: **[USECASE.md](USECASE.md)** — includes the crisis detection accuracy improvement, content scaling metrics, and revenue protection analysis.
+
 ## Repository Structure
 
 ```

@@ -50,6 +50,12 @@ The notebook is organized into cell groups that mirror the chapter's sections:
 | **7** | Reference | Toolchain Reference Explorer — formatted display of all tools cited in the chapter |
 | **8** | Summary | Cost Dashboard and section completion status |
 
+## Real-World Use Case: NovaClaim Insurance
+
+How would a mid-market insurer deploy these patterns to process 40,000 claims per month? The companion case study follows **NovaClaim Insurance** as they tackle cost explosion, API outages, prompt injection risks, and regulatory fairness audits — mapping each section of this chapter to a specific operational problem.
+
+Read the full case study: **[USECASE.md](USECASE.md)** — includes stakeholder profiles, failed alternatives, revenue impact analysis, and next-step recommendations.
+
 ## Repository Structure
 
 ```

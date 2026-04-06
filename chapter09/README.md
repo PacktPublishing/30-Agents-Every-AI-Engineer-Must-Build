@@ -54,6 +54,12 @@ The notebook is organized into cell groups that mirror the chapter's sections:
 | **3.7–3.9** | §10.2 — Campaign Demo | End-to-end campaign walkthrough with DataVault Pro brief |
 | **4** | Summary | Key takeaways and pointer to Chapter 11 |
 
+## Real-World Use Case: VaultPay Fintech
+
+How does a fintech startup use these three agent architectures to ship faster, pass PCI DSS audits, and fix a declining support chatbot? The companion case study follows **VaultPay** — a payment processing platform facing a September audit deadline — through test-driven code generation, automated compliance scanning that catches card-number logging before it reaches production, and a self-improving support bot.
+
+Read the full case study: **[USECASE.md](USECASE.md)** — includes the specific PCI violations caught, the self-improvement loop metrics, and projected revenue impact.
+
 ## Repository Structure
 
 ```

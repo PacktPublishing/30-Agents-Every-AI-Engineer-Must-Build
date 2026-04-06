@@ -52,6 +52,12 @@ The notebook is organized into cell groups that mirror the chapter's sections:
 | **9** | §11.3 — Control Management | Proportional control, deadband hysteresis, short-cycling prevention |
 | **10** | §11.3 — Sensor Fusion | Temporal averaging, 5-minute fusion window, process_zone loop |
 
+## Real-World Use Case: Meridian Facilities
+
+How does a commercial property firm managing 22 buildings use multimodal agents to cut energy costs, eliminate security alert fatigue, and prevent data center SLA breaches? The companion case study follows **Meridian Facilities** as they deploy vision-language agents for contextual occupancy analysis, audio agents for tenant call routing, and physical sensing agents with proportional HVAC control and CO2 monitoring.
+
+Read the full case study: **[USECASE.md](USECASE.md)** — includes the 4 building scenarios (normal office, server overheat, after-hours intrusion, high CO2), energy savings, and tenant retention impact.
+
 ## Repository Structure
 
 ```

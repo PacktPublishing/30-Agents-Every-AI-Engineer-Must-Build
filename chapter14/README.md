@@ -53,6 +53,16 @@ The notebook is organized into cell groups that mirror the chapter's sections:
 | **12** | §14.2.4 — LegalBrief Case Study | Citation verification gate (hallucination detection) |
 | **13** | Summary | Extensions and pointers to Chapter 15 |
 
+## Real-World Use Cases
+
+This chapter's agents operate in two of the most regulated industries — where a wrong recommendation triggers lawsuits and a hallucinated citation triggers court sanctions.
+
+**Meridian Wealth Partners** — An RIA firm managing $2.8B can't scale to 6,000 clients because compliance review is the bottleneck (180 recommendations/week, 23% rejection rate). The case study shows how compliance-by-architecture — embedding suitability and concentration gates as structural LangGraph nodes — makes regulatory violations structurally impossible, not just unlikely.
+
+**Cartwright Legal Group** — A 45-attorney firm spends $1.6M–$2.1M/year on legal research, and a junior associate nearly submits a memo with a non-existent citation. The case study shows how authority-weighted hybrid retrieval and the citation verification gate eliminate hallucination risk while cutting research time by 75%.
+
+Read the full case study: **[USECASE.md](USECASE.md)** — includes the RetailAdvisor and LegalBrief walkthroughs, compliance formulas, and revenue impact.
+
 ## Repository Structure
 
 ```

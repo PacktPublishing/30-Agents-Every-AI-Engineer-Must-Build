@@ -46,6 +46,16 @@ The notebook is organized into cell groups that mirror the chapter's sections:
 | **3** | §13.5–13.8 — Scientific Discovery Agent | Literature synthesis, knowledge gap detection, hypothesis generation, experimental feedback |
 | **4** | §13.9 — Cross-Domain Analysis | Integration patterns and shared architectural lessons |
 
+## Real-World Use Cases
+
+This chapter's two agent architectures target domains where decisions directly impact human welfare and scientific progress.
+
+**Pinnacle Health Network** — A regional health system's ED misses 14 sepsis cases per year because subtle presentations slip past triage. The case study shows how Bayesian belief updating with a 0.15 escalation threshold catches sepsis 74% faster than the existing qSOFA screening — while reducing alert fatigue from a 94% dismissal rate to 18%.
+
+**NovaMateria Labs** — A materials science company needs to design an aerospace polymer meeting three competing targets (Tg > 350°C, tensile ≥ 100 MPa, elongation ≥ 15%) under a 14-month DARPA deadline. The case study shows how knowledge gap detection finds a cross-disciplinary blind spot, and closed-loop experimental feedback compresses the research timeline by 60%.
+
+Read the full case study: **[USECASE.md](USECASE.md)** — includes Bayesian update walkthrough, privacy architecture, and experimental convergence data.
+
 ## Repository Structure
 
 ```

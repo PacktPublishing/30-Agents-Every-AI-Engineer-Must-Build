@@ -50,6 +50,12 @@ The notebook is organized into cell groups that mirror the chapter's sections:
 | **7** | §7.7b — Agentic Workflow (Insurance) | State machine with 5 agents, guard conditions, CLM-4821 walkthrough |
 | **8** | Summary | Recap of all three architectural patterns, pointers to Chapter 8 |
 
+## Real-World Use Case: ShieldPoint Insurance
+
+What does it look like when a regional insurer automates 18,000 claims per month using all three orchestration patterns? The companion case study follows **ShieldPoint Insurance** through tool-using agents for analytics, chain-of-agents for market intelligence with conflict detection, and a 5-agent state-machine claims workflow with HITL gates and full audit trails.
+
+Read the full case study: **[USECASE.md](USECASE.md)** — includes the three test claims (auto-approve, HITL escalation, validation rejection), revenue impact, and integration roadmap.
+
 ## Repository Structure
 
 ```

@@ -64,6 +64,16 @@ This chapter uses **two notebooks** that mirror the chapter's two major sections
 | **5** | §12.10 — Audience Adaptation | Clinician vs. patient explanation templates |
 | **6** | Case Study | DiagnosticAssistant medical case study with multi-source evidence |
 
+## Real-World Use Cases
+
+This chapter's code addresses two high-stakes domains where ethical AI and explainability are not optional — they're regulatory requirements.
+
+**TalentForward** — An HR tech company discovers their resume screening algorithm has a disparate impact ratio of 0.73 (below the legal 0.80 threshold). The case study shows how the three-layer FairHiringAgent detects and mitigates gender bias while maintaining an auditable trail for their Fortune 500 client's legal team.
+
+**ClearPath Health** — A clinical decision support startup finds that doctors ignore their 87% confidence predictions because there's no explanation behind the number. The case study shows how SHAP attribution, counterfactual analysis, and audience-adapted explanations raise physician engagement from 12% to 47%.
+
+Read the full case study: **[USECASE.md](USECASE.md)** — includes both scenarios with stakeholder profiles, fairness metrics, and revenue impact.
+
 ## Repository Structure
 
 ```

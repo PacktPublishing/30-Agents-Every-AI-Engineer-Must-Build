@@ -50,6 +50,12 @@ The notebook is organized into cell groups that mirror the chapter's sections:
 | **7** | Listing 16.7 — Constraint Assembler | Cross-domain constraint assembler + NOTAM integration |
 | **8** | Failure Scenarios | Wind RED, Battery RED, NOTAM active, API timeout demos |
 
+## Real-World Use Case: ArcticWing Aerial
+
+How does a drone services company operating in Ottawa winters reduce its 38% flight scrub rate while maintaining Transport Canada safety compliance? The companion case study follows **ArcticWing Aerial** as they deploy the Unified Constraint Envelope (binary AND across 9 constraints in 5 domains) to make deterministic go/no-go decisions, and the cross-domain cascade analyzer to detect when a power outage 3 hops away will block road access to the launch site.
+
+Read the full case study: **[USECASE.md](USECASE.md)** — includes the 5 failure scenarios (wind, battery, NOTAM, timeout, stale data), safety margin calculations, and fleet utilization impact.
+
 ## Repository Structure
 
 ```

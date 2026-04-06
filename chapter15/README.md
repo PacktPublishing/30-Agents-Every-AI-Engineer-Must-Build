@@ -55,6 +55,12 @@ The notebook is organized into cell groups that mirror the chapter's sections:
 | **12** | §15.11 — Rubric Case Study | Three-agent rubric design + emergent intelligence |
 | **13** | Summary | Key takeaways and further reading |
 
+## Real-World Use Case: LearnPath EdTech
+
+What does it take to raise course completion from 52% to 78% across 12,000 learners? The companion case study follows **LearnPath** — an adaptive Python programming platform — as they deploy IRT placement testing (4 minutes vs. 3 weeks of fixed curriculum), Bayesian Knowledge Tracing that detects declining mastery after 2 failures, misconception-targeted feedback that tells students *why* their break statement is wrong, and SM-2 spaced repetition that prevents skill decay over 6 weeks.
+
+Read the full case study: **[USECASE.md](USECASE.md)** — includes student "Jake" Thompson's learning trajectory, the multi-agent rubric design demo, and revenue retention analysis.
+
 ## Repository Structure
 
 ```
