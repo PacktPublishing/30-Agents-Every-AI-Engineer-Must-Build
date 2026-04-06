@@ -12,7 +12,7 @@ import json
 import functools
 from typing import Any, Callable
 
-from utils import color_logger as log
+import color_logger as log
 
 # ══════════════════════════════════════════════════════════════
 # 4.3.1 — Mock Response Registry (7 entries)
