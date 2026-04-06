@@ -116,7 +116,7 @@ def get_api_key() -> str | None:
     load_dotenv()
     key = os.getenv("OPENAI_API_KEY")
 
-    if key and key.strip() and key.strip() != "your-key-here":
+    if key and key.strip() and "your-key" not in key and "your_key" not in key:
         return key.strip()
 
     try:
