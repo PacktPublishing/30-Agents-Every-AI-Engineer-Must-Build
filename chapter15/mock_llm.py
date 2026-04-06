@@ -12,7 +12,7 @@
 # ===========================================================================
 
 import re
-from utils.resilience import ColorLogger
+from resilience import ColorLogger
 
 logger = ColorLogger("MockLLM")
 
