@@ -65,46 +65,46 @@ python autonomous_decision_agent.py
 
 Build the conceptual and practical foundation for designing, developing, and deploying intelligent agent systems. These chapters establish the theoretical vocabulary and engineering discipline that distinguish principled agent development from ad hoc prompt engineering.
 
-| Chapter | Title | Topics |
-|---|---|---|
-| [Chapter 01](https://github.com/PacktPublishing/30-Agents-Every-AI-Engineer-Must-Build/blob/main/chapter01/README.md) | **Foundations of Agent Engineering** | Evolution from rule-based to LLM-powered agents · Cognitive architecture of intelligent agents · Agent Development Lifecycle · Agentic AI Progression Framework · Hybrid symbolic-neural approaches |
-| [Chapter 02](https://github.com/PacktPublishing/30-Agents-Every-AI-Engineer-Must-Build/blob/main/chapter02/README.md) | **The Agent Engineer's Toolkit** | LangChain, LlamaIndex, AutoGPT framework analysis · LLM selection and fine-tuning guidelines · Vector databases · Tool integration frameworks · Evaluation and benchmarking tools · Cloud-native development platforms |
-| [Chapter 03](https://github.com/PacktPublishing/30-Agents-Every-AI-Engineer-Must-Build/blob/main/chapter03/README.md) | **The Art of Agent Prompting** | System prompts for agent cognition · Role definition and persona construction · Agent-to-agent communication protocols · Chain-of-thought reasoning · Iterative prompt development and version control |
-| [Chapter 04](https://github.com/PacktPublishing/30-Agents-Every-AI-Engineer-Must-Build/blob/main/chapter04/README.md) | **Agent Deployment and Responsible Development** | Infrastructure scaling and cost management · Prompt injection defenses · Data privacy and sandboxing · Bias detection and mitigation · Transparency and regulatory compliance |
+| Chapter | Title | Topics | Real-World Use Case |
+|---|---|---|---|
+| [Chapter 01](https://github.com/PacktPublishing/30-Agents-Every-AI-Engineer-Must-Build/blob/main/chapter01/README.md) | **Foundations of Agent Engineering** | Evolution from rule-based to LLM-powered agents · Cognitive architecture · Agent Development Lifecycle · Progression Framework | — |
+| [Chapter 02](https://github.com/PacktPublishing/30-Agents-Every-AI-Engineer-Must-Build/blob/main/chapter02/README.md) | **The Agent Engineer's Toolkit** | LangChain, LlamaIndex, AutoGPT · LLM selection · Vector databases · Tool integration · Cloud platforms | — |
+| [Chapter 03](https://github.com/PacktPublishing/30-Agents-Every-AI-Engineer-Must-Build/blob/main/chapter03/README.md) | **The Art of Agent Prompting** | System prompts · Persona construction · Agent-to-agent protocols · Chain-of-thought · Prompt version control | — |
+| [Chapter 04](https://github.com/PacktPublishing/30-Agents-Every-AI-Engineer-Must-Build/blob/main/chapter04/README.md) | **Agent Deployment and Responsible Development** | Infrastructure scaling · Cost management · Prompt injection defenses · Bias detection · Regulatory compliance | [NovaClaim Insurance](chapter04/USECASE.md) — Deploying AI agents for 40K claims/month |
 
 ### Part 2: Core Agent Architectures
 
 Explore the fundamental agent architectures that serve as composable building blocks. Each architecture is designed to be combined with others to produce systems whose capabilities exceed the sum of their individual components.
 
-| Chapter | Title | Agents Covered |
-|---|---|---|
-| [Chapter 05](https://github.com/PacktPublishing/30-Agents-Every-AI-Engineer-Must-Build/blob/main/chapter05/README.md) | **Foundational Cognitive Architectures** | The Autonomous Decision-Making Agent · The Planning Agent (tree-of-thought reasoning) · The Memory-Augmented Agent (working, episodic, semantic memory) |
-| [Chapter 06](https://github.com/PacktPublishing/30-Agents-Every-AI-Engineer-Must-Build/blob/main/chapter06/README.md) | **Information Retrieval and Knowledge Agents** | The Knowledge Retrieval Agent (advanced RAG) · The Document Intelligence Agent · The Scientific Research Agent |
-| [Chapter 07](https://github.com/PacktPublishing/30-Agents-Every-AI-Engineer-Must-Build/blob/main/chapter07/README.md) | **Tool Manipulation and Orchestration Agents** | The Tool-Using Agent (function calling patterns) · The Chain-of-Agents Orchestrator · The Agentic Workflow System (human-in-the-loop) |
-| [Chapter 08](https://github.com/PacktPublishing/30-Agents-Every-AI-Engineer-Must-Build/blob/main/chapter08/README.md) | **Data Analysis and Reasoning Agents** | The Data Analysis Agent · The Verification and Validation Agent · The General Problem Solver |
+| Chapter | Title | Agents Covered | Real-World Use Case |
+|---|---|---|---|
+| [Chapter 05](https://github.com/PacktPublishing/30-Agents-Every-AI-Engineer-Must-Build/blob/main/chapter05/README.md) | **Foundational Cognitive Architectures** | The Autonomous Decision-Making Agent · The Planning Agent · The Memory-Augmented Agent | — |
+| [Chapter 06](https://github.com/PacktPublishing/30-Agents-Every-AI-Engineer-Must-Build/blob/main/chapter06/README.md) | **Information Retrieval and Knowledge Agents** | The Knowledge Retrieval Agent (advanced RAG) · The Document Intelligence Agent · The Scientific Research Agent | — |
+| [Chapter 07](https://github.com/PacktPublishing/30-Agents-Every-AI-Engineer-Must-Build/blob/main/chapter07/README.md) | **Tool Manipulation and Orchestration Agents** | The Tool-Using Agent · The Chain-of-Agents Orchestrator · The Agentic Workflow System | [ShieldPoint Insurance](chapter07/USECASE.md) — 5-agent claims pipeline cutting cycle time from 12 days to 3.5 |
+| [Chapter 08](https://github.com/PacktPublishing/30-Agents-Every-AI-Engineer-Must-Build/blob/main/chapter08/README.md) | **Data Analysis and Reasoning Agents** | The Data Analysis Agent · The Verification and Validation Agent · The General Problem Solver | — |
 
 ### Part 3: Specialized Application Agents
 
-Extend core architectures into domains with stringent requirements for reliability, safety, and domain expertise. Each chapter includes production deployment considerations: latency budgets, cost optimization, monitoring, and graceful degradation techniques.
+Extend core architectures into domains with stringent requirements for reliability, safety, and domain expertise. Each chapter includes production deployment considerations, a working codebase, and a [real-world use case study](chapter09/USECASE.md) with fictional companies, stakeholder profiles, and revenue impact analysis.
 
-| Chapter | Title | Agents Covered |
-|---|---|---|
-| [Chapter 09](https://github.com/PacktPublishing/30-Agents-Every-AI-Engineer-Must-Build/blob/main/chapter09/README.md) | **Software Development Agents** | The Code-Generation Agent (program synthesis) · The Security-Hardened Agent · The Self-Improving Agent |
-| [Chapter 10](https://github.com/PacktPublishing/30-Agents-Every-AI-Engineer-Must-Build/blob/main/chapter10/README.md) | **Conversational and Content Creation Agents** | The Conversational Agent (dialog management) · The Content Creation Agent (multi-modal) · The Recommendation Agent |
-| [Chapter 11](https://github.com/PacktPublishing/30-Agents-Every-AI-Engineer-Must-Build/blob/main/chapter11/README.md) | **Multi-Modal Perception Agents** | The Vision-Language Agent · The Audio Processing Agent · The Physical World Sensing Agent (IoT/sensor fusion) |
-| [Chapter 12](https://github.com/PacktPublishing/30-Agents-Every-AI-Engineer-Must-Build/blob/main/chapter12/README.md) | **Ethical and Explainable Agents** | The Ethical Reasoning Agent (value alignment) · The Explainable Agent (decision transparency) |
+| Chapter | Title | Agents Covered | Real-World Use Case |
+|---|---|---|---|
+| [Chapter 09](https://github.com/PacktPublishing/30-Agents-Every-AI-Engineer-Must-Build/blob/main/chapter09/README.md) | **Software Development Agents** | The Code-Generation Agent · The Security-Hardened Agent · The Self-Improving Agent | [VaultPay](chapter09/USECASE.md) — Fintech startup catching PCI violations in CI/CD and fixing a declining support chatbot |
+| [Chapter 10](https://github.com/PacktPublishing/30-Agents-Every-AI-Engineer-Must-Build/blob/main/chapter10/README.md) | **Conversational and Content Creation Agents** | The Conversational Agent · The Content Creation Agent · The Recommendation Agent | [MindBridge Health](chapter10/USECASE.md) — Campus wellness platform with crisis-safe chatbot serving 31K students |
+| [Chapter 11](https://github.com/PacktPublishing/30-Agents-Every-AI-Engineer-Must-Build/blob/main/chapter11/README.md) | **Multi-Modal Perception Agents** | The Vision-Language Agent · The Audio Processing Agent · The Physical World Sensing Agent | [Meridian Facilities](chapter11/USECASE.md) — 22-building smart property management with 17% energy reduction |
+| [Chapter 12](https://github.com/PacktPublishing/30-Agents-Every-AI-Engineer-Must-Build/blob/main/chapter12/README.md) | **Ethical and Explainable Agents** | The Ethical Reasoning Agent · The Explainable Agent | [TalentForward + ClearPath Health](chapter12/USECASE.md) — Fair hiring (DI 0.73 → 0.80+) and explainable clinical diagnosis |
 
-### Part 4: Domain-Specific and Emerging Agent Systems
+### Part 4: Domain-Specific Agent Systems with Real-World Use Cases
 
-Apply the full range of agent architectures to transform professional domains where complexity, regulation, and human impact are most acute. Every case study includes a discussion of the regulatory constraints that shaped the architectural decisions.
+Apply the full range of agent architectures to transform professional domains where complexity, regulation, and human impact are most acute. Each chapter includes a detailed [use case study](chapter13/USECASE.md) with a fictional company navigating real industry constraints — failed alternatives, regulatory requirements, revenue impact, and a step-by-step mapping of how the code solves each problem.
 
-| Chapter | Title | Agents Covered |
-|---|---|---|
-| [Chapter 13](https://github.com/PacktPublishing/30-Agents-Every-AI-Engineer-Must-Build/blob/main/chapter13/README.md) | **Healthcare and Scientific Agents** | The Healthcare Intelligence Agent (clinical decision support) · The Scientific Discovery Agent |
-| [Chapter 14](https://github.com/PacktPublishing/30-Agents-Every-AI-Engineer-Must-Build/blob/main/chapter14/README.md) | **Financial and Legal Domain Agents** | The Financial Advisory Agent (risk assessment) · The Legal Intelligence Agent (case analysis, contract review) |
-| [Chapter 15](https://github.com/PacktPublishing/30-Agents-Every-AI-Engineer-Must-Build/blob/main/chapter15/README.md) | **Education and Knowledge Agents** | The Education Intelligence Agent (adaptive learning) · The Collective Intelligence Agent (multi-agent collaboration) |
-| [Chapter 16](https://github.com/PacktPublishing/30-Agents-Every-AI-Engineer-Must-Build/blob/main/chapter16/README.md) | **Embodied and Physical World Agents** | The Embodied Intelligence Agent (robotics control) · The Domain-Transforming Integration Agent (smart city systems) |
-| Epilogue | **The Future of Intelligent Agents** | Autonomous agent evolution · Agent societies and emergent behaviors · Brain-inspired cognitive architectures · Strategic implementation roadmaps |
+| Chapter | Title | Agents Covered | Real-World Use Case |
+|---|---|---|---|
+| [Chapter 13](https://github.com/PacktPublishing/30-Agents-Every-AI-Engineer-Must-Build/blob/main/chapter13/README.md) | **Healthcare and Scientific Agents** | The Healthcare Intelligence Agent · The Scientific Discovery Agent | [Pinnacle Health + NovaMateria Labs](chapter13/USECASE.md) — Bayesian sepsis detection cutting missed cases by 79%; materials discovery compressed 60% |
+| [Chapter 14](https://github.com/PacktPublishing/30-Agents-Every-AI-Engineer-Must-Build/blob/main/chapter14/README.md) | **Financial and Legal Domain Agents** | The Financial Advisory Agent · The Legal Intelligence Agent | [Meridian Wealth + Cartwright Legal](chapter14/USECASE.md) — Compliance-by-architecture for $2.8B RIA; hallucination-proof legal research |
+| [Chapter 15](https://github.com/PacktPublishing/30-Agents-Every-AI-Engineer-Must-Build/blob/main/chapter15/README.md) | **Education and Knowledge Agents** | The Education Intelligence Agent · The Collective Intelligence Agent | [LearnPath](chapter15/USECASE.md) — Adaptive Python tutor raising completion from 52% to 78% across 12K learners |
+| [Chapter 16](https://github.com/PacktPublishing/30-Agents-Every-AI-Engineer-Must-Build/blob/main/chapter16/README.md) | **Embodied and Physical World Agents** | The Embodied Intelligence Agent · The Domain-Transforming Integration Agent | [ArcticWing Aerial](chapter16/USECASE.md) — Autonomous drone ops in Ottawa winter, scrub rate 38% → 14% |
+| Epilogue | **The Future of Intelligent Agents** | Autonomous agent evolution · Agent societies and emergent behaviors · Brain-inspired cognitive architectures | — |
 
 ## Chapter Structure
 
@@ -174,26 +174,6 @@ This book accommodates three distinct reading approaches:
 | 28 | [The Education Intelligence Agent](chapter15/chapter15_education_and_knowledge_agents.ipynb) | Ch 15: Education & Knowledge Agents |
 | 29 | [The Collective Intelligence Agent](chapter15/chapter15_education_and_knowledge_agents.ipynb) | Ch 15: Education & Knowledge Agents |
 | 30 | [The Embodied Intelligence Agent](chapter16/chapter16_embodied_agents.ipynb) | Ch 16: Embodied & Physical World Agents |
-
----
-
-## Industry Verticals
-
-Beyond foundational architectures, this book applies AI agents to **8 real-world industry verticals** — each with a detailed use case study showing the problem, the people involved, the failed alternatives, and how the agent code solves it.
-
-| Vertical | Chapters | What You'll Build | Use Case Study |
-|---|---|---|---|
-| **Insurance & Business Process** | [Ch 4](chapter04/USECASE.md), [Ch 7](chapter07/USECASE.md) | Cost-aware deployment, circuit breakers, state-machine claims processing with HITL gates | NovaClaim: 40K claims/month with cost-optimized model routing. ShieldPoint: 5-agent claims pipeline cutting cycle time from 12 days to 3.5 |
-| **Software Engineering** | [Ch 9](chapter09/USECASE.md) | Test-driven code generation (LangGraph), PCI DSS compliance scanning, self-improving agents | VaultPay: Fintech startup catching compliance violations in CI/CD, zero PCI breaches reaching production |
-| **Mental Health & Marketing** | [Ch 10](chapter10/USECASE.md) | Empathetic chatbot with crisis detection, brand-constrained content generation with editor validation | MindBridge Health: Campus wellness platform serving 31K students, crisis escalation with 98% accuracy |
-| **Smart Buildings & IoT** | [Ch 11](chapter11/USECASE.md) | Vision-language scene analysis, voice sentiment routing, sensor fusion with proportional control | Meridian Facilities: 22-building portfolio with 17% energy reduction, server room overheat detection in seconds |
-| **HR & Hiring Fairness** | [Ch 12](chapter12/USECASE.md) | Deontic logic guardrails, four-fifths rule enforcement, bias monitoring pipeline with automated mitigation | TalentForward: Detecting gender bias (DI 0.73 → 0.80+), automated EU AI Act compliance reports |
-| **Healthcare & Scientific Research** | [Ch 12](chapter12/USECASE.md), [Ch 13](chapter13/USECASE.md) | SHAP/LIME explainability, Bayesian clinical diagnosis, scientific hypothesis generation with closed-loop validation | ClearPath Health: Explainable diagnosis raising doctor engagement from 12% to 47%. Pinnacle Health: Sepsis detection cutting missed cases by 79%. NovaMateria Labs: 60% faster materials discovery |
-| **Finance & Legal** | [Ch 14](chapter14/USECASE.md) | Supervisor-pattern portfolio advisory with compliance gates, authority-weighted legal search, citation verification | Meridian Wealth: Compliance-by-architecture preventing suitability violations. Cartwright Legal: Hallucination-proof legal research with citation verification gate |
-| **Education & Adaptive Learning** | [Ch 15](chapter15/USECASE.md) | IRT placement testing, Bayesian Knowledge Tracing, SM-2 spaced repetition, multi-agent rubric consensus | LearnPath: Adaptive Python tutor raising course completion from 52% to 78% across 12K learners |
-| **Robotics & Autonomous Systems** | [Ch 16](chapter16/USECASE.md) | Unified constraint envelope (5-domain safety fusion), cross-domain cascade analysis, conservative fallback on API failure | ArcticWing Aerial: Autonomous drone operations in Ottawa winter, scrub rate reduced from 38% to 14% |
-
-Each use case study is a standalone markdown file in the chapter directory — click the chapter links above to read the full case with revenue impact analysis, stakeholder profiles, and next-step recommendations.
 
 ---
 
