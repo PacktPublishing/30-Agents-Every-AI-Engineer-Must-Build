@@ -40,7 +40,7 @@ def get_api_key():
 
     # Check environment first (.env already loaded above)
     key = os.getenv("OPENAI_API_KEY")
-    if key and key.strip():
+    if key and key.strip() and "your-key" not in key and "your_key" not in key:
         _API_KEY = key.strip()
         _SIMULATION_MODE = False
         ColorLog.success("API key loaded from environment.")

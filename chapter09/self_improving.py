@@ -22,8 +22,8 @@ import json
 from datetime import datetime, timezone
 from typing import Any, Dict, List, Optional
 
-from src.utils import ColorLog, fail_gracefully
-from src.state_models import (
+from chapter09.utils import ColorLog, fail_gracefully
+from chapter09.state_models import (
     FeedbackRecord,
     AdaptationType,
     ImprovementHypothesis,

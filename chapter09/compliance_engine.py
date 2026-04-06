@@ -26,7 +26,7 @@ from typing import Any, Dict, List, Optional
 
 from pydantic import BaseModel, Field
 
-from src.utils import ColorLog, fail_gracefully
+from chapter09.utils import ColorLog, fail_gracefully
 
 
 # ===================================================================

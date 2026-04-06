@@ -10,7 +10,7 @@
 # real LLM would produce for the corresponding chapter section.
 # Ref: Strategy §2.3 — 12 response entries across §9.2, §9.3, §9.4.
 
-from src.utils import ColorLog
+from chapter09.utils import ColorLog
 
 
 # ===================================================================

@@ -13,8 +13,8 @@
 import re
 from typing import Any, Dict
 
-from src.utils import ColorLog, fail_gracefully
-from src.state_models import Task, AgentState
+from chapter09.utils import ColorLog, fail_gracefully
+from chapter09.state_models import Task, AgentState
 
 
 # ---------------------------------------------------------------------------
@@ -567,13 +567,13 @@ def build_workflow(llm):
         "backend_test", lambda state: _backend_test_node(state, llm)
     )
     workflow.add_node(
-        "backend_code", lambda state: _backend_agent_node(state, llm)
+        "backend_code_gen", lambda state: _backend_agent_node(state, llm)
     )
     workflow.add_node(
         "frontend_test", lambda state: _frontend_test_node(state, llm)
     )
     workflow.add_node(
-        "frontend_code", lambda state: _frontend_agent_node(state, llm)
+        "frontend_code_gen", lambda state: _frontend_agent_node(state, llm)
     )
     workflow.add_node(
         "integration", lambda state: _integration_agent_node(state, llm)
@@ -585,7 +585,7 @@ def build_workflow(llm):
     # Define the workflow edges — Ref: §9.2 listing
     workflow.set_entry_point("planning")
     workflow.add_edge("planning", "backend_test")
-    workflow.add_edge("backend_test", "backend_code")
+    workflow.add_edge("backend_test", "backend_code_gen")
 
     # Conditional edge: loop back if backend tests fail
     # Iteration limit (< 3) prevents infinite loops
@@ -593,29 +593,29 @@ def build_workflow(llm):
         task = state.get("current_task")
         if (task and task.test_results != "PASS"
                 and task.iterations < 3):
-            return "backend_code"
+            return "backend_code_gen"
         return "frontend_test"
 
     workflow.add_conditional_edges(
-        "backend_code",
+        "backend_code_gen",
         check_backend,
-        {"backend_code": "backend_code", "frontend_test": "frontend_test"},
+        {"backend_code_gen": "backend_code_gen", "frontend_test": "frontend_test"},
     )
 
-    workflow.add_edge("frontend_test", "frontend_code")
+    workflow.add_edge("frontend_test", "frontend_code_gen")
 
     # Conditional edge: loop back if frontend tests fail
     def check_frontend(state):
         task = state.get("current_task")
         if (task and task.test_results != "PASS"
                 and task.iterations < 3):
-            return "frontend_code"
+            return "frontend_code_gen"
         return "integration"
 
     workflow.add_conditional_edges(
-        "frontend_code",
+        "frontend_code_gen",
         check_frontend,
-        {"frontend_code": "frontend_code", "integration": "integration"},
+        {"frontend_code_gen": "frontend_code_gen", "integration": "integration"},
     )
 
     workflow.add_edge("integration", "summary")
