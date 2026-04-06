@@ -13,8 +13,8 @@
 import os
 import sys
 
-from src.resilience import ColorLogger, fail_gracefully, logger
-from src.mock_layer import get_llm
+from resilience import ColorLogger, fail_gracefully, logger
+from mock_layer import get_llm
 
 # ---------------------------------------------------------------------------
 # SIMULATION_MODE detection
