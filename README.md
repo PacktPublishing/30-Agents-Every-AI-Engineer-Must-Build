@@ -124,7 +124,18 @@ Each chapter follows a consistent six-part structure designed for both learning 
 This book accommodates three distinct reading approaches:
 
 - **Sequential:** Chapters 1–4 → 5–12 → 13–16 → Epilogue (full foundation to specialization)
-- **Domain-Focused:** Chapters 1–4 → jump to your industry chapter (13–16) → revisit core architectures as needed
+- **Domain-Focused:** Start with Chapters 1–4 for foundations, then jump directly to your industry vertical:
+
+  | If you work in... | Start here | Then explore |
+  |---|---|---|
+  | **Healthcare** | Ch 13 (Bayesian diagnosis, scientific discovery) | Ch 12 (explainability, fairness) → Ch 11 (medical imaging) |
+  | **Finance or Legal** | Ch 14 (portfolio advisory, contract analysis) | Ch 4 (cost management, compliance) → Ch 12 (audit trails) |
+  | **Insurance** | Ch 7 (claims workflow, HITL escalation) | Ch 4 (deployment patterns) → Ch 9 (compliance scanning) |
+  | **Education** | Ch 15 (adaptive tutoring, knowledge tracing) | Ch 10 (conversational agents) → Ch 9 (self-improving agents) |
+  | **Software Engineering** | Ch 9 (code generation, PCI/HIPAA scanning) | Ch 7 (tool orchestration) → Ch 12 (explainable decisions) |
+  | **Facilities / IoT** | Ch 11 (sensor fusion, proportional control) | Ch 8 (data analysis) → Ch 7 (workflow automation) |
+  | **Robotics / Drones** | Ch 16 (safety envelopes, cascade analysis) | Ch 11 (perception agents) → Ch 4 (resilience patterns) |
+
 - **Reference:** Look up specific agent architectures as needed for particular projects
 
 ---
@@ -163,6 +174,26 @@ This book accommodates three distinct reading approaches:
 | 28 | [The Education Intelligence Agent](chapter15/chapter15_education_and_knowledge_agents.ipynb) | Ch 15: Education & Knowledge Agents |
 | 29 | [The Collective Intelligence Agent](chapter15/chapter15_education_and_knowledge_agents.ipynb) | Ch 15: Education & Knowledge Agents |
 | 30 | [The Embodied Intelligence Agent](chapter16/chapter16_embodied_agents.ipynb) | Ch 16: Embodied & Physical World Agents |
+
+---
+
+## Industry Verticals
+
+Beyond foundational architectures, this book applies AI agents to **8 real-world industry verticals** — each with a detailed use case study showing the problem, the people involved, the failed alternatives, and how the agent code solves it.
+
+| Vertical | Chapters | What You'll Build | Use Case Study |
+|---|---|---|---|
+| **Insurance & Business Process** | [Ch 4](chapter04/USECASE.md), [Ch 7](chapter07/USECASE.md) | Cost-aware deployment, circuit breakers, state-machine claims processing with HITL gates | NovaClaim: 40K claims/month with cost-optimized model routing. ShieldPoint: 5-agent claims pipeline cutting cycle time from 12 days to 3.5 |
+| **Software Engineering** | [Ch 9](chapter09/USECASE.md) | Test-driven code generation (LangGraph), PCI DSS compliance scanning, self-improving agents | VaultPay: Fintech startup catching compliance violations in CI/CD, zero PCI breaches reaching production |
+| **Mental Health & Marketing** | [Ch 10](chapter10/USECASE.md) | Empathetic chatbot with crisis detection, brand-constrained content generation with editor validation | MindBridge Health: Campus wellness platform serving 31K students, crisis escalation with 98% accuracy |
+| **Smart Buildings & IoT** | [Ch 11](chapter11/USECASE.md) | Vision-language scene analysis, voice sentiment routing, sensor fusion with proportional control | Meridian Facilities: 22-building portfolio with 17% energy reduction, server room overheat detection in seconds |
+| **HR & Hiring Fairness** | [Ch 12](chapter12/USECASE.md) | Deontic logic guardrails, four-fifths rule enforcement, bias monitoring pipeline with automated mitigation | TalentForward: Detecting gender bias (DI 0.73 → 0.80+), automated EU AI Act compliance reports |
+| **Healthcare & Scientific Research** | [Ch 12](chapter12/USECASE.md), [Ch 13](chapter13/USECASE.md) | SHAP/LIME explainability, Bayesian clinical diagnosis, scientific hypothesis generation with closed-loop validation | ClearPath Health: Explainable diagnosis raising doctor engagement from 12% to 47%. Pinnacle Health: Sepsis detection cutting missed cases by 79%. NovaMateria Labs: 60% faster materials discovery |
+| **Finance & Legal** | [Ch 14](chapter14/USECASE.md) | Supervisor-pattern portfolio advisory with compliance gates, authority-weighted legal search, citation verification | Meridian Wealth: Compliance-by-architecture preventing suitability violations. Cartwright Legal: Hallucination-proof legal research with citation verification gate |
+| **Education & Adaptive Learning** | [Ch 15](chapter15/USECASE.md) | IRT placement testing, Bayesian Knowledge Tracing, SM-2 spaced repetition, multi-agent rubric consensus | LearnPath: Adaptive Python tutor raising course completion from 52% to 78% across 12K learners |
+| **Robotics & Autonomous Systems** | [Ch 16](chapter16/USECASE.md) | Unified constraint envelope (5-domain safety fusion), cross-domain cascade analysis, conservative fallback on API failure | ArcticWing Aerial: Autonomous drone operations in Ottawa winter, scrub rate reduced from 38% to 14% |
+
+Each use case study is a standalone markdown file in the chapter directory — click the chapter links above to read the full case with revenue impact analysis, stakeholder profiles, and next-step recommendations.
 
 ---
 
