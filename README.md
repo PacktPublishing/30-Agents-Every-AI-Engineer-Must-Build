@@ -57,6 +57,21 @@ python autonomous_decision_agent.py
 | **Tools** | git, terminal, virtual environment tool (venv, conda, or uv) |
 | **API Keys** | **None required** — every chapter runs in Simulation Mode with built-in MockLLM responses. Optional: OpenAI, Anthropic, or Hugging Face keys unlock Live Mode (varies by chapter) |
 
+### Pre-Executed Example Notebooks
+
+Every chapter includes **two pre-executed notebooks** so you can review the full output without running any code:
+
+| File Pattern | Mode | Description |
+|---|---|---|
+| `EXAMPLE_RUN_SIMULATION_MODE_<notebook>.ipynb` | Simulation | Executed without an API key — all responses come from the chapter's MockLLM with pre-authored, curriculum-aligned output |
+| `EXAMPLE_RUN_LLM_MODE_<notebook>.ipynb` | Live LLM | Executed with an OpenAI API key — all responses come from GPT-4o/GPT-4o-mini via the OpenAI API |
+
+Both notebooks produce identical cell structure with different output — compare them side by side to see how Simulation Mode faithfully mirrors Live LLM behavior. This is useful for:
+
+- **Reviewing output before installing dependencies** — browse the executed notebooks directly on GitHub
+- **Comparing mock vs. live responses** — verify that Simulation Mode covers the same scenarios
+- **Validating your own runs** — after executing a notebook, compare your output against the example runs
+
 ---
 
 ## Table of Contents

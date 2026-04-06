@@ -86,6 +86,17 @@ When no Hugging Face token or CUDA GPU is detected, the notebook activates **Sim
 - Every cell executes successfully with no GPU or external dependencies
 - Outputs are deterministic and chapter-accurate
 
+## Pre-Executed Example Runs
+
+Two pre-executed notebooks are included so you can review the full output without running any code or installing dependencies:
+
+| Notebook | Mode | Description |
+|---|---|---|
+| [EXAMPLE_RUN_SIMULATION_MODE_chapter_11_multimodal_agents.ipynb](EXAMPLE_RUN_SIMULATION_MODE_chapter_11_multimodal_agents.ipynb) | Simulation | Executed without an API key — MockLLM responses |
+| [EXAMPLE_RUN_LLM_MODE_chapter_11_multimodal_agents.ipynb](EXAMPLE_RUN_LLM_MODE_chapter_11_multimodal_agents.ipynb) | Live LLM | Executed with an OpenAI API key — real GPT responses |
+
+Compare both to see how Simulation Mode mirrors Live LLM behavior.
+
 ## Resilience Architecture
 
 All agent operations are wrapped in the `@graceful_fallback` decorator:

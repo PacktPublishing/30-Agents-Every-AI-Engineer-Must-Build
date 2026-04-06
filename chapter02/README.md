@@ -79,6 +79,17 @@ Both modes use color-coded logging:
 - **Green** `[SUCCESS]`: Completed steps, valid returns
 - **Red** `[HANDLED ERROR]`: Caught exceptions, fallback activation
 
+## Pre-Executed Example Runs
+
+Two pre-executed notebooks are included so you can review the full output without running any code or installing dependencies:
+
+| Notebook | Mode | Description |
+|---|---|---|
+| [EXAMPLE_RUN_SIMULATION_MODE_chapter_02_agent_toolkit.ipynb](EXAMPLE_RUN_SIMULATION_MODE_chapter_02_agent_toolkit.ipynb) | Simulation | Executed without an API key — MockLLM responses |
+| [EXAMPLE_RUN_LLM_MODE_chapter_02_agent_toolkit.ipynb](EXAMPLE_RUN_LLM_MODE_chapter_02_agent_toolkit.ipynb) | Live LLM | Executed with an OpenAI API key — real GPT responses |
+
+Compare both to see how Simulation Mode mirrors Live LLM behavior.
+
 ## Requirements
 
 - **Python:** 3.10+ (recommended: 3.11 or 3.12)

@@ -95,6 +95,17 @@ When API keys are absent, the system automatically switches to **Simulation Mode
 
 A user with an OpenAI key but no Finnhub key gets real LLM reasoning over mock financial data. The `@graceful_fallback` decorator wraps every external call, ensuring the notebook never crashes.
 
+## Pre-Executed Example Runs
+
+Two pre-executed notebooks are included so you can review the full output without running any code or installing dependencies:
+
+| Notebook | Mode | Description |
+|---|---|---|
+| [EXAMPLE_RUN_SIMULATION_MODE_chapter14_financial_legal_agents.ipynb](EXAMPLE_RUN_SIMULATION_MODE_chapter14_financial_legal_agents.ipynb) | Simulation | Executed without an API key — MockLLM responses |
+| [EXAMPLE_RUN_LLM_MODE_chapter14_financial_legal_agents.ipynb](EXAMPLE_RUN_LLM_MODE_chapter14_financial_legal_agents.ipynb) | Live LLM | Executed with an OpenAI API key — real GPT responses |
+
+Compare both to see how Simulation Mode mirrors Live LLM behavior.
+
 ## Resilience Architecture
 
 All agent operations are wrapped in the `@graceful_fallback` decorator:

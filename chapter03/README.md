@@ -81,6 +81,17 @@ When no API key is detected, the notebook activates **Simulation Mode**:
 
 All LLM calls are wrapped in the `@graceful_fallback` decorator — if anything fails, you see a Red `[HANDLED ERROR]` log (never a traceback) and the notebook continues.
 
+## Pre-Executed Example Runs
+
+Two pre-executed notebooks are included so you can review the full output without running any code or installing dependencies:
+
+| Notebook | Mode | Description |
+|---|---|---|
+| [EXAMPLE_RUN_SIMULATION_MODE_chapter_03_agent_prompting.ipynb](EXAMPLE_RUN_SIMULATION_MODE_chapter_03_agent_prompting.ipynb) | Simulation | Executed without an API key — MockLLM responses |
+| [EXAMPLE_RUN_LLM_MODE_chapter_03_agent_prompting.ipynb](EXAMPLE_RUN_LLM_MODE_chapter_03_agent_prompting.ipynb) | Live LLM | Executed with an OpenAI API key — real GPT responses |
+
+Compare both to see how Simulation Mode mirrors Live LLM behavior.
+
 ## Requirements
 
 - **Python:** 3.10+ (recommended: 3.11 or 3.12)
