@@ -125,8 +125,12 @@ def detect_api_key():
     # Tier 2: Check environment variable
     api_key = os.getenv("OPENAI_API_KEY")
     if api_key and api_key.strip():
-        log_info("API key detected from environment variable.")
-        return api_key.strip(), "LIVE"
+        # Skip placeholder values from .env templates
+        if "your-key" in api_key or "your_key" in api_key:
+            log_warning("Placeholder API key detected. Skipping.")
+        else:
+            log_info("API key detected from environment variable.")
+            return api_key.strip(), "LIVE"
 
     # Tier 3: Interactive prompt via getpass (only in interactive terminals)
     if sys.stdin and sys.stdin.isatty():
