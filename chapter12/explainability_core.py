@@ -16,8 +16,8 @@ from typing import Any
 
 import numpy as np
 
-from src.utils import ColorLogger, graceful_fallback, is_simulation
-from src.mock_llm import MockLLM, _make_meta
+from chapter12.utils import ColorLogger, graceful_fallback, is_simulation
+from chapter12.mock_llm import MockLLM, _make_meta
 
 logger = ColorLogger("ExplainabilityCore")
 

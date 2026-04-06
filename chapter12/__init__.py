@@ -6,7 +6,7 @@
 __version__ = "1.0.0"
 
 # --- Utilities (src/utils.py) ---
-from src.utils import (
+from chapter12.utils import (
     ColorLogger,
     graceful_fallback,
     resolve_api_key,
@@ -16,10 +16,10 @@ from src.utils import (
 )
 
 # --- Mock Layer (src/mock_llm.py) ---
-from src.mock_llm import MockLLM, strip_meta
+from chapter12.mock_llm import MockLLM, strip_meta
 
 # --- Synthetic Data (src/synthetic_data.py) ---
-from src.synthetic_data import (
+from chapter12.synthetic_data import (
     generate_hr_dataset,
     generate_medical_dataset,
     summarize_hr_dataset,
@@ -27,7 +27,7 @@ from src.synthetic_data import (
 )
 
 # --- Ethical Core (src/ethical_core.py) ---
-from src.ethical_core import (
+from chapter12.ethical_core import (
     DeonticOperator,
     EthicalReasoningAgent,
     EUCompliantAgent,
@@ -44,7 +44,7 @@ from src.ethical_core import (
 )
 
 # --- Explainability Core (src/explainability_core.py) ---
-from src.explainability_core import (
+from chapter12.explainability_core import (
     ExplainableAgent,
     DecisionLogger,
     ExplanationGenerator,

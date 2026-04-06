@@ -10,7 +10,7 @@ import copy
 from datetime import datetime
 from typing import Any
 
-from src.utils import ColorLogger, graceful_fallback
+from chapter12.utils import ColorLogger, graceful_fallback
 
 logger = ColorLogger("MockLLM")
 

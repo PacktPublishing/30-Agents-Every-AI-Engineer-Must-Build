@@ -164,7 +164,7 @@ def resolve_api_key() -> str:
 
     # Step 1: Environment variable (includes .env via python-dotenv)
     key = os.environ.get("OPENAI_API_KEY", "").strip()
-    if key:
+    if key and "your-key" not in key and "your_key" not in key:
         _CURRENT_MODE = "live"
         logger.success("API key detected from environment. Live Mode enabled.")
         return key

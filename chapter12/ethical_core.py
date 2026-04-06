@@ -13,8 +13,8 @@ import collections
 from datetime import datetime, timezone
 from typing import Any
 
-from src.utils import ColorLogger, graceful_fallback, is_simulation
-from src.mock_llm import MockLLM, _make_meta
+from chapter12.utils import ColorLogger, graceful_fallback, is_simulation
+from chapter12.mock_llm import MockLLM, _make_meta
 
 logger = ColorLogger("EthicalCore")
 

@@ -8,7 +8,7 @@
 import random
 from typing import Any
 
-from src.utils import ColorLogger
+from chapter12.utils import ColorLogger
 
 logger = ColorLogger("SyntheticData")
 
