@@ -29,3 +29,9 @@ python-dotenv==1.0.1
 # --- Notebook ---
 jupyter>=1.0.0
 ipykernel>=6.25.0
+
+# Multi-provider LLM support (Anthropic and Google Gemini)
+langchain-anthropic>=0.3.0
+langchain-google-genai>=2.0.0
+anthropic>=0.42.0
+google-generativeai>=0.8.0

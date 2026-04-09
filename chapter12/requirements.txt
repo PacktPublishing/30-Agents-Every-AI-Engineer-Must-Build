@@ -24,3 +24,9 @@ seaborn>=0.13.0,<0.15.0
 
 # Notebook environment
 ipykernel>=6.29.0
+
+# Multi-provider LLM support (Anthropic and Google Gemini)
+langchain-anthropic>=0.3.0
+langchain-google-genai>=2.0.0
+anthropic>=0.42.0
+google-generativeai>=0.8.0

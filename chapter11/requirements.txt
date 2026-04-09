@@ -14,3 +14,9 @@ python-dotenv>=1.0.0
 # torch>=2.2.0
 # transformers>=4.40.0
 # accelerate>=0.28.0
+
+# Multi-provider LLM support (Anthropic and Google Gemini)
+langchain-anthropic>=0.3.0
+langchain-google-genai>=2.0.0
+anthropic>=0.42.0
+google-generativeai>=0.8.0
