@@ -23,26 +23,42 @@ load_dotenv()
 
 _API_KEY = None
 _SIMULATION_MODE = None
+_LLM_PROVIDER = None
 
 
 def get_api_key():
     """
     Zero-hardcode API key resolution chain:
       1. .env file (via python-dotenv)
-      2. Environment variable OPENAI_API_KEY
+      2. Environment variable OPENAI_API_KEY (or ANTHROPIC/GOOGLE via LLM_PROVIDER)
       3. Interactive getpass prompt (skipped in non-interactive envs)
       4. Simulation Mode fallback (returns None)
 
     Returns:
         str or None: The API key, or None to activate Simulation Mode.
     """
-    global _API_KEY, _SIMULATION_MODE
+    global _API_KEY, _SIMULATION_MODE, _LLM_PROVIDER
 
-    # Check environment first (.env already loaded above)
+    # Multi-provider: try shared provider detection first
+    try:
+        sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
+        from supporting.llm_provider import detect_provider
+        provider, key, mode = detect_provider()
+        _LLM_PROVIDER = provider
+        if mode == "LIVE":
+            _API_KEY = key
+            _SIMULATION_MODE = False
+            ColorLog.success(f"API key loaded — provider: {provider}")
+            return _API_KEY
+    except ImportError:
+        pass  # Fall through to legacy detection
+
+    # Legacy: Check OPENAI_API_KEY environment variable
     key = os.getenv("OPENAI_API_KEY")
     if key and key.strip() and "your-key" not in key and "your_key" not in key:
         _API_KEY = key.strip()
         _SIMULATION_MODE = False
+        _LLM_PROVIDER = "openai"
         ColorLog.success("API key loaded from environment.")
         return _API_KEY
 
@@ -51,11 +67,12 @@ def get_api_key():
         try:
             import getpass
             key = getpass.getpass(
-                "Enter OPENAI_API_KEY (or press Enter for Simulation Mode): "
+                "Enter API key (OpenAI/Anthropic/Google) or press Enter for Simulation: "
             )
             if key and key.strip():
                 _API_KEY = key.strip()
                 _SIMULATION_MODE = False
+                _LLM_PROVIDER = "openai"  # default assumption
                 ColorLog.success("API key entered manually.")
                 return _API_KEY
         except (EOFError, OSError):
@@ -64,6 +81,7 @@ def get_api_key():
     # Fall through to Simulation Mode
     _API_KEY = None
     _SIMULATION_MODE = True
+    _LLM_PROVIDER = "simulation"
     ColorLog.info(
         "No API key detected — activating Simulation Mode (MockLLM)."
     )
@@ -79,6 +97,55 @@ def is_simulation_mode():
     if _SIMULATION_MODE is None:
         get_api_key()
     return _SIMULATION_MODE
+
+
+def get_provider():
+    """Return the detected LLM provider name.
+
+    Returns:
+        str: "openai", "anthropic", "google", or "simulation"
+    """
+    global _LLM_PROVIDER
+    if _LLM_PROVIDER is None:
+        get_api_key()
+    return _LLM_PROVIDER
+
+
+def get_llm(model=None, temperature=0, **kwargs):
+    """Return a LangChain-compatible chat model for the detected provider.
+
+    Falls back to MockLLM if in Simulation Mode.
+
+    Args:
+        model: Model name override.
+        temperature: Model temperature.
+
+    Returns:
+        A LangChain BaseChatModel or MockLLM instance.
+    """
+    if is_simulation_mode():
+        from chapter09.mock_llm import MockLLM
+        return MockLLM()
+
+    try:
+        sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
+        from supporting.llm_provider import get_llm as _get_llm
+        return _get_llm(
+            provider=get_provider(),
+            model=model,
+            api_key=_API_KEY,
+            temperature=temperature,
+            **kwargs,
+        )
+    except ImportError:
+        # Fallback to OpenAI directly
+        from langchain_openai import ChatOpenAI
+        return ChatOpenAI(
+            model=model or "gpt-4o",
+            temperature=temperature,
+            api_key=_API_KEY,
+            **kwargs,
+        )
 
 
 # ---------------------------------------------------------------------------

@@ -101,33 +101,57 @@ def graceful_fallback(section_ref: str, fallback_value=None):
     return decorator
 
 
+_LLM_PROVIDER = None
+
+
 def get_api_key() -> str | None:
     """
-    Secure API key retrieval chain: .env → getpass → None.
+    Secure API key retrieval chain with multi-provider support.
 
     1. Loads .env file via python-dotenv
-    2. Checks OPENAI_API_KEY environment variable
-    3. Validates key is non-empty and not the placeholder
+    2. Multi-provider detection (OpenAI → Anthropic → Google) via LLM_PROVIDER
+    3. Legacy fallback to OPENAI_API_KEY environment variable
     4. Falls back to interactive getpass input
     5. Returns None if no valid key found (triggers Simulation Mode)
 
     Author: Imran Ahmad
     """
+    global _LLM_PROVIDER
     load_dotenv()
-    key = os.getenv("OPENAI_API_KEY")
 
+    # Multi-provider detection via shared utility
+    try:
+        import sys as _sys
+        _sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
+        from supporting.llm_provider import detect_provider
+        provider, key, mode = detect_provider()
+        _LLM_PROVIDER = provider
+        if mode == "LIVE":
+            return key
+    except ImportError:
+        pass  # Fall through to legacy
+
+    # Legacy: OPENAI_API_KEY
+    key = os.getenv("OPENAI_API_KEY")
     if key and key.strip() and "your-key" not in key and "your_key" not in key:
+        _LLM_PROVIDER = "openai"
         return key.strip()
 
     try:
         key = getpass.getpass(
-            "Enter your OpenAI API key (or press Enter for Simulation Mode): "
+            "Enter API key (OpenAI/Anthropic/Google) or press Enter for Simulation: "
         )
         if key and key.strip():
+            _LLM_PROVIDER = "openai"
             return key.strip()
     except (EOFError, OSError, Exception):
-        # Catches StdinNotImplementedError in non-interactive Jupyter contexts,
-        # EOFError in piped stdin, and OSError in other edge cases.
         pass
 
+    _LLM_PROVIDER = "simulation"
     return None
+
+
+def get_provider() -> str:
+    """Return the detected LLM provider name."""
+    global _LLM_PROVIDER
+    return _LLM_PROVIDER or "simulation"

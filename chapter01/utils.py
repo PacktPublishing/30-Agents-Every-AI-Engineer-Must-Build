@@ -85,10 +85,16 @@ def live_mode_banner():
 
     Author: Imran Ahmad
     """
+    provider = get_provider()
+    provider_label = {
+        "openai": "OpenAI API",
+        "anthropic": "Anthropic API (Claude)",
+        "google": "Google Gemini API",
+    }.get(provider, "API")
     banner = "=" * 60
     print(f"\n{GREEN}{BOLD}{banner}")
-    print("   LIVE MODE ACTIVE")
-    print("   Connected to OpenAI API.")
+    print(f"   LIVE MODE ACTIVE")
+    print(f"   Connected to {provider_label}.")
     print(f"{banner}{RESET}\n")
 
 
@@ -98,11 +104,17 @@ def live_mode_banner():
 # Flow: .env (dotenv) → os.getenv → getpass → SIMULATION
 # ============================================================
 
+_LLM_PROVIDER = None
+
+
 def detect_api_key():
-    """Detect an OpenAI API key using a three-tier fallback cascade.
+    """Detect an API key using a multi-provider fallback cascade.
+
+    Supports OpenAI, Anthropic, and Google Gemini. The provider is selected
+    by LLM_PROVIDER env var, or auto-detected from available keys.
 
     Tier 1: Load from .env file via python-dotenv.
-    Tier 2: Check os.getenv("OPENAI_API_KEY").
+    Tier 2: Multi-provider detection (OpenAI → Anthropic → Google).
     Tier 3: Prompt via getpass (interactive environments only).
     Fallback: Return (None, "SIMULATION") if all tiers fail.
 
@@ -112,6 +124,8 @@ def detect_api_key():
 
     Author: Imran Ahmad
     """
+    global _LLM_PROVIDER
+
     # Tier 1: Attempt to load from .env via python-dotenv
     try:
         from dotenv import load_dotenv
@@ -122,14 +136,26 @@ def detect_api_key():
     except Exception:
         log_warning("Could not load .env file. Continuing with fallback detection.")
 
-    # Tier 2: Check environment variable
+    # Tier 2: Multi-provider detection via shared utility
+    try:
+        sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
+        from supporting.llm_provider import detect_provider
+        provider, key, mode = detect_provider()
+        _LLM_PROVIDER = provider
+        if mode == "LIVE":
+            log_info(f"API key detected — provider: {provider}")
+            return key, "LIVE"
+    except ImportError:
+        pass  # Fall through to legacy detection
+
+    # Legacy: Check OPENAI_API_KEY environment variable
     api_key = os.getenv("OPENAI_API_KEY")
     if api_key and api_key.strip():
-        # Skip placeholder values from .env templates
         if "your-key" in api_key or "your_key" in api_key:
             log_warning("Placeholder API key detected. Skipping.")
         else:
             log_info("API key detected from environment variable.")
+            _LLM_PROVIDER = "openai"
             return api_key.strip(), "LIVE"
 
     # Tier 3: Interactive prompt via getpass (only in interactive terminals)
@@ -137,17 +163,79 @@ def detect_api_key():
         try:
             import getpass
             api_key = getpass.getpass(
-                "Enter your OpenAI API key (or press Enter for Simulation Mode): "
+                "Enter API key (OpenAI/Anthropic/Google) or press Enter for Simulation: "
             )
             if api_key and api_key.strip():
                 log_info("API key provided via interactive prompt.")
+                _LLM_PROVIDER = "openai"  # default assumption
                 return api_key.strip(), "LIVE"
         except (EOFError, OSError):
             pass
 
     # Fallback: Simulation Mode
     log_info("No API key detected. Activating Simulation Mode.")
+    _LLM_PROVIDER = "simulation"
     return None, "SIMULATION"
+
+
+def get_provider():
+    """Return the detected LLM provider name.
+
+    Returns:
+        str: "openai", "anthropic", "google", or "simulation"
+    """
+    global _LLM_PROVIDER
+    return _LLM_PROVIDER or "simulation"
+
+
+def get_client(api_key=None):
+    """Return a raw API client for the detected provider.
+
+    For direct API usage (not LangChain). Falls back to OpenAI.
+
+    Args:
+        api_key: API key override.
+
+    Returns:
+        Provider-specific client object.
+    """
+    provider = get_provider()
+    try:
+        sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
+        from supporting.llm_provider import get_client as _get_client
+        return _get_client(provider=provider, api_key=api_key)
+    except ImportError:
+        from openai import OpenAI
+        return OpenAI(api_key=api_key)
+
+
+def chat_completion(client, messages, model=None, temperature=0):
+    """Send a chat completion and return the response text.
+
+    Normalizes response format across OpenAI, Anthropic, and Google.
+
+    Args:
+        client: Provider client from get_client().
+        messages: List of {"role": ..., "content": ...} dicts.
+        model: Model name override.
+        temperature: Model temperature.
+
+    Returns:
+        str: The assistant's response text.
+    """
+    provider = get_provider()
+    try:
+        sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
+        from supporting.llm_provider import chat_completion as _chat_completion
+        return _chat_completion(client, provider, messages, model=model, temperature=temperature)
+    except ImportError:
+        # Fallback: assume OpenAI
+        response = client.chat.completions.create(
+            model=model or "gpt-4o",
+            messages=messages,
+            temperature=temperature,
+        )
+        return response.choices[0].message.content
 
 
 # ============================================================

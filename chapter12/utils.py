@@ -148,24 +148,43 @@ def _is_retryable(exc: Exception) -> bool:
 # ---------------------------------------------------------------------------
 
 _CURRENT_MODE = None  # Cached after first resolution
+_LLM_PROVIDER = None
 
 
 def resolve_api_key() -> str:
     """
-    Cascading API key resolution:
-        1. os.environ / .env  →  OPENAI_API_KEY
-        2. getpass prompt     →  (interactive terminals only)
-        3. Empty string       →  triggers Simulation Mode
+    Cascading API key resolution with multi-provider support.
+
+    Supports OpenAI, Anthropic, and Google Gemini via LLM_PROVIDER env var.
+
+        1. Multi-provider detection (OpenAI → Anthropic → Google)
+        2. Legacy: os.environ / .env → OPENAI_API_KEY
+        3. getpass prompt (interactive terminals only)
+        4. Empty string → triggers Simulation Mode
 
     Returns the resolved key (may be empty).
     Ref: Strategy §1.3, Mode Detection Flow
     """
-    global _CURRENT_MODE
+    global _CURRENT_MODE, _LLM_PROVIDER
+
+    # Step 0: Multi-provider detection via shared utility
+    try:
+        sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
+        from supporting.llm_provider import detect_provider
+        provider, key, mode = detect_provider()
+        _LLM_PROVIDER = provider
+        if mode == "LIVE":
+            _CURRENT_MODE = "live"
+            logger.success(f"API key detected — provider: {provider}. Live Mode enabled.")
+            return key
+    except ImportError:
+        pass  # Fall through to legacy
 
     # Step 1: Environment variable (includes .env via python-dotenv)
     key = os.environ.get("OPENAI_API_KEY", "").strip()
     if key and "your-key" not in key and "your_key" not in key:
         _CURRENT_MODE = "live"
+        _LLM_PROVIDER = "openai"
         logger.success("API key detected from environment. Live Mode enabled.")
         return key
 
@@ -174,22 +193,23 @@ def resolve_api_key() -> str:
         try:
             import getpass
             key = getpass.getpass(
-                "[Chapter 12] Enter OpenAI API key (or press Enter for Simulation Mode): "
+                "[Chapter 12] Enter API key (OpenAI/Anthropic/Google) or Enter for Simulation: "
             ).strip()
             if key:
                 os.environ["OPENAI_API_KEY"] = key
                 _CURRENT_MODE = "live"
+                _LLM_PROVIDER = "openai"
                 logger.success("API key entered via prompt. Live Mode enabled.")
                 return key
         except (EOFError, OSError):
-            pass  # Non-interactive environment; fall through
+            pass
 
     # Step 3: No key → Simulation Mode
     _CURRENT_MODE = "simulation"
+    _LLM_PROVIDER = "simulation"
     logger.info(
         "No API key detected. Running in Simulation Mode with chapter-derived "
-        "mock data. All outputs are synthetic. Supply an OpenAI API key via "
-        ".env for live mode."
+        "mock data. All outputs are synthetic. Supply an API key via .env for live mode."
     )
     return ""
 
@@ -210,6 +230,14 @@ def get_mode() -> str:
 def is_simulation() -> bool:
     """Convenience check: True if running in Simulation Mode."""
     return get_mode() == "simulation"
+
+
+def get_provider() -> str:
+    """Return the detected LLM provider name."""
+    global _LLM_PROVIDER
+    if _LLM_PROVIDER is None:
+        resolve_api_key()
+    return _LLM_PROVIDER or "simulation"
 
 
 # ---------------------------------------------------------------------------
