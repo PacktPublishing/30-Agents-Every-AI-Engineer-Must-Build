@@ -37,9 +37,9 @@ PROVIDER_MODELS = {
         "legacy": "claude-sonnet-4-20250514",
     },
     "google": {
-        "default": "gemini-2.0-flash",
-        "fast": "gemini-2.0-flash",
-        "legacy": "gemini-1.5-flash",
+        "default": "gemini-2.5-flash",
+        "fast": "gemini-2.5-flash",
+        "legacy": "gemini-2.0-flash-lite",
     },
 }
 
