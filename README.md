@@ -39,13 +39,18 @@ cd 30-Agents-Every-AI-Engineer-Must-Build
 # Navigate to a chapter
 cd chapter05
 
-# Install dependencies
+# Install base dependencies
 pip install -r requirements.txt
 
-# (Optional) Configure your LLM provider for Live Mode
+# Install your chosen provider's dependencies
+pip install -r requirements-openai.txt    # For OpenAI GPT-4o
+pip install -r requirements-claude.txt    # For Anthropic Claude Sonnet 4
+pip install -r requirements-gemini.txt    # For Google Gemini Flash 2.5
+pip install -r requirements-ollama.txt    # For local Ollama (no API key)
+
+# (Optional) Configure your API key for Live Mode
 cp .env.template .env
 # Set ONE of: OPENAI_API_KEY, ANTHROPIC_API_KEY, or GOOGLE_API_KEY
-# Or use Ollama locally (no API key needed — see below)
 
 # Launch the notebook
 jupyter notebook ch05_foundational_architectures.ipynb

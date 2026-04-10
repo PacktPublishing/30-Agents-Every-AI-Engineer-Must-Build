@@ -75,7 +75,11 @@ chapter15/
 ├── README.md                                              # This file
 ├── AGENTS.md                                              # Agentic AI metadata
 ├── LICENSE                                                # MIT License
-├── requirements.txt                                       # Pinned Python dependencies
+├── requirements.txt                       # Base/shared dependencies
+├── requirements-openai.txt                # + OpenAI provider deps
+├── requirements-claude.txt                # + Anthropic Claude provider deps
+├── requirements-gemini.txt                # + Google Gemini provider deps
+├── requirements-ollama.txt                # + Local Ollama provider deps
 ├── .env.template                                          # API key template (zero-hardcode policy)
 ├── .gitignore                                             # Standard Python + .env exclusions
 ├── TROUBLESHOOTING.md                                     # Dependency conflict resolution guide
@@ -126,7 +130,7 @@ All agent operations are wrapped in the `@graceful_fallback` decorator:
 ## Requirements
 
 - **Python:** 3.10+ (tested up to 3.12)
-- **Dependencies:** See `requirements.txt` (includes `openai`, `numpy`, `networkx`, `python-dotenv`)
+- **Dependencies:** See `requirements.txt` (base) and `requirements-<provider>.txt` for your LLM provider (includes `openai`, `numpy`, `networkx`, `python-dotenv`)
 - **API Key:** Optional — any of OpenAI, Anthropic, Google, or local Ollama. Simulation Mode works without any.
 
 ## Troubleshooting

@@ -104,7 +104,7 @@ For local LLM setup instructions (Ollama + DeepSeek on Windows, macOS, and Linux
 ## Requirements
 
 - **Python:** 3.10+ (recommended: 3.11 or 3.12)
-- **Dependencies:** See `requirements.txt`
+- **Dependencies:** See `requirements.txt` (base) and `requirements-<provider>.txt` for your LLM provider
 - **API Key:** Optional — any of OpenAI, Anthropic, Google, or local Ollama. Simulation Mode works without any.
 
 ## License

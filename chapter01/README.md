@@ -65,7 +65,11 @@ ch01-foundations-of-agent-engineering/
 │
 ├── README.md                          # This file
 ├── AGENTS.md                          # Agentic AI Foundation 2026 metadata
-├── requirements.txt                   # Pinned Python dependencies
+├── requirements.txt                       # Base/shared dependencies
+├── requirements-openai.txt                # + OpenAI provider deps
+├── requirements-claude.txt                # + Anthropic Claude provider deps
+├── requirements-gemini.txt                # + Google Gemini provider deps
+├── requirements-ollama.txt                # + Local Ollama provider deps
 ├── .env.template                      # API key template (zero-hardcode policy)
 ├── .gitignore                         # Standard Python + .env exclusions
 ├── TROUBLESHOOTING.md                 # Dependency conflict resolution guide
@@ -118,7 +122,7 @@ The Resilience Demo cell (Cell Group 9) uses `MockLLM(failure_rate=1.0)` to trig
 ## Requirements
 
 - **Python:** 3.10+ (recommended: 3.11 or 3.12)
-- **Dependencies:** See `requirements.txt`
+- **Dependencies:** See `requirements.txt` (base) and `requirements-<provider>.txt` for your LLM provider
 - **API Key:** Optional — any of OpenAI, Anthropic, Google, or local Ollama. Simulation Mode works without any.
 
 ## Troubleshooting

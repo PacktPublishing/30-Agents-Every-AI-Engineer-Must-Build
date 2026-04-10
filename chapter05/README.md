@@ -65,7 +65,11 @@ chapter05/
 ├── README.md                                  # This file
 ├── AGENTS.md                                  # Agentic AI metadata
 ├── TROUBLESHOOTING.md                         # Dependency conflict resolution guide
-├── requirements.txt                           # Pinned Python dependencies
+├── requirements.txt                       # Base/shared dependencies
+├── requirements-openai.txt                # + OpenAI provider deps
+├── requirements-claude.txt                # + Anthropic Claude provider deps
+├── requirements-gemini.txt                # + Google Gemini provider deps
+├── requirements-ollama.txt                # + Local Ollama provider deps
 ├── .env.template                              # API key template (zero-hardcode policy)
 ├── .gitignore                                 # Standard Python + .env exclusions
 │
@@ -114,7 +118,7 @@ All agent operations are wrapped in the `@fail_gracefully` decorator from `resil
 ## Requirements
 
 - **Python:** 3.10+ (required — the code uses `str | None` union syntax)
-- **Dependencies:** See `requirements.txt`
+- **Dependencies:** See `requirements.txt` (base) and `requirements-<provider>.txt` for your LLM provider
 - **API Key:** Optional — any of OpenAI, Anthropic, Google, or local Ollama. Simulation Mode works without any.
 
 ## Troubleshooting

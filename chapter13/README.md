@@ -70,7 +70,11 @@ chapter13/
 ├── README.md                                          # This file
 ├── AGENTS.md                                          # Agentic AI metadata
 ├── LICENSE                                            # MIT License
-├── requirements.txt                                   # Pinned Python dependencies
+├── requirements.txt                       # Base/shared dependencies
+├── requirements-openai.txt                # + OpenAI provider deps
+├── requirements-claude.txt                # + Anthropic Claude provider deps
+├── requirements-gemini.txt                # + Google Gemini provider deps
+├── requirements-ollama.txt                # + Local Ollama provider deps
 ├── .env.template                                      # API key template (zero-hardcode policy)
 ├── .gitignore                                         # Standard Python + .env exclusions
 ├── troubleshooting.md                                 # Dependency conflict resolution guide
@@ -116,7 +120,7 @@ All agent operations are wrapped in resilience decorators:
 ## Requirements
 
 - **Python:** 3.10+ (recommended: 3.11 or 3.12)
-- **Dependencies:** See `requirements.txt` (includes `numpy`, `langchain-core`, `fhir.resources`, `aiohttp`, `scipy`)
+- **Dependencies:** See `requirements.txt` (base) and `requirements-<provider>.txt` for your LLM provider (includes `numpy`, `langchain-core`, `fhir.resources`, `aiohttp`, `scipy`)
 - **API Key:** Optional — any of OpenAI, Anthropic, Google, or local Ollama. Simulation Mode works without any.
 
 ## Troubleshooting

@@ -70,9 +70,14 @@ Read the full case study: **[USECASE.md](USECASE.md)** — includes the 4 buildi
 chapter11/
 │
 ├── README.md                              # This file
+├── LOCAL_LLM_SETUP.md                     # Ollama setup guide (Win/Mac/Linux)
 ├── AGENTS.md                              # Agentic AI metadata
 ├── LICENSE                                # MIT License
-├── requirements.txt                       # Pinned Python dependencies
+├── requirements.txt                       # Base/shared dependencies
+├── requirements-openai.txt                # + OpenAI provider deps
+├── requirements-claude.txt                # + Anthropic Claude provider deps
+├── requirements-gemini.txt                # + Google Gemini provider deps
+├── requirements-ollama.txt                # + Local Ollama provider deps
 ├── .env.template                          # Token template (zero-hardcode policy)
 ├── .gitignore                             # Standard Python + .env exclusions
 ├── troubleshooting.md                     # Dependency conflict resolution guide
@@ -119,7 +124,7 @@ All agent operations are wrapped in the `@graceful_fallback` decorator:
 ## Requirements
 
 - **Python:** 3.10+ (recommended: 3.11 or 3.12)
-- **Dependencies:** See `requirements.txt`
+- **Dependencies:** See `requirements.txt` (base) and `requirements-<provider>.txt` for your LLM provider
 - **API Key / GPU:** Optional (Simulation Mode works without either)
 
 For Live Mode: CUDA-capable GPU with 16+ GB VRAM and a Hugging Face account with LLaVA 1.5 access.
