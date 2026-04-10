@@ -8,7 +8,7 @@
 
 This repository is the executable companion to **Chapter 13** of *30 Agents Every AI Engineer Must Build*. It explores two agent architectures for high-stakes, information-intensive domains: the Healthcare Intelligence Agent (four-layer architecture with data ingestion, clinical knowledge integration, Bayesian diagnostic reasoning, and audience-adapted explanation generation — including safety escalation, provenance tracking, and immutable audit trails) and the Scientific Discovery Agent (multi-phase pipeline for fault-tolerant literature synthesis, information-theoretic knowledge gap detection, abductive hypothesis generation, and closed-loop experimental feedback).
 
-Every code cell runs **without an API key** in Simulation Mode, powered by context-aware mock responses derived directly from Chapter 13 content. When an OpenAI API key is provided, the notebook seamlessly switches to Live Mode.
+Every code cell runs **without an API key** in Simulation Mode, powered by context-aware mock responses derived directly from Chapter 13 content. When an API key is provided (OpenAI, Anthropic, or Google) or Ollama is running locally, the notebook seamlessly switches to Live Mode. Each provider has its own pre-executed notebook variant.
 
 ## Quickstart
 
@@ -26,9 +26,9 @@ source .venv/bin/activate   # Linux/Mac
 # 3. Install dependencies
 pip install -r requirements.txt
 
-# 4. (Optional) Add your OpenAI API key for Live Mode
+# 4. (Optional) Configure your LLM provider for Live Mode
 cp .env.template .env
-# Edit .env and add your key, or skip this step for Simulation Mode
+# Set OPENAI_API_KEY, ANTHROPIC_API_KEY, or GOOGLE_API_KEY — or use Ollama locally
 
 # 5. Launch the notebook
 jupyter notebook chapter13_healthcare_scientific_agents.ipynb
@@ -83,16 +83,21 @@ When no API key is detected, the notebook activates **Simulation Mode**:
 
 API key detection follows a three-tier cascade: `.env` file → environment variable → interactive prompt → Simulation Mode.
 
-## Pre-Executed Example Runs
+## Pre-Executed Notebook Variants
 
-Two pre-executed notebooks are included so you can review the full output without running any code or installing dependencies:
+Every notebook is pre-executed with outputs saved. Pick the variant that matches your setup:
 
-| Notebook | Mode | Description |
+| Notebook | Provider | Description |
 |---|---|---|
-| [EXAMPLE_RUN_SIMULATION_MODE_chapter13_healthcare_scientific_agents.ipynb](EXAMPLE_RUN_SIMULATION_MODE_chapter13_healthcare_scientific_agents.ipynb) | Simulation | Executed without an API key — MockLLM responses |
-| [EXAMPLE_RUN_LLM_MODE_chapter13_healthcare_scientific_agents.ipynb](EXAMPLE_RUN_LLM_MODE_chapter13_healthcare_scientific_agents.ipynb) | Live LLM | Executed with an OpenAI API key — real GPT responses |
+| [ch13_healthcare_scientific_agents__RUN_NO_KEY_SIMULATION.ipynb](ch13_healthcare_scientific_agents__RUN_NO_KEY_SIMULATION.ipynb) | Simulation | No API key — MockLLM responses |
+| [ch13_healthcare_scientific_agents__RUN_OPENAI_GPT4o.ipynb](ch13_healthcare_scientific_agents__RUN_OPENAI_GPT4o.ipynb) | OpenAI GPT-4o | Live LLM via `OPENAI_API_KEY` |
+| [ch13_healthcare_scientific_agents__RUN_CLAUDE_Sonnet4.ipynb](ch13_healthcare_scientific_agents__RUN_CLAUDE_Sonnet4.ipynb) | Claude Sonnet 4 | Live LLM via `ANTHROPIC_API_KEY` |
+| [ch13_healthcare_scientific_agents__RUN_GEMINI_Flash25.ipynb](ch13_healthcare_scientific_agents__RUN_GEMINI_Flash25.ipynb) | Gemini Flash 2.5 | Live LLM via `GOOGLE_API_KEY` |
+| [ch13_healthcare_scientific_agents__RUN_LOCAL_OLLAMA_DeepSeek_V2_16B.ipynb](ch13_healthcare_scientific_agents__RUN_LOCAL_OLLAMA_DeepSeek_V2_16B.ipynb) | Local Ollama | DeepSeek V2 16B — no API key |
 
-Compare both to see how Simulation Mode mirrors Live LLM behavior.
+All variants produce equivalent output. Compare them to see how different providers handle the same agent tasks.
+
+For local LLM setup instructions (Ollama + DeepSeek on Windows, macOS, and Linux), see **[LOCAL_LLM_SETUP.md](LOCAL_LLM_SETUP.md)**.
 
 ## Resilience Architecture
 
@@ -106,7 +111,7 @@ All agent operations are wrapped in resilience decorators:
 
 - **Python:** 3.10+ (recommended: 3.11 or 3.12)
 - **Dependencies:** See `requirements.txt` (includes `numpy`, `langchain-core`, `fhir.resources`, `aiohttp`, `scipy`)
-- **API Key:** Optional (Simulation Mode works without one)
+- **API Key:** Optional — any of OpenAI, Anthropic, Google, or local Ollama. Simulation Mode works without any.
 
 ## Troubleshooting
 

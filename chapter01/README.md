@@ -8,7 +8,7 @@
 
 This repository is the executable companion to **Chapter 1** of *AI Agents*. It transforms the chapter's theoretical foundations into runnable Python code, covering the cognitive loop, agent brain patterns, interoperability protocols, interaction paradigms, the Agentic AI Progression Framework, and real-world business case studies.
 
-Every code cell runs **without an API key** in Simulation Mode, powered by a `MockLLM` engine that returns chapter-derived responses. When an OpenAI API key is provided, the notebook seamlessly switches to Live Mode.
+Every code cell runs **without an API key** in Simulation Mode, powered by a `MockLLM` engine that returns chapter-derived responses. When an API key is provided (OpenAI, Anthropic, or Google) or Ollama is running locally, the notebook seamlessly switches to Live Mode. Each provider has its own pre-executed notebook variant.
 
 ## Quickstart
 
@@ -26,9 +26,9 @@ source .venv/bin/activate   # Linux/Mac
 # 3. Install dependencies
 pip install -r requirements.txt
 
-# 4. (Optional) Add your OpenAI API key for Live Mode
+# 4. (Optional) Configure your LLM provider for Live Mode
 cp .env.template .env
-# Edit .env and add your key, or skip this step for Simulation Mode
+# Set OPENAI_API_KEY, ANTHROPIC_API_KEY, or GOOGLE_API_KEY — or use Ollama locally
 
 # 5. Launch the notebook
 jupyter notebook ch01_foundations_of_agent_engineering.ipynb
@@ -76,23 +76,28 @@ ch01-foundations-of-agent-engineering/
 
 When no API key is detected, the notebook activates **Simulation Mode**:
 
-- `MockLLM` replaces the OpenAI client transparently
+- `MockLLM` replaces the LLM client transparently (works identically across all providers)
 - All 22 responses are pre-authored from Chapter 1 content
 - A yellow `SIMULATION MODE` banner confirms activation at startup
 - Every cell executes successfully with no external dependencies
 
 API key detection follows a three-tier cascade: `.env` file → environment variable → interactive prompt → Simulation Mode.
 
-## Pre-Executed Example Runs
+## Pre-Executed Notebook Variants
 
-Two pre-executed notebooks are included so you can review the full output without running any code or installing dependencies:
+Every notebook is pre-executed with outputs saved. Pick the variant that matches your setup:
 
-| Notebook | Mode | Description |
+| Notebook | Provider | Description |
 |---|---|---|
-| [EXAMPLE_RUN_SIMULATION_MODE_ch01_foundations_of_agent_engineering.ipynb](EXAMPLE_RUN_SIMULATION_MODE_ch01_foundations_of_agent_engineering.ipynb) | Simulation | Executed without an API key — MockLLM responses |
-| [EXAMPLE_RUN_LLM_MODE_ch01_foundations_of_agent_engineering.ipynb](EXAMPLE_RUN_LLM_MODE_ch01_foundations_of_agent_engineering.ipynb) | Live LLM | Executed with an OpenAI API key — real GPT responses |
+| [ch01_foundations_of_agent_engineering__RUN_NO_KEY_SIMULATION.ipynb](ch01_foundations_of_agent_engineering__RUN_NO_KEY_SIMULATION.ipynb) | Simulation | No API key — MockLLM responses |
+| [ch01_foundations_of_agent_engineering__RUN_OPENAI_GPT4o.ipynb](ch01_foundations_of_agent_engineering__RUN_OPENAI_GPT4o.ipynb) | OpenAI GPT-4o | Live LLM via `OPENAI_API_KEY` |
+| [ch01_foundations_of_agent_engineering__RUN_CLAUDE_Sonnet4.ipynb](ch01_foundations_of_agent_engineering__RUN_CLAUDE_Sonnet4.ipynb) | Claude Sonnet 4 | Live LLM via `ANTHROPIC_API_KEY` |
+| [ch01_foundations_of_agent_engineering__RUN_GEMINI_Flash25.ipynb](ch01_foundations_of_agent_engineering__RUN_GEMINI_Flash25.ipynb) | Gemini Flash 2.5 | Live LLM via `GOOGLE_API_KEY` |
+| [ch01_foundations_of_agent_engineering__RUN_LOCAL_OLLAMA_DeepSeek_V2_16B.ipynb](ch01_foundations_of_agent_engineering__RUN_LOCAL_OLLAMA_DeepSeek_V2_16B.ipynb) | Local Ollama | DeepSeek V2 16B — no API key |
 
-Compare both to see how Simulation Mode mirrors Live LLM behavior.
+All variants produce equivalent output. Compare them to see how different providers handle the same agent tasks.
+
+For local LLM setup instructions (Ollama + DeepSeek on Windows, macOS, and Linux), see **[LOCAL_LLM_SETUP.md](LOCAL_LLM_SETUP.md)**.
 
 ## Resilience Architecture
 
@@ -108,7 +113,7 @@ The Resilience Demo cell (Cell Group 9) uses `MockLLM(failure_rate=1.0)` to trig
 
 - **Python:** 3.10+ (recommended: 3.11 or 3.12)
 - **Dependencies:** See `requirements.txt`
-- **API Key:** Optional (Simulation Mode works without one)
+- **API Key:** Optional — any of OpenAI, Anthropic, Google, or local Ollama. Simulation Mode works without any.
 
 ## Troubleshooting
 

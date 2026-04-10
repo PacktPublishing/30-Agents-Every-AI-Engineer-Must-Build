@@ -8,7 +8,7 @@
 
 This repository is the executable companion to **Chapter 14** of *30 Agents Every AI Engineer Must Build*. It implements two production-grade agent architectures for regulated domains: the Financial Advisory Agent (supervised multi-agent system with LangGraph StateGraph coordinating Market Data, Financial Analysis, and News specialist agents — featuring composite risk scoring, client tolerance adjustment, and compliance-by-architecture validation) and the Legal Intelligence Agent (RAG-powered legal research with hybrid retrieval, authority-weighted ranking, a three-stage precedent-finding pipeline, contract analysis with parallel compliance validation, and citation verification to detect hallucinated case law).
 
-Every code cell runs **without an API key** in Simulation Mode, powered by `MockChatOpenAI`, `MockStructuredChain`, and `MockVectorStore` that return chapter-derived responses. When API keys are provided, the notebook seamlessly switches to Live Mode on a per-service basis.
+Every code cell runs **without an API key** in Simulation Mode, powered by `MockChatOpenAI`, `MockStructuredChain`, and `MockVectorStore` that return chapter-derived responses. When API keys are provided (OpenAI, Anthropic, or Google) or Ollama is running locally, the notebook seamlessly switches to Live Mode. Each provider has its own pre-executed notebook variant.
 
 ## Quickstart
 
@@ -26,9 +26,9 @@ source .venv/bin/activate   # Linux/Mac
 # 3. Install dependencies
 pip install -r requirements.txt
 
-# 4. (Optional) Add your API keys for Live Mode
+# 4. (Optional) Configure your LLM provider for Live Mode
 cp .env.template .env
-# Edit .env and add your keys, or skip this step for Simulation Mode
+# Set OPENAI_API_KEY, ANTHROPIC_API_KEY, or GOOGLE_API_KEY — or use Ollama locally
 
 # 5. Launch the notebook
 jupyter notebook chapter14_financial_legal_agents.ipynb
@@ -79,7 +79,7 @@ chapter14/
 ├── chapter14_financial_legal_agents.ipynb     # Primary deliverable
 │
 ├── mock_llm.py                               # ColorLogger, ServiceConfig, @graceful_fallback,
-│                                             #   MockChatOpenAI, MockStructuredChain, MockEmbeddingModel,
+│                                             #   MockLLM, MockStructuredChain, MockEmbeddingModel,
 │                                             #   MockVectorStore
 └── mock_data.py                              # MOCK_STOCK_DATA, MOCK_FINNHUB_*, MOCK_TAVILY_NEWS,
                                               #   MOCK_CLIENT_PROFILES, MOCK_LEGAL_CASES, MOCK_CONTRACT
@@ -89,22 +89,27 @@ chapter14/
 
 When API keys are absent, the system automatically switches to **Simulation Mode** on a per-service basis. A color-coded dashboard at startup shows each service's status:
 
-- **OpenAI (LLM):** `MockChatOpenAI` with keyword-based mock responses
+- **LLM:** `MockLLM` with keyword-based mock responses
 - **Finnhub (Financial Data):** Deterministic mock stock data, quotes, and financials
 - **Tavily (News Search):** Pre-authored financial news results
 
-A user with an OpenAI key but no Finnhub key gets real LLM reasoning over mock financial data. The `@graceful_fallback` decorator wraps every external call, ensuring the notebook never crashes.
+A user with any LLM provider key (but no Finnhub key) gets real LLM reasoning over mock financial data. The `@graceful_fallback` decorator wraps every external call, ensuring the notebook never crashes.
 
-## Pre-Executed Example Runs
+## Pre-Executed Notebook Variants
 
-Two pre-executed notebooks are included so you can review the full output without running any code or installing dependencies:
+Every notebook is pre-executed with outputs saved. Pick the variant that matches your setup:
 
-| Notebook | Mode | Description |
+| Notebook | Provider | Description |
 |---|---|---|
-| [EXAMPLE_RUN_SIMULATION_MODE_chapter14_financial_legal_agents.ipynb](EXAMPLE_RUN_SIMULATION_MODE_chapter14_financial_legal_agents.ipynb) | Simulation | Executed without an API key — MockLLM responses |
-| [EXAMPLE_RUN_LLM_MODE_chapter14_financial_legal_agents.ipynb](EXAMPLE_RUN_LLM_MODE_chapter14_financial_legal_agents.ipynb) | Live LLM | Executed with an OpenAI API key — real GPT responses |
+| [ch14_financial_legal_agents__RUN_NO_KEY_SIMULATION.ipynb](ch14_financial_legal_agents__RUN_NO_KEY_SIMULATION.ipynb) | Simulation | No API key — MockLLM responses |
+| [ch14_financial_legal_agents__RUN_OPENAI_GPT4o.ipynb](ch14_financial_legal_agents__RUN_OPENAI_GPT4o.ipynb) | OpenAI GPT-4o | Live LLM via `OPENAI_API_KEY` |
+| [ch14_financial_legal_agents__RUN_CLAUDE_Sonnet4.ipynb](ch14_financial_legal_agents__RUN_CLAUDE_Sonnet4.ipynb) | Claude Sonnet 4 | Live LLM via `ANTHROPIC_API_KEY` |
+| [ch14_financial_legal_agents__RUN_GEMINI_Flash25.ipynb](ch14_financial_legal_agents__RUN_GEMINI_Flash25.ipynb) | Gemini Flash 2.5 | Live LLM via `GOOGLE_API_KEY` |
+| [ch14_financial_legal_agents__RUN_LOCAL_OLLAMA_DeepSeek_V2_16B.ipynb](ch14_financial_legal_agents__RUN_LOCAL_OLLAMA_DeepSeek_V2_16B.ipynb) | Local Ollama | DeepSeek V2 16B — no API key |
 
-Compare both to see how Simulation Mode mirrors Live LLM behavior.
+All variants produce equivalent output. Compare them to see how different providers handle the same agent tasks.
+
+For local LLM setup instructions (Ollama + DeepSeek on Windows, macOS, and Linux), see **[LOCAL_LLM_SETUP.md](LOCAL_LLM_SETUP.md)**.
 
 ## Resilience Architecture
 
@@ -120,7 +125,7 @@ All agent operations are wrapped in the `@graceful_fallback` decorator:
 - **Dependencies:** See `requirements.txt`
 - **API Keys:** Optional (Simulation Mode works without any)
 
-Optional API services for Live Mode: OpenAI (gpt-4o-mini), Finnhub (free tier at finnhub.io), Tavily (free tier at tavily.com).
+Optional API services for Live Mode: OpenAI, Anthropic (Claude Sonnet 4), Google (Gemini Flash 2.5), or local Ollama (DeepSeek V2), Finnhub (free tier at finnhub.io), Tavily (free tier at tavily.com).
 
 ## Troubleshooting
 

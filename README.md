@@ -42,8 +42,13 @@ cd chapter05
 # Install dependencies
 pip install -r requirements.txt
 
-# Run the examples
-python autonomous_decision_agent.py
+# (Optional) Configure your LLM provider for Live Mode
+cp .env.template .env
+# Set ONE of: OPENAI_API_KEY, ANTHROPIC_API_KEY, or GOOGLE_API_KEY
+# Or use Ollama locally (no API key needed — see below)
+
+# Launch the notebook
+jupyter notebook ch05_foundational_architectures.ipynb
 ```
 
 ### Software and Hardware Requirements
@@ -55,22 +60,26 @@ python autonomous_decision_agent.py
 | **Python** | 3.10 or later |
 | **GPU** | NVIDIA GPU with CUDA 12+ (recommended, not required) |
 | **Tools** | git, terminal, virtual environment tool (venv, conda, or uv) |
-| **API Keys** | **None required** — every chapter runs in Simulation Mode with built-in MockLLM responses. Optional: OpenAI, Anthropic, or Hugging Face keys unlock Live Mode (varies by chapter) |
+| **API Keys** | **None required** — every chapter runs in Simulation Mode with built-in MockLLM responses. Optional: OpenAI, Anthropic, or Google API key unlocks Live Mode. Local Ollama requires no key. |
+| **Ollama** | Optional — for local LLM mode: [install Ollama](https://ollama.com), then `ollama pull deepseek-v2:16b` and `ollama pull llama3.1:8b`. 16 GB+ RAM recommended. |
 
-### Pre-Executed Example Notebooks
+### Choose Your LLM Provider
 
-Every chapter includes **two pre-executed notebooks** so you can review the full output without running any code:
+Every chapter includes **five pre-executed notebook variants** — pick the one that matches your setup:
 
-| File Pattern | Mode | Description |
-|---|---|---|
-| `EXAMPLE_RUN_SIMULATION_MODE_<notebook>.ipynb` | Simulation | Executed without an API key — all responses come from the chapter's MockLLM with pre-authored, curriculum-aligned output |
-| `EXAMPLE_RUN_LLM_MODE_<notebook>.ipynb` | Live LLM | Executed with an OpenAI API key — all responses come from GPT-4o/GPT-4o-mini via the OpenAI API |
+| Notebook Suffix | Provider | API Key | Model |
+|---|---|---|---|
+| `__RUN_NO_KEY_SIMULATION` | None (MockLLM) | None | Built-in chapter-derived mock responses |
+| `__RUN_OPENAI_GPT4o` | OpenAI | `OPENAI_API_KEY` | GPT-4o / GPT-4o-mini |
+| `__RUN_CLAUDE_Sonnet4` | Anthropic | `ANTHROPIC_API_KEY` | Claude Sonnet 4 |
+| `__RUN_GEMINI_Flash25` | Google | `GOOGLE_API_KEY` | Gemini Flash 2.5 |
+| `__RUN_LOCAL_OLLAMA_DeepSeek_V2_16B` | Ollama (local) | None | DeepSeek V2 16B + Llama 3.1 8B embeddings |
 
-Both notebooks produce identical cell structure with different output — compare them side by side to see how Simulation Mode faithfully mirrors Live LLM behavior. This is useful for:
+All five variants produce equivalent pedagogical output with identical cell structure. Every notebook is pre-executed with outputs saved, so you can browse them directly on GitHub without running any code.
 
-- **Reviewing output before installing dependencies** — browse the executed notebooks directly on GitHub
-- **Comparing mock vs. live responses** — verify that Simulation Mode covers the same scenarios
-- **Validating your own runs** — after executing a notebook, compare your output against the example runs
+- **No setup at all?** Open the `__RUN_NO_KEY_SIMULATION` notebook — it runs entirely on MockLLM with no dependencies.
+- **Want real LLM output?** Set one API key in `.env` and open the matching notebook.
+- **Prefer local inference?** Install [Ollama](https://ollama.com), pull the models, and open the `__RUN_LOCAL_OLLAMA_DeepSeek_V2_16B` notebook — no API key, no cloud calls, everything stays on your machine. See [LOCAL_LLM_SETUP.md](chapter01/LOCAL_LLM_SETUP.md) for step-by-step instructions on Windows, macOS, and Linux.
 
 ---
 

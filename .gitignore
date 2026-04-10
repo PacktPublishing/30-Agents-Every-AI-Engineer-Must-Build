@@ -2,6 +2,7 @@ cat >> .gitignore << 'EOF'
 
 # Local environment files
 .env
+CLAUD.md
 .envs/
 __pycache__/
 *.pyc

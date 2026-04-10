@@ -86,16 +86,21 @@ When no Hugging Face token or CUDA GPU is detected, the notebook activates **Sim
 - Every cell executes successfully with no GPU or external dependencies
 - Outputs are deterministic and chapter-accurate
 
-## Pre-Executed Example Runs
+## Pre-Executed Notebook Variants
 
-Two pre-executed notebooks are included so you can review the full output without running any code or installing dependencies:
+Every notebook is pre-executed with outputs saved. Pick the variant that matches your setup:
 
-| Notebook | Mode | Description |
+| Notebook | Provider | Description |
 |---|---|---|
-| [EXAMPLE_RUN_SIMULATION_MODE_chapter_11_multimodal_agents.ipynb](EXAMPLE_RUN_SIMULATION_MODE_chapter_11_multimodal_agents.ipynb) | Simulation | Executed without an API key — MockLLM responses |
-| [EXAMPLE_RUN_LLM_MODE_chapter_11_multimodal_agents.ipynb](EXAMPLE_RUN_LLM_MODE_chapter_11_multimodal_agents.ipynb) | Live LLM | Executed with an OpenAI API key — real GPT responses |
+| [ch11_multimodal_agents__RUN_NO_KEY_SIMULATION.ipynb](ch11_multimodal_agents__RUN_NO_KEY_SIMULATION.ipynb) | Simulation | No API key — MockLLM responses |
+| [ch11_multimodal_agents__RUN_OPENAI_GPT4o.ipynb](ch11_multimodal_agents__RUN_OPENAI_GPT4o.ipynb) | OpenAI GPT-4o | Live LLM via `OPENAI_API_KEY` |
+| [ch11_multimodal_agents__RUN_CLAUDE_Sonnet4.ipynb](ch11_multimodal_agents__RUN_CLAUDE_Sonnet4.ipynb) | Claude Sonnet 4 | Live LLM via `ANTHROPIC_API_KEY` |
+| [ch11_multimodal_agents__RUN_GEMINI_Flash25.ipynb](ch11_multimodal_agents__RUN_GEMINI_Flash25.ipynb) | Gemini Flash 2.5 | Live LLM via `GOOGLE_API_KEY` |
+| [ch11_multimodal_agents__RUN_LOCAL_OLLAMA_DeepSeek_V2_16B.ipynb](ch11_multimodal_agents__RUN_LOCAL_OLLAMA_DeepSeek_V2_16B.ipynb) | Local Ollama | DeepSeek V2 16B — no API key |
 
-Compare both to see how Simulation Mode mirrors Live LLM behavior.
+All variants produce equivalent output. Compare them to see how different providers handle the same agent tasks.
+
+For local LLM setup instructions (Ollama + DeepSeek on Windows, macOS, and Linux), see **[LOCAL_LLM_SETUP.md](LOCAL_LLM_SETUP.md)**.
 
 ## Resilience Architecture
 

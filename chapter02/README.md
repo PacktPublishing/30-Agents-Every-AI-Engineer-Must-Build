@@ -8,7 +8,7 @@
 
 This repository is the executable companion to **Chapter 2** of *30 Agents Every AI Engineer Must Build*. It covers the full agent engineering stack: frameworks (LangChain, LangGraph, LlamaIndex, AutoGPT, CrewAI, AutoGen), LLM selection guidelines, vector databases, RAG pipelines, tool integration patterns, and cloud-native development platforms.
 
-Every code cell runs **without an API key** in Simulation Mode, powered by a `MockLLM` layer that returns chapter-derived responses. When an OpenAI API key is provided, the notebook seamlessly switches to Live Mode.
+Every code cell runs **without an API key** in Simulation Mode, powered by a `MockLLM` layer that returns chapter-derived responses. When an API key is provided (OpenAI, Anthropic, or Google) or Ollama is running locally, the notebook seamlessly switches to Live Mode. Each provider has its own pre-executed notebook variant.
 
 ## Quickstart
 
@@ -26,9 +26,9 @@ source .venv/bin/activate   # Linux/Mac
 # 3. Install dependencies
 pip install -r requirements.txt
 
-# 4. (Optional) Add your OpenAI API key for Live Mode
+# 4. (Optional) Configure your LLM provider for Live Mode
 cp .env.template .env
-# Edit .env and add your key, or skip this step for Simulation Mode
+# Set OPENAI_API_KEY, ANTHROPIC_API_KEY, or GOOGLE_API_KEY — or use Ollama locally
 
 # 5. Launch the notebook
 jupyter notebook chapter_02_agent_toolkit.ipynb
@@ -69,7 +69,7 @@ chapter02/
 
 When no API key is detected, the notebook activates **Simulation Mode**:
 
-- `MockLLM` replaces the OpenAI client transparently
+- `MockLLM` replaces the LLM client transparently (works identically across all providers)
 - All responses are pre-authored from Chapter 2 content
 - A `[SIMULATION]` prefix confirms activation at startup
 - Every cell executes successfully with no external dependencies
@@ -79,22 +79,27 @@ Both modes use color-coded logging:
 - **Green** `[SUCCESS]`: Completed steps, valid returns
 - **Red** `[HANDLED ERROR]`: Caught exceptions, fallback activation
 
-## Pre-Executed Example Runs
+## Pre-Executed Notebook Variants
 
-Two pre-executed notebooks are included so you can review the full output without running any code or installing dependencies:
+Every notebook is pre-executed with outputs saved. Pick the variant that matches your setup:
 
-| Notebook | Mode | Description |
+| Notebook | Provider | Description |
 |---|---|---|
-| [EXAMPLE_RUN_SIMULATION_MODE_chapter_02_agent_toolkit.ipynb](EXAMPLE_RUN_SIMULATION_MODE_chapter_02_agent_toolkit.ipynb) | Simulation | Executed without an API key — MockLLM responses |
-| [EXAMPLE_RUN_LLM_MODE_chapter_02_agent_toolkit.ipynb](EXAMPLE_RUN_LLM_MODE_chapter_02_agent_toolkit.ipynb) | Live LLM | Executed with an OpenAI API key — real GPT responses |
+| [ch02_agent_toolkit__RUN_NO_KEY_SIMULATION.ipynb](ch02_agent_toolkit__RUN_NO_KEY_SIMULATION.ipynb) | Simulation | No API key — MockLLM responses |
+| [ch02_agent_toolkit__RUN_OPENAI_GPT4o.ipynb](ch02_agent_toolkit__RUN_OPENAI_GPT4o.ipynb) | OpenAI GPT-4o | Live LLM via `OPENAI_API_KEY` |
+| [ch02_agent_toolkit__RUN_CLAUDE_Sonnet4.ipynb](ch02_agent_toolkit__RUN_CLAUDE_Sonnet4.ipynb) | Claude Sonnet 4 | Live LLM via `ANTHROPIC_API_KEY` |
+| [ch02_agent_toolkit__RUN_GEMINI_Flash25.ipynb](ch02_agent_toolkit__RUN_GEMINI_Flash25.ipynb) | Gemini Flash 2.5 | Live LLM via `GOOGLE_API_KEY` |
+| [ch02_agent_toolkit__RUN_LOCAL_OLLAMA_DeepSeek_V2_16B.ipynb](ch02_agent_toolkit__RUN_LOCAL_OLLAMA_DeepSeek_V2_16B.ipynb) | Local Ollama | DeepSeek V2 16B — no API key |
 
-Compare both to see how Simulation Mode mirrors Live LLM behavior.
+All variants produce equivalent output. Compare them to see how different providers handle the same agent tasks.
+
+For local LLM setup instructions (Ollama + DeepSeek on Windows, macOS, and Linux), see **[LOCAL_LLM_SETUP.md](LOCAL_LLM_SETUP.md)**.
 
 ## Requirements
 
 - **Python:** 3.10+ (recommended: 3.11 or 3.12)
 - **Dependencies:** See `requirements.txt`
-- **API Key:** Optional (Simulation Mode works without one)
+- **API Key:** Optional — any of OpenAI, Anthropic, Google, or local Ollama. Simulation Mode works without any.
 
 ## License
 
