@@ -109,6 +109,8 @@ All variants produce equivalent output. Compare them to see how different provid
 
 For local LLM setup instructions (Ollama + DeepSeek on Windows, macOS, and Linux), see **[LOCAL_LLM_SETUP.md](LOCAL_LLM_SETUP.md)**.
 
+For a detailed comparison of how each provider performs on this chapter's tasks — including Bloom's taxonomy ratings, strengths/weaknesses, and per-dimension scores — see **[LLM_COMPARISON.md](LLM_COMPARISON.md)**.
+
 ## Resilience Architecture
 
 All agent operations are wrapped in the `@graceful_fallback` decorator:
