@@ -157,6 +157,80 @@ Healthcare requires evaluation-level reasoning — assessing evidence quality, w
 
 ---
 
+
+
+---
+
+## Visual Summary
+
+### Overall Score Comparison
+
+```
+  Provider              Score  Visual
+  ────────────────────  ─────  ──────────────────────────────
+  🥇 Claude Sonnet 4        8.5  █████████████████████████░░░░░
+  🥈 OpenAI GPT-4o          7.5  ██████████████████████░░░░░░░░
+  🥉 Gemini Flash 2.5       7.1  █████████████████████░░░░░░░░░
+     DeepSeek V2 (Local)    5.3  ███████████████░░░░░░░░░░░░░░░
+```
+
+### Bloom's Taxonomy Tower
+
+```
+  Level  Name          Providers at this level
+  ─────  ────────────  ──────────────────────────
+  L6 Create       │ 
+  L5 Evaluate     ┃ C
+  L4 Analyze      ┃ C O
+  L3 Apply        ┃ C G O
+  L2 Understand   ┃ C G D O
+  L1 Remember     ┃ C G D O
+```
+
+Legend: **C** = Claude Sonnet 4, **G** = Gemini Flash 2.5, **D** = DeepSeek V2, **O** = OpenAI GPT-4o
+
+### Cross-Chapter Context
+
+How this chapter compares to the book-wide average:
+
+```
+  Provider              Ch Score  Book Avg  Delta
+  ────────────────────  ────────  ────────  ─────
+  Claude Sonnet 4          8.5       8.5    ▲+0.0
+  Gemini Flash 2.5         7.1       7.2    ▼+0.1
+  DeepSeek V2 (Local)      5.3       5.7    ▼+0.4
+  OpenAI GPT-4o            7.5       7.4    ▲+0.1
+```
+
+---
+
+## Winner: Claude Sonnet 4
+
+| | |
+|---|---|
+| **Chapter 13 Winner** | **Claude Sonnet 4** |
+| **Score** | **8.5 / 10** |
+| **Bloom's Level** | **Level 5 — Evaluate** |
+
+**Why Claude Sonnet 4 wins this chapter:**
+- Highest weighted average across all 8 scoring dimensions
+- Bloom's Level 5 (Evaluate) — the deepest cognitive sophistication
+- 1.0-point lead over runner-up OpenAI GPT-4o (7.5)
+
+**Runner-up:** OpenAI GPT-4o (7.5/10)
+
+**Third place:** Gemini Flash 2.5 (7.1/10)
+
+### Best Provider by Scenario
+
+| Scenario | Best Choice | Why |
+|---|---|---|
+| Maximum quality | Claude Sonnet 4 | Highest scores across all dimensions |
+| Cost-efficient production | Gemini Flash 2.5 | Best quality-per-dollar ratio |
+| Air-gapped / private data | DeepSeek V2 (Local) | Only option with zero cloud dependency |
+| Rapid prototyping | DeepSeek V2 (Local) | No API key, instant iteration, zero cost |
+
+
 ## Provider Profiles for This Chapter
 
 ### Claude Sonnet 4 — "The Clinical Advisor"

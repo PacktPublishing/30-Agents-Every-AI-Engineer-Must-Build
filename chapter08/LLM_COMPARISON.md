@@ -172,6 +172,76 @@ Claude reaches Level 6 (Create) in this chapter by synthesizing novel analytical
 
 ---
 
+
+
+---
+
+## Visual Summary
+
+### Overall Score Comparison
+
+```
+  Provider              Score  Visual
+  ────────────────────  ─────  ──────────────────────────────
+  🥇 Claude Sonnet 4        9.1  ███████████████████████████░░░
+  🥈 OpenAI GPT-4o          6.5  ███████████████████░░░░░░░░░░░
+```
+
+### Bloom's Taxonomy Tower
+
+```
+  Level  Name          Providers at this level
+  ─────  ────────────  ──────────────────────────
+  L6 Create       │ 
+  L5 Evaluate     ┃ C
+  L4 Analyze      ┃ C
+  L3 Apply        ┃ C O
+  L2 Understand   ┃ C O
+  L1 Remember     ┃ C O
+```
+
+Legend: **C** = Claude Sonnet 4, **G** = Gemini Flash 2.5, **D** = DeepSeek V2, **O** = OpenAI GPT-4o
+
+### Cross-Chapter Context
+
+How this chapter compares to the book-wide average:
+
+```
+  Provider              Ch Score  Book Avg  Delta
+  ────────────────────  ────────  ────────  ─────
+  Claude Sonnet 4          9.1       8.5    ▲+0.6
+  Gemini Flash 2.5         N/A       7.2     —
+  DeepSeek V2 (Local)      N/A       5.7     —
+  OpenAI GPT-4o            6.5       7.4    ▼+0.9
+```
+
+---
+
+## Winner: Claude Sonnet 4
+
+| | |
+|---|---|
+| **Chapter 8 Winner** | **Claude Sonnet 4** |
+| **Score** | **9.1 / 10** |
+| **Bloom's Level** | **Level 5 — Evaluate** |
+
+**Why Claude Sonnet 4 wins this chapter:**
+- Highest weighted average across all 8 scoring dimensions
+- Bloom's Level 5 (Evaluate) — the deepest cognitive sophistication
+- 2.6-point lead over runner-up OpenAI GPT-4o (6.5)
+
+**Runner-up:** OpenAI GPT-4o (6.5/10)
+
+### Best Provider by Scenario
+
+| Scenario | Best Choice | Why |
+|---|---|---|
+| Maximum quality | Claude Sonnet 4 | Highest scores across all dimensions |
+| Cost-efficient production | Gemini Flash 2.5 | Best quality-per-dollar ratio |
+| Air-gapped / private data | DeepSeek V2 (Local) | Only option with zero cloud dependency |
+| Rapid prototyping | DeepSeek V2 (Local) | No API key, instant iteration, zero cost |
+
+
 ## Provider Profiles for This Chapter
 
 ### Claude Sonnet 4 — "The Data Scientist"

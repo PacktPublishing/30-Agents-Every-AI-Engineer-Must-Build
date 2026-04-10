@@ -244,6 +244,80 @@ Claude's ToT synthesis reaches **Level 6 (Create)** by producing a genuinely nov
 
 ---
 
+
+
+---
+
+## Visual Summary
+
+### Overall Score Comparison
+
+```
+  Provider              Score  Visual
+  ────────────────────  ─────  ──────────────────────────────
+  🥇 Claude Sonnet 4        8.7  ██████████████████████████░░░░
+  🥈 OpenAI GPT-4o          8.1  ████████████████████████░░░░░░
+  🥉 Gemini Flash 2.5       7.5  ██████████████████████░░░░░░░░
+     DeepSeek V2 (Local)    5.9  █████████████████░░░░░░░░░░░░░
+```
+
+### Bloom's Taxonomy Tower
+
+```
+  Level  Name          Providers at this level
+  ─────  ────────────  ──────────────────────────
+  L6 Create       ┃ C
+  L5 Evaluate     ┃ C O
+  L4 Analyze      ┃ C G O
+  L3 Apply        ┃ C G D O
+  L2 Understand   ┃ C G D O
+  L1 Remember     ┃ C G D O
+```
+
+Legend: **C** = Claude Sonnet 4, **G** = Gemini Flash 2.5, **D** = DeepSeek V2, **O** = OpenAI GPT-4o
+
+### Cross-Chapter Context
+
+How this chapter compares to the book-wide average:
+
+```
+  Provider              Ch Score  Book Avg  Delta
+  ────────────────────  ────────  ────────  ─────
+  Claude Sonnet 4          8.7       8.5    ▲+0.2
+  Gemini Flash 2.5         7.5       7.2    ▲+0.3
+  DeepSeek V2 (Local)      5.9       5.7    ▲+0.2
+  OpenAI GPT-4o            8.1       7.4    ▲+0.7
+```
+
+---
+
+## Winner: Claude Sonnet 4
+
+| | |
+|---|---|
+| **Chapter 3 Winner** | **Claude Sonnet 4** |
+| **Score** | **8.7 / 10** |
+| **Bloom's Level** | **Level 6 — Create** |
+
+**Why Claude Sonnet 4 wins this chapter:**
+- Highest weighted average across all 8 scoring dimensions
+- Bloom's Level 6 (Create) — the deepest cognitive sophistication
+- 0.6-point lead over runner-up OpenAI GPT-4o (8.1)
+
+**Runner-up:** OpenAI GPT-4o (8.1/10)
+
+**Third place:** Gemini Flash 2.5 (7.5/10)
+
+### Best Provider by Scenario
+
+| Scenario | Best Choice | Why |
+|---|---|---|
+| Maximum quality | Claude Sonnet 4 | Highest scores across all dimensions |
+| Cost-efficient production | Gemini Flash 2.5 | Best quality-per-dollar ratio |
+| Air-gapped / private data | DeepSeek V2 (Local) | Only option with zero cloud dependency |
+| Rapid prototyping | DeepSeek V2 (Local) | No API key, instant iteration, zero cost |
+
+
 ## Provider Profiles for This Chapter
 
 ### Claude Sonnet 4 — "The Strategist"

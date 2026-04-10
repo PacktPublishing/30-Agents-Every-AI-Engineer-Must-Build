@@ -212,6 +212,79 @@ This means OpenAI/Gemini/Ollama show real-world retrieval quality, while Claude 
 
 ---
 
+
+
+---
+
+## Visual Summary
+
+### Overall Score Comparison
+
+```
+  Provider              Score  Visual
+  ────────────────────  ─────  ──────────────────────────────
+  🥇 Claude Sonnet 4        8.8  ██████████████████████████░░░░
+  🥈 Gemini Flash 2.5       7.2  █████████████████████░░░░░░░░░
+  🥉 DeepSeek V2 (Local)    5.5  ████████████████░░░░░░░░░░░░░░
+```
+
+### Bloom's Taxonomy Tower
+
+```
+  Level  Name          Providers at this level
+  ─────  ────────────  ──────────────────────────
+  L6 Create       │ 
+  L5 Evaluate     ┃ C
+  L4 Analyze      ┃ C
+  L3 Apply        ┃ C G
+  L2 Understand   ┃ C G D
+  L1 Remember     ┃ C G D
+```
+
+Legend: **C** = Claude Sonnet 4, **G** = Gemini Flash 2.5, **D** = DeepSeek V2, **O** = OpenAI GPT-4o
+
+### Cross-Chapter Context
+
+How this chapter compares to the book-wide average:
+
+```
+  Provider              Ch Score  Book Avg  Delta
+  ────────────────────  ────────  ────────  ─────
+  Claude Sonnet 4          8.8       8.5    ▲+0.3
+  Gemini Flash 2.5         7.2       7.2    ▲+0.0
+  DeepSeek V2 (Local)      5.5       5.7    ▼+0.2
+  OpenAI GPT-4o            N/A       7.4     —
+```
+
+---
+
+## Winner: Claude Sonnet 4
+
+| | |
+|---|---|
+| **Chapter 6 Winner** | **Claude Sonnet 4** |
+| **Score** | **8.8 / 10** |
+| **Bloom's Level** | **Level 5 — Evaluate** |
+
+**Why Claude Sonnet 4 wins this chapter:**
+- Highest weighted average across all 8 scoring dimensions
+- Bloom's Level 5 (Evaluate) — the deepest cognitive sophistication
+- 1.6-point lead over runner-up Gemini Flash 2.5 (7.2)
+
+**Runner-up:** Gemini Flash 2.5 (7.2/10)
+
+**Third place:** DeepSeek V2 (Local) (5.5/10)
+
+### Best Provider by Scenario
+
+| Scenario | Best Choice | Why |
+|---|---|---|
+| Maximum quality | Claude Sonnet 4 | Highest scores across all dimensions |
+| Cost-efficient production | Gemini Flash 2.5 | Best quality-per-dollar ratio |
+| Air-gapped / private data | DeepSeek V2 (Local) | Only option with zero cloud dependency |
+| Rapid prototyping | DeepSeek V2 (Local) | No API key, instant iteration, zero cost |
+
+
 ## Provider Profiles
 
 ### Claude Sonnet 4 — "The Analyst"
