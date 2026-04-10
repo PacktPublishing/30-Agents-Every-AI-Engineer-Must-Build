@@ -26,6 +26,12 @@ source .venv/bin/activate   # Linux/Mac
 # 3. Install dependencies
 pip install -r requirements.txt
 
+# Then add your provider's dependencies:
+pip install -r requirements-openai.txt    # For OpenAI GPT-4o
+pip install -r requirements-claude.txt    # For Anthropic Claude Sonnet 4
+pip install -r requirements-gemini.txt    # For Google Gemini Flash 2.5
+pip install -r requirements-ollama.txt    # For local Ollama (DeepSeek V2)
+
 # 4. (Optional) Add your Hugging Face token for Live Mode
 cp .env.template .env
 # Edit .env and add your token, or skip this step for Simulation Mode

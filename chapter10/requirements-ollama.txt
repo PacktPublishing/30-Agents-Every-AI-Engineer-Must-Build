@@ -1,0 +1,8 @@
+# Chapter 10 — OLLAMA provider dependencies
+# Install: pip install -r requirements.txt -r requirements-ollama.txt
+
+# Base dependencies (shared across all providers)
+-r requirements.txt
+
+# Ollama local LLM provider (no API key needed)
+langchain-ollama>=0.1.0

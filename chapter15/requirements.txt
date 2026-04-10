@@ -8,7 +8,6 @@
 # ===========================================================================
 
 # === Core Dependencies (Ch.15, p. 2) ===
-openai==1.40.0
 numpy==1.26.4
 networkx==3.3
 python-dotenv==1.0.1
@@ -20,9 +19,3 @@ notebook>=7.0.0
 
 # === Standard Library (no install — listed for reference) ===
 # math, dataclasses, datetime, functools, typing, getpass, re, json
-
-# Multi-provider LLM support (Anthropic and Google Gemini)
-langchain-anthropic>=0.3.0
-langchain-google-genai>=2.0.0
-anthropic>=0.42.0
-google-generativeai>=0.8.0

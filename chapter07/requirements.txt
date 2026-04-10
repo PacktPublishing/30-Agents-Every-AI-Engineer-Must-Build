@@ -12,10 +12,3 @@ ipykernel>=6.29,<7.0
 notebook>=7.2,<8.0
 
 # Optional — Live Mode only (uncomment to enable real API calls):
-# openai>=1.60,<2.0
-
-# Multi-provider LLM support (Anthropic and Google Gemini)
-langchain-anthropic>=0.3.0
-langchain-google-genai>=2.0.0
-anthropic>=0.42.0
-google-generativeai>=0.8.0

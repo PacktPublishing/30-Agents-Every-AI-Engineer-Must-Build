@@ -26,6 +26,12 @@ source .venv/bin/activate   # Linux/Mac
 # 3. Install dependencies
 pip install -r requirements.txt
 
+# Then add your provider's dependencies:
+pip install -r requirements-openai.txt    # For OpenAI GPT-4o
+pip install -r requirements-claude.txt    # For Anthropic Claude Sonnet 4
+pip install -r requirements-gemini.txt    # For Google Gemini Flash 2.5
+pip install -r requirements-ollama.txt    # For local Ollama (DeepSeek V2)
+
 # 4. (Optional) Configure your LLM provider for Live Mode
 cp .env.template .env
 # Set OPENAI_API_KEY, ANTHROPIC_API_KEY, or GOOGLE_API_KEY — or use Ollama locally

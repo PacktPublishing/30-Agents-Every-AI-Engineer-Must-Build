@@ -6,7 +6,6 @@
 # ============================================================
 
 # Core LLM Client (used in LIVE mode only)
-openai>=1.52.0,<2.0.0
 
 # Environment & Secrets Management
 python-dotenv>=1.0.1,<2.0.0
@@ -17,9 +16,3 @@ ipykernel>=6.29.0
 
 # Data Handling (used in case study simulations)
 dataclasses-json>=0.6.0,<1.0.0
-
-# Multi-provider LLM support (Anthropic and Google Gemini)
-langchain-anthropic>=0.3.0
-langchain-google-genai>=2.0.0
-anthropic>=0.42.0
-google-generativeai>=0.8.0

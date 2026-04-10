@@ -29,9 +29,3 @@ scipy>=1.12,<2.0
 # Jupyter
 jupyter>=1.0
 ipykernel>=6.0
-
-# Multi-provider LLM support (Anthropic and Google Gemini)
-langchain-anthropic>=0.3.0
-langchain-google-genai>=2.0.0
-anthropic>=0.42.0
-google-generativeai>=0.8.0

@@ -7,7 +7,6 @@
 # --- Core Framework ---
 langgraph>=0.3.0,<0.4.0
 langchain-core>=0.3.0,<0.4.0
-langchain-openai>=0.3.0,<0.4.0
 
 # --- Data Validation ---
 pydantic>=2.7.0,<3.0.0
@@ -21,9 +20,3 @@ ipykernel>=6.29.0
 
 # --- Utilities ---
 typing-extensions>=4.9.0
-
-# Multi-provider LLM support (Anthropic and Google Gemini)
-langchain-anthropic>=0.3.0
-langchain-google-genai>=2.0.0
-anthropic>=0.42.0
-google-generativeai>=0.8.0

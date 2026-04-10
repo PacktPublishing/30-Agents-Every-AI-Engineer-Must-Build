@@ -1,0 +1,9 @@
+# Chapter 06 — GEMINI provider dependencies
+# Install: pip install -r requirements.txt -r requirements-gemini.txt
+
+# Base dependencies (shared across all providers)
+-r requirements.txt
+
+# Google Gemini provider
+google-generativeai>=0.8.0
+langchain-google-genai>=2.0.0

@@ -1,0 +1,9 @@
+# Chapter 04 — CLAUDE provider dependencies
+# Install: pip install -r requirements.txt -r requirements-claude.txt
+
+# Base dependencies (shared across all providers)
+-r requirements.txt
+
+# Anthropic Claude provider
+anthropic>=0.42.0
+langchain-anthropic>=0.3.0

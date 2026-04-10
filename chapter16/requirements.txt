@@ -7,10 +7,8 @@
 # See TROUBLESHOOTING.md for version conflict resolutions.
 
 langchain==0.2.16
-langchain-openai==0.1.23
 langchain-core>=0.2.38,<0.3.0        # Peer dep of langchain==0.2.16
 langgraph==0.1.4
-openai==1.40.0
 pydantic==2.8.2
 python-dotenv==1.0.1
 
@@ -20,9 +18,3 @@ ipykernel>=6.29.0
 
 # Standard library (no install needed, listed for documentation):
 # json, os, getpass, functools, typing, dataclasses, collections
-
-# Multi-provider LLM support (Anthropic and Google Gemini)
-langchain-anthropic>=0.3.0
-langchain-google-genai>=2.0.0
-anthropic>=0.42.0
-google-generativeai>=0.8.0
