@@ -85,6 +85,7 @@ All five variants produce equivalent pedagogical output with identical cell stru
 - **No setup at all?** Open the `__RUN_NO_KEY_SIMULATION` notebook — it runs entirely on MockLLM with no dependencies.
 - **Want real LLM output?** Set one API key in `.env` and open the matching notebook.
 - **Prefer local inference?** Install [Ollama](https://ollama.com), pull the models, and open the `__RUN_LOCAL_OLLAMA_DeepSeek_V2_16B` notebook — no API key, no cloud calls, everything stays on your machine. See [LOCAL_LLM_SETUP.md](chapter01/LOCAL_LLM_SETUP.md) for step-by-step instructions on Windows, macOS, and Linux.
+- **Which provider is best?** See the **[LLM Provider Comparison Summary](LLM_COMPARISON_SUMMARY.md)** for head-to-head results across all 17 chapters with Bloom's taxonomy analysis, visualizations, and per-domain recommendations.
 
 ---
 
