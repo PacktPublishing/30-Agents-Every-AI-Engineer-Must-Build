@@ -7,3 +7,6 @@
 # Google Gemini provider
 google-generativeai>=0.8.0
 langchain-google-genai>=2.0.0
+
+# Pin langchain-core to 0.2.x for compatibility with langchain==0.2.16
+langchain-core>=0.2.38,<0.3.0
