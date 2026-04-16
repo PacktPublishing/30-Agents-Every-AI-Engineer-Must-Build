@@ -89,6 +89,9 @@ class ServiceConfig:
 
     SERVICES = {
         "OPENAI_API_KEY": "OpenAI (LLM)",
+        "ANTHROPIC_API_KEY": "Anthropic (LLM)",
+        "GOOGLE_API_KEY": "Google Gemini (LLM)",
+        "OLLAMA_HOST": "Ollama Local (LLM)",
         "FINNHUB_API_KEY": "Finnhub (Financial Data)",
         "TAVILY_API_KEY": "Tavily (News Search)",
     }
