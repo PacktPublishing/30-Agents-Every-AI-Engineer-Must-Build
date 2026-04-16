@@ -177,33 +177,33 @@ This book accommodates three distinct reading approaches:
 | 1 | [The Autonomous Decision-Making Agent](chapter05/ch05_foundational_architectures.ipynb) | Ch 5: Foundational Cognitive Architectures |
 | 2 | [The Planning Agent](chapter05/ch05_foundational_architectures.ipynb) | Ch 5: Foundational Cognitive Architectures |
 | 3 | [The Memory-Augmented Agent](chapter05/ch05_foundational_architectures.ipynb) | Ch 5: Foundational Cognitive Architectures |
-| 4 | [The Knowledge Retrieval Agent](chapter06/chapter_06_knowledge_agents.ipynb) | Ch 6: Information Retrieval & Knowledge Agents |
-| 5 | [The Document Intelligence Agent](chapter06/chapter_06_knowledge_agents.ipynb) | Ch 6: Information Retrieval & Knowledge Agents |
-| 6 | [The Scientific Research Agent](chapter06/chapter_06_knowledge_agents.ipynb) | Ch 6: Information Retrieval & Knowledge Agents |
-| 7 | [The Tool-Using Agent](chapter07/Chapter_07_Tool_Orchestration.ipynb) | Ch 7: Tool Manipulation & Orchestration Agents |
-| 8 | [The Chain-of-Agents Orchestrator](chapter07/Chapter_07_Tool_Orchestration.ipynb) | Ch 7: Tool Manipulation & Orchestration Agents |
-| 9 | [The Agentic Workflow System](chapter07/Chapter_07_Tool_Orchestration.ipynb) | Ch 7: Tool Manipulation & Orchestration Agents |
+| 4 | [The Knowledge Retrieval Agent](chapter06/ch06_knowledge_agents.ipynb) | Ch 6: Information Retrieval & Knowledge Agents |
+| 5 | [The Document Intelligence Agent](chapter06/ch06_knowledge_agents.ipynb) | Ch 6: Information Retrieval & Knowledge Agents |
+| 6 | [The Scientific Research Agent](chapter06/ch06_knowledge_agents.ipynb) | Ch 6: Information Retrieval & Knowledge Agents |
+| 7 | [The Tool-Using Agent](chapter07/ch07_tool_orchestration.ipynb) | Ch 7: Tool Manipulation & Orchestration Agents |
+| 8 | [The Chain-of-Agents Orchestrator](chapter07/ch07_tool_orchestration.ipynb) | Ch 7: Tool Manipulation & Orchestration Agents |
+| 9 | [The Agentic Workflow System](chapter07/ch07_tool_orchestration.ipynb) | Ch 7: Tool Manipulation & Orchestration Agents |
 | 10 | [The Data Analysis Agent](chapter08/ch08_data_analysis_reasoning_agents.ipynb) | Ch 8: Data Analysis & Reasoning Agents |
 | 11 | [The Verification and Validation Agent](chapter08/ch08_data_analysis_reasoning_agents.ipynb) | Ch 8: Data Analysis & Reasoning Agents |
 | 12 | [The General Problem Solver](chapter08/ch08_data_analysis_reasoning_agents.ipynb) | Ch 8: Data Analysis & Reasoning Agents |
 | 13 | [The Code-Generation Agent](chapter09/ch09_software_dev_agents.ipynb) | Ch 9: Software Development Agents |
 | 14 | [The Security-Hardened Agent](chapter09/ch09_software_dev_agents.ipynb) | Ch 9: Software Development Agents |
 | 15 | [The Self-Improving Agent](chapter09/ch09_software_dev_agents.ipynb) | Ch 9: Software Development Agents |
-| 16 | [The Conversational Agent](chapter10/Chapter_10_Conversational_and_Content_Creation_Agents.ipynb) | Ch 10: Conversational & Content Creation Agents |
-| 17 | [The Content Creation Agent](chapter10/Chapter_10_Conversational_and_Content_Creation_Agents.ipynb) | Ch 10: Conversational & Content Creation Agents |
-| 18 | [The Recommendation Agent](chapter10/Chapter_10_Conversational_and_Content_Creation_Agents.ipynb) | Ch 10: Conversational & Content Creation Agents |
-| 19 | [The Vision-Language Agent](chapter11/chapter_11_multimodal_agents.ipynb) | Ch 11: Multi-Modal Perception Agents |
-| 20 | [The Audio Processing Agent](chapter11/chapter_11_multimodal_agents.ipynb) | Ch 11: Multi-Modal Perception Agents |
-| 21 | [The Physical World Sensing Agent](chapter11/chapter_11_multimodal_agents.ipynb) | Ch 11: Multi-Modal Perception Agents |
-| 22 | [The Ethical Reasoning Agent](chapter12/01_ethical_reasoning_agent.ipynb) | Ch 12: Ethical & Explainable Agents |
-| 23 | [The Explainable Agent](chapter12/02_explainable_agent.ipynb) | Ch 12: Ethical & Explainable Agents |
-| 24 | [The Healthcare Intelligence Agent](chapter13/chapter13_healthcare_scientific_agents.ipynb) | Ch 13: Healthcare & Scientific Agents |
-| 25 | [The Scientific Discovery Agent](chapter13/chapter13_healthcare_scientific_agents.ipynb) | Ch 13: Healthcare & Scientific Agents |
-| 26 | [The Financial Advisory Agent](chapter14/chapter14_financial_legal_agents.ipynb) | Ch 14: Financial & Legal Domain Agents |
-| 27 | [The Legal Intelligence Agent](chapter14/chapter14_financial_legal_agents.ipynb) | Ch 14: Financial & Legal Domain Agents |
-| 28 | [The Education Intelligence Agent](chapter15/chapter15_education_and_knowledge_agents.ipynb) | Ch 15: Education & Knowledge Agents |
-| 29 | [The Collective Intelligence Agent](chapter15/chapter15_education_and_knowledge_agents.ipynb) | Ch 15: Education & Knowledge Agents |
-| 30 | [The Embodied Intelligence Agent](chapter16/chapter16_embodied_agents.ipynb) | Ch 16: Embodied & Physical World Agents |
+| 16 | [The Conversational Agent](chapter10/ch10_conversational_and_content_creation_agents.ipynb) | Ch 10: Conversational & Content Creation Agents |
+| 17 | [The Content Creation Agent](chapter10/ch10_conversational_and_content_creation_agents.ipynb) | Ch 10: Conversational & Content Creation Agents |
+| 18 | [The Recommendation Agent](chapter10/ch10_conversational_and_content_creation_agents.ipynb) | Ch 10: Conversational & Content Creation Agents |
+| 19 | [The Vision-Language Agent](chapter11/ch11_multimodal_agents.ipynb) | Ch 11: Multi-Modal Perception Agents |
+| 20 | [The Audio Processing Agent](chapter11/ch11_multimodal_agents.ipynb) | Ch 11: Multi-Modal Perception Agents |
+| 21 | [The Physical World Sensing Agent](chapter11/ch11_multimodal_agents.ipynb) | Ch 11: Multi-Modal Perception Agents |
+| 22 | [The Ethical Reasoning Agent](chapter12/ch12_01_ethical_reasoning_agent.ipynb) | Ch 12: Ethical & Explainable Agents |
+| 23 | [The Explainable Agent](chapter12/ch12_02_explainable_agent.ipynb) | Ch 12: Ethical & Explainable Agents |
+| 24 | [The Healthcare Intelligence Agent](chapter13/ch13_healthcare_scientific_agents.ipynb) | Ch 13: Healthcare & Scientific Agents |
+| 25 | [The Scientific Discovery Agent](chapter13/ch13_healthcare_scientific_agents.ipynb) | Ch 13: Healthcare & Scientific Agents |
+| 26 | [The Financial Advisory Agent](chapter14/ch14_financial_legal_agents.ipynb) | Ch 14: Financial & Legal Domain Agents |
+| 27 | [The Legal Intelligence Agent](chapter14/ch14_financial_legal_agents.ipynb) | Ch 14: Financial & Legal Domain Agents |
+| 28 | [The Education Intelligence Agent](chapter15/ch15_education_and_knowledge_agents.ipynb) | Ch 15: Education & Knowledge Agents |
+| 29 | [The Collective Intelligence Agent](chapter15/ch15_education_and_knowledge_agents.ipynb) | Ch 15: Education & Knowledge Agents |
+| 30 | [The Embodied Intelligence Agent](chapter16/ch16_embodied_agents.ipynb) | Ch 16: Embodied & Physical World Agents |
 
 ---
 
