@@ -1,4 +1,4 @@
-# Chapter 6 — LLM Provider Comparison
+# Chapter 6 -- LLM Provider Comparison
 
 **Book:** *30 Agents Every AI Engineer Must Build* by Imran Ahmad (Packt Publishing, 2026)
 
@@ -6,9 +6,15 @@ This document compares the performance of four LLM providers running the same Ch
 
 ---
 
+## Agent Tasks in This Chapter
+
+- **Knowledge Retrieval Agent (RAG)** -- Retrieval-augmented generation over local documents (knowledge_base_rag.txt, compliance_policy.txt)
+- **Document Intelligence Agent** -- OCR processing with confidence scoring and schema extraction
+- **Scientific Research Agent** -- arXiv paper retrieval, thematic clustering, and literature synthesis
+
 ## Scoring Dimensions
 
-Each provider is rated 0–10 across eight dimensions:
+Each provider is rated 0-10 across eight dimensions:
 
 | Dimension | What It Measures |
 |---|---|
@@ -34,103 +40,119 @@ Each provider is rated 0–10 across eight dimensions:
 
 ---
 
-## Task 1: RAG Query — "What are the main limitations of RAG?"
+## Execution Mode Summary
 
-### OpenAI GPT-4o
+| Provider | RAG Queries | Embeddings | arXiv Search | Scoring Basis |
+|---|---|---|---|---|
+| **Claude Sonnet 4** | LIVE (ChatAnthropic) | LIVE (HuggingFace all-MiniLM-L6-v2) | SIMULATION (mock papers) | Real LLM for RAG |
+| **Gemini Flash 2.5** | LIVE (ChatGoogleGenerativeAI) | LIVE (gemini-embedding-001) | SIMULATION (mock papers) | Real LLM for RAG |
+| **OpenAI GPT-4o** | SIMULATION (MockRetrievalQAResult) | LIVE (text-embedding-3-large) | LIVE (real arXiv API) | MockLLM for RAG |
+| **DeepSeek V2 16B** | LIVE (Ollama deepseek-v2:16b) | LIVE (Ollama llama3.1:8b) | SIMULATION (mock papers) | Real LLM for RAG |
 
-**Result:** Ran in Simulation Mode (invalid API key). Returned MockLLM response.
-
-Not scored — output is from MockLLM, not the actual model.
+**Key finding:** Only Claude, Gemini, and DeepSeek produced actual LLM-generated RAG answers. OpenAI's RAG queries went through MockRetrievalQAResult (simulation), though it retrieved real arXiv papers for the scientific research task.
 
 ---
 
+## Task 1: RAG Query -- "What are the main limitations of RAG?"
+
 ### Claude Sonnet 4
 
-**Response characteristics:**
-- Structured answer with two major sections: **Operational Limitations** and **Retrieval Failures**
-- Used markdown headers (`##`) and bold labels for each limitation
-- Identified three operational limitations (index freshness, latency, security) with explanatory sentences
+**Actual output:**
+- Structured with `## Operational Limitations` and `## Retrieval Failures` sections
+- Identified three operational limitations: Index Freshness, Latency, Security
 - Separately categorized retrieval failure modes (low semantic similarity, vocabulary mismatch)
-- Added a **Mitigation Strategies** section synthesizing corrective actions from the source
-- Concluded with a meta-observation: "the provided context appears to be incomplete" — an epistemic caveat
+- Added a `## Mitigation Strategies Mentioned` section synthesizing corrective actions
+- Concluded with: "the provided context appears to be incomplete" -- an epistemic caveat
 
 | Dimension | Score | Rationale |
 |---|---|---|
 | Factual Accuracy | 9 | All claims traceable to source documents; no hallucinations |
 | Completeness | 9 | Covered operational, retrieval, and mitigation aspects; noted incompleteness |
-| Structure & Organization | 10 | Hierarchical headings, bold labels, bullet lists, logical flow |
-| Conciseness | 8 | Slightly verbose but every sentence adds value |
+| Structure & Organization | 10 | Hierarchical headings, bold labels, logical sections |
+| Conciseness | 7 | Thorough but verbose -- every sentence adds value but could be tighter |
 | Source Grounding | 9 | Closely tied to retrieved chunks; acknowledged when context was insufficient |
-| Bloom's Level | **5 — Evaluate** | Assessed which failures are most impactful, judged context completeness |
-| Nuance & Caveats | 10 | Explicitly flagged that context may be incomplete — rare self-awareness |
-| Practical Utility | 9 | A practitioner could directly use this as a diagnostic checklist |
-
-**Bloom's Analysis:** Claude operates primarily at the **Evaluate** level — it doesn't just list limitations but categorizes them by type (operational vs. retrieval), assesses their impact, and critically notes when its own evidence base is insufficient. The mitigation section pushes toward **Create** (Level 6) by synthesizing corrective actions into a coherent strategy.
+| Bloom's Level | **5 -- Evaluate** | Categorized limitations by type, assessed impact, judged context completeness |
+| Nuance & Caveats | 10 | Explicitly flagged incomplete context -- rare self-awareness |
+| Practical Utility | 9 | Directly usable as a diagnostic checklist |
 
 ---
 
 ### Gemini Flash 2.5
 
-**Response characteristics:**
-- Bullet-point list with five distinct limitations
-- Each limitation has a bold header and a 1–2 sentence explanation
-- Included a detailed sub-breakdown of chunking misconfiguration (overly large, overly small, insufficient overlap)
-- Mentioned ongoing maintenance and vocabulary mismatch
+**Actual output:**
+- Bullet-point list with five limitations, each with bold header and 1-2 sentence explanation
+- Detailed sub-breakdown of chunking misconfiguration (overly large, overly small, insufficient overlap)
+- Covered: quality dependency, chunking misconfiguration, ongoing maintenance, vocabulary mismatch
+- No meta-commentary on coverage gaps
 
 | Dimension | Score | Rationale |
 |---|---|---|
-| Factual Accuracy | 9 | All points directly from retrieved context |
-| Completeness | 7 | Focused heavily on chunking; missed security, latency, index freshness |
-| Structure & Organization | 8 | Clean bullets with bold headers, but flat hierarchy |
-| Conciseness | 9 | Tight, no wasted words |
+| Factual Accuracy | 9 | All points directly from retrieved context; accurate claims |
+| Completeness | 7 | Strong on chunking details but missed security, latency, and index freshness |
+| Structure & Organization | 8 | Clean bullets with bold headers; flat hierarchy (no sections) |
+| Conciseness | 9 | Tight, no wasted words -- excellent information density |
 | Source Grounding | 8 | Closely tied to chunks but no meta-commentary on coverage |
-| Bloom's Level | **3 — Apply** | Extracted relevant info and organized it for the question |
-| Nuance & Caveats | 5 | No acknowledgment of missing context or limitations of the answer itself |
-| Practical Utility | 7 | Useful but narrowly focused on chunking — misses broader operational concerns |
-
-**Bloom's Analysis:** Gemini operates at the **Apply** level — it successfully maps retrieved content to the question, but doesn't analyze relationships between limitations or evaluate which are most significant. The chunking sub-breakdown shows some analytical depth but stays within a single category rather than comparing across categories.
+| Bloom's Level | **3 -- Apply** | Extracted and organized information but did not analyze across categories |
+| Nuance & Caveats | 5 | No acknowledgment of missing context or answer limitations |
+| Practical Utility | 7 | Useful but narrowly focused on chunking; misses broader operational concerns |
 
 ---
 
-### Ollama DeepSeek V2 16B (Local)
+### OpenAI GPT-4o
 
-**Response characteristics:**
-- Single paragraph listing limitations as a numbered inline list
-- Mentioned: quality dependency on chunks, vocabulary mismatch, computational costs
-- Considerably shorter than cloud provider responses
+**Execution note:** RAG queries ran through MockRetrievalQAResult (simulation mode), not the actual GPT-4o model. The response is a pre-authored single-paragraph mock.
+
+| Dimension | Score | Rationale |
+|---|---|---|
+| Factual Accuracy | 7 | MockLLM response is correct but generic |
+| Completeness | 5 | Single paragraph covering basic points only |
+| Structure & Organization | 4 | No formatting structure -- flat paragraph |
+| Conciseness | 7 | Brief but at cost of completeness |
+| Source Grounding | 6 | Generic mock response loosely tied to source |
+| Bloom's Level | **2 -- Understand** | Paraphrases source content without analysis |
+| Nuance & Caveats | 3 | No qualifications or gap acknowledgment |
+| Practical Utility | 4 | Too thin to be actionable |
+
+> *Output is from MockRetrievalQAResult, not the actual GPT-4o model.*
+
+---
+
+### DeepSeek V2 16B (Local)
+
+**Execution note:** RAG pipeline ran with real Ollama DeepSeek V2 16B model and llama3.1:8b embeddings. However, only 16 cells have output (vs 23 for cloud providers), limiting scoring evidence.
 
 | Dimension | Score | Rationale |
 |---|---|---|
 | Factual Accuracy | 8 | Claims are correct but thin |
-| Completeness | 5 | Only three limitations mentioned; missed chunking details, security, latency |
-| Structure & Organization | 4 | Single paragraph, no headers or visual structure |
-| Conciseness | 9 | Very compact — but at the cost of completeness |
-| Source Grounding | 7 | Draws from context but doesn't elaborate |
-| Bloom's Level | **2 — Understand** | Paraphrases source content accurately but doesn't analyze or evaluate |
-| Nuance & Caveats | 3 | No qualifications or acknowledgment of gaps |
-| Practical Utility | 5 | Too thin to be actionable; a practitioner would need more detail |
-
-**Bloom's Analysis:** DeepSeek V2 operates at the **Understand** level — it correctly summarizes key points from the retrieved context but doesn't demonstrate analysis (breaking into categories), evaluation (assessing relative importance), or synthesis (recommending mitigations). This is characteristic of smaller models that prioritize brevity over depth.
+| Completeness | 5 | Abbreviated coverage; fewer details than cloud providers |
+| Structure & Organization | 4 | Minimal formatting; single paragraph style |
+| Conciseness | 8 | Very compact, though at cost of completeness |
+| Source Grounding | 7 | Draws from context but lacks elaboration |
+| Bloom's Level | **2 -- Understand** | Summarizes accurately but does not analyze or evaluate |
+| Nuance & Caveats | 3 | No qualifications or edge case acknowledgment |
+| Practical Utility | 5 | Too brief for practitioner use |
 
 ---
 
-## Task 2: Diagnostic Query — "What is our refund policy for subscriptions?"
+## Task 2: Diagnostic Query -- "What is our refund policy for subscriptions?"
 
 ### Claude Sonnet 4
 
-**Response characteristics:**
-- Structured with four bold sections: Full Refunds, Prorated Refunds, Processing Time, Exclusions
-- Included the exact formula: `(annual subscription cost / 365) x remaining days`
+**Actual output:** Structured with four bold sections:
+- **Full Refunds:** Cancel within 14 calendar days of renewal
+- **Prorated Refunds:** Formula: (annual subscription cost / 365) x remaining days
+- **Processing Time:** 5-10 business days
+- **Exclusions:** No refunds for promotional/discounted subscriptions unless required by law
 - Added scope qualifier: "This policy applies to customers enrolled in recurring subscription plans"
 
 | Dimension | Score | Rationale |
 |---|---|---|
 | Factual Accuracy | 10 | Every detail matches the source policy document exactly |
-| Completeness | 10 | Covered all four policy aspects including exclusions and scope |
-| Structure & Organization | 10 | Clear sections mirror a real policy document |
+| Completeness | 10 | Covered all four aspects including exclusions and scope |
+| Structure & Organization | 10 | Clear sections that mirror a real policy document |
 | Conciseness | 9 | Comprehensive without redundancy |
 | Source Grounding | 10 | Every claim directly from compliance_policy.txt |
-| Bloom's Level | **4 — Analyze** | Decomposed the policy into logical components with relationships |
+| Bloom's Level | **4 -- Analyze** | Decomposed the policy into logical components |
 | Nuance & Caveats | 8 | Noted the legal exception for promotional subscriptions |
 | Practical Utility | 10 | Could be given directly to a customer support agent |
 
@@ -138,81 +160,102 @@ Not scored — output is from MockLLM, not the actual model.
 
 ### Gemini Flash 2.5
 
-**Response characteristics:**
-- Flowing paragraph covering the same policy points
-- Included the prorated formula and processing timeline
-- Mentioned the promotional exclusion with the legal caveat
+**Actual output:** Flowing paragraph covering:
+- Full refund within 14 calendar days
+- Prorated refund formula (daily rate x remaining days)
+- Processing time: 5-10 business days
+- Promotional exclusion with legal caveat
 
 | Dimension | Score | Rationale |
 |---|---|---|
-| Factual Accuracy | 10 | All details correct |
+| Factual Accuracy | 10 | All details correct and complete |
 | Completeness | 9 | Covered full refunds, proration, processing time, exclusions |
-| Structure & Organization | 6 | Dense paragraph — harder to scan than structured output |
+| Structure & Organization | 6 | Dense paragraph -- harder to scan than structured output |
 | Conciseness | 8 | Complete but could benefit from visual structure |
 | Source Grounding | 10 | Faithfully reproduces source policy |
-| Bloom's Level | **3 — Apply** | Extracted and reorganized information for the question |
-| Nuance & Caveats | 7 | Mentioned legal exception |
+| Bloom's Level | **3 -- Apply** | Extracted and reorganized information for the question |
+| Nuance & Caveats | 7 | Mentioned the legal exception |
 | Practical Utility | 7 | Correct but a support agent would prefer bulleted format |
 
 ---
 
-### Ollama DeepSeek V2 16B (Local)
+### OpenAI GPT-4o
 
-**Response characteristics:**
-- Short paragraph with core policy: 14-day full refund, proration after
-- Mentioned processing time
+**Execution note:** MockRetrievalQAResult returned: "[SIMULATION MODE] The subscription refund policy allows full refunds within 14 days of renewal. After 14 days, refunds are prorated based on remaining subscription period."
 
 | Dimension | Score | Rationale |
 |---|---|---|
-| Factual Accuracy | 9 | Core facts correct |
-| Completeness | 6 | Missed exclusions and the proration formula |
-| Structure & Organization | 5 | Single paragraph |
+| Factual Accuracy | 8 | Core facts correct but simplified |
+| Completeness | 5 | Missed exclusions, processing time, and the proration formula |
+| Structure & Organization | 4 | Single sentence, no formatting |
+| Conciseness | 7 | Brief but incomplete |
+| Source Grounding | 6 | Generic summary of policy |
+| Bloom's Level | **2 -- Understand** | Summarizes without decomposition |
+| Nuance & Caveats | 2 | No mention of exclusions or edge cases |
+| Practical Utility | 4 | Missing details a customer would ask about |
+
+> *Output is from MockRetrievalQAResult.*
+
+---
+
+### DeepSeek V2 16B (Local)
+
+| Dimension | Score | Rationale |
+|---|---|---|
+| Factual Accuracy | 8 | Core facts correct |
+| Completeness | 6 | Covered basics but missed exclusions and formula details |
+| Structure & Organization | 5 | Single paragraph format |
 | Conciseness | 8 | Brief but incomplete |
 | Source Grounding | 7 | Draws from source but drops details |
-| Bloom's Level | **2 — Understand** | Summarizes but doesn't decompose or analyze |
-| Nuance & Caveats | 3 | No mention of exclusions or edge cases |
-| Practical Utility | 5 | Missing details a customer might ask about |
+| Bloom's Level | **2 -- Understand** | Summarizes but does not decompose |
+| Nuance & Caveats | 3 | No mention of exclusions |
+| Practical Utility | 5 | Missing details for practical use |
 
 ---
 
 ## Task 3: Scientific Research Synthesis
 
-### Key Observation
+### Execution Modes
 
-OpenAI (Live), Gemini, and Ollama used **live arXiv search** — they retrieved real, current papers (2024–2025) and clustered them using actual embeddings. Claude and the Simulation Mode used **mock arXiv data** (pre-authored papers from `agent_utils.py`) because the arXiv API was rate-limited (HTTP 429) during their runs.
+- **OpenAI:** Retrieved LIVE arXiv papers (real 2025 papers including "Investigating Retrieval-Augmented Generation in Quranic Studies" and "FAIR-RAG: Faithful Adaptive Iterative Refinement"). Clustered using real embeddings with TF-IDF labels.
+- **Claude, Gemini, DeepSeek:** All used SIMULATION MODE for arXiv retrieval (12 mock papers from agent_utils.py). Clustering used SentenceTransformer embeddings but on identical mock data.
 
-This means OpenAI/Gemini/Ollama show real-world retrieval quality, while Claude shows synthesis quality on curated data.
-
-### Synthesis Quality Comparison
-
-| Aspect | OpenAI GPT-4o | Claude Sonnet 4 | Gemini Flash 2.5 | DeepSeek V2 Local |
-|---|---|---|---|---|
-| Papers retrieved | 12 (live arXiv) | 12 (mock data) | 12 (mock data) | 12 (live arXiv) |
-| Cluster coherence | Good — thematic grouping | Excellent — domain-specific labels | Same as Claude (mock) | Good — thematic grouping |
-| Cluster labels | TF-IDF keywords | Semantically meaningful | Same as Claude (mock) | TF-IDF keywords |
-| Synthesis depth | 1–2 sentences per cluster | Quantitative claims (e.g., "23% improvement") | Same as Claude (mock) | 1–2 sentences per cluster |
+Since 3 of 4 providers used mock data for this task, cross-provider comparison of synthesis quality is limited. The clustering and labeling outputs are largely driven by the embedding model and KMeans algorithm, not the LLM itself.
 
 ---
 
 ## Overall Scorecard
 
-| Dimension | Claude Sonnet 4 | Gemini Flash 2.5 | DeepSeek V2 (Local) | OpenAI GPT-4o |
-|---|---|---|---|---|
-| Factual Accuracy | **9.5** | **9.3** | **8.3** | N/A (Sim) |
-| Completeness | **9.3** | **7.7** | **5.3** | N/A (Sim) |
-| Structure & Organization | **10.0** | **7.0** | **4.3** | N/A (Sim) |
-| Conciseness | **8.7** | **8.7** | **8.7** | N/A (Sim) |
-| Source Grounding | **9.3** | **8.7** | **7.0** | N/A (Sim) |
-| Bloom's Taxonomy Level | **5.0 (Evaluate)** | **3.3 (Apply)** | **2.0 (Understand)** | N/A (Sim) |
-| Nuance & Caveats | **9.0** | **6.0** | **3.0** | N/A (Sim) |
-| Practical Utility | **9.3** | **7.0** | **5.0** | N/A (Sim) |
-| **WEIGHTED AVERAGE** | **8.8** | **7.2** | **5.5** | — |
+Averaged across Tasks 1 and 2 (the RAG queries where LLM differentiation is most meaningful):
 
-> *OpenAI GPT-4o ran in Simulation Mode due to an invalid API key — not a model limitation. With a valid key, it would be expected to score in the 7.5–8.5 range based on GPT-4o benchmarks.*
+| Dimension | Claude Sonnet 4 | Gemini Flash 2.5 | OpenAI GPT-4o | DeepSeek V2 (Local) |
+|---|---|---|---|---|
+| Factual Accuracy | **9.5** | **9.5** | **7.5*** | **8.0** |
+| Completeness | **9.5** | **8.0** | **5.0*** | **5.5** |
+| Structure & Organization | **10.0** | **7.0** | **4.0*** | **4.5** |
+| Conciseness | **8.0** | **8.5** | **7.0*** | **8.0** |
+| Source Grounding | **9.5** | **9.0** | **6.0*** | **7.0** |
+| Bloom's Taxonomy Level | **4.5 (Analyze-Evaluate)** | **3.0 (Apply)** | **2.0 (Understand)*** | **2.0 (Understand)** |
+| Nuance & Caveats | **9.0** | **6.0** | **2.5*** | **3.0** |
+| Practical Utility | **9.5** | **7.0** | **4.0*** | **5.0** |
+| **WEIGHTED AVERAGE** | **8.7** | **7.3** | **4.8*** | **5.4** |
+
+> *\* OpenAI scores reflect MockRetrievalQAResult output for RAG tasks. With a real RetrievalQA chain, GPT-4o would be expected to score in the 7.5-8.5 range.*
 
 ---
 
+## Bloom's Taxonomy Analysis
 
+```
+Level 6: Create      |
+Level 5: Evaluate    | ============ Claude Sonnet 4 (Task 1)
+Level 4: Analyze     | ============ Claude Sonnet 4 (Task 2)
+Level 3: Apply       | ============ Gemini Flash 2.5
+Level 2: Understand  | ============ DeepSeek V2 / OpenAI* (MockLLM)
+Level 1: Remember    |
+```
+
+Claude reaches Level 5 on the RAG limitations query by categorizing limitations into types (operational vs. retrieval), assessing their impact, and critically noting when its own evidence base is insufficient. Gemini operates solidly at Level 3 -- correctly mapping information to questions but rarely stepping back to evaluate. DeepSeek stays at Level 2 with accurate but shallow paraphrasing.
 
 ---
 
@@ -222,39 +265,29 @@ This means OpenAI/Gemini/Ollama show real-world retrieval quality, while Claude 
 
 ```
   Provider              Score  Visual
-  ────────────────────  ─────  ──────────────────────────────
-  🥇 Claude Sonnet 4        8.8  ██████████████████████████░░░░
-  🥈 Gemini Flash 2.5       7.2  █████████████████████░░░░░░░░░
-  🥉 DeepSeek V2 (Local)    5.5  ████████████████░░░░░░░░░░░░░░
+  --------------------  -----  ------------------------------
+  Claude Sonnet 4        8.7   ==========================....
+  Gemini Flash 2.5       7.3   =====================.........
+  DeepSeek V2 (Local)    5.4   ================..............
+  OpenAI GPT-4o          4.8*  ==============................
 ```
+
+> *OpenAI ran in Simulation Mode for RAG queries.*
 
 ### Bloom's Taxonomy Tower
 
 ```
   Level  Name          Providers at this level
-  ─────  ────────────  ──────────────────────────
-  L6 Create       │ 
-  L5 Evaluate     ┃ C
-  L4 Analyze      ┃ C
-  L3 Apply        ┃ C G
-  L2 Understand   ┃ C G D
-  L1 Remember     ┃ C G D
+  -----  ------------  --------------------------
+  L6 Create       |
+  L5 Evaluate     | C
+  L4 Analyze      | C
+  L3 Apply        | C G
+  L2 Understand   | C G D O
+  L1 Remember     | C G D O
 ```
 
 Legend: **C** = Claude Sonnet 4, **G** = Gemini Flash 2.5, **D** = DeepSeek V2, **O** = OpenAI GPT-4o
-
-### Cross-Chapter Context
-
-How this chapter compares to the book-wide average:
-
-```
-  Provider              Ch Score  Book Avg  Delta
-  ────────────────────  ────────  ────────  ─────
-  Claude Sonnet 4          8.8       8.5    ▲+0.3
-  Gemini Flash 2.5         7.2       7.2    ▲+0.0
-  DeepSeek V2 (Local)      5.5       5.7    ▼+0.2
-  OpenAI GPT-4o            N/A       7.4     —
-```
 
 ---
 
@@ -263,111 +296,61 @@ How this chapter compares to the book-wide average:
 | | |
 |---|---|
 | **Chapter 6 Winner** | **Claude Sonnet 4** |
-| **Score** | **8.8 / 10** |
-| **Bloom's Level** | **Level 5 — Evaluate** |
+| **Score** | **8.7 / 10** |
+| **Bloom's Level** | **Level 5 -- Evaluate** |
 
 **Why Claude Sonnet 4 wins this chapter:**
 - Highest weighted average across all 8 scoring dimensions
-- Bloom's Level 5 (Evaluate) — the deepest cognitive sophistication
-- 1.6-point lead over runner-up Gemini Flash 2.5 (7.2)
+- Only provider to reach Bloom's Level 5 -- evaluating context completeness and categorizing limitations by type
+- Produced structured, section-based output that mirrors professional documentation
+- The epistemic caveat ("context appears to be incomplete") demonstrates a level of self-awareness absent from other providers
 
-**Runner-up:** Gemini Flash 2.5 (7.2/10)
+**Important caveat:** OpenAI GPT-4o was not fairly tested because its RAG queries ran through MockRetrievalQAResult. With a live RetrievalQA chain, GPT-4o would likely score significantly higher (estimated 7.5-8.5 range).
 
-**Third place:** DeepSeek V2 (Local) (5.5/10)
+**Runner-up:** Gemini Flash 2.5 (7.3/10) -- excellent conciseness and accuracy, but narrower coverage and flat structure
+
+**Third place:** DeepSeek V2 (5.4/10) -- correct fundamentals but too brief for practical use
 
 ### Best Provider by Scenario
 
 | Scenario | Best Choice | Why |
 |---|---|---|
-| Maximum quality | Claude Sonnet 4 | Highest scores across all dimensions |
-| Cost-efficient production | Gemini Flash 2.5 | Best quality-per-dollar ratio |
+| Maximum quality | Claude Sonnet 4 | Highest completeness, structure, and analytical depth |
+| Cost-efficient production | Gemini Flash 2.5 | Strong accuracy with excellent conciseness at lower cost |
 | Air-gapped / private data | DeepSeek V2 (Local) | Only option with zero cloud dependency |
 | Rapid prototyping | DeepSeek V2 (Local) | No API key, instant iteration, zero cost |
 
 
 ## Provider Profiles
 
-### Claude Sonnet 4 — "The Analyst"
+### Claude Sonnet 4 -- "The Analyst"
+**Strengths:** Highest cognitive sophistication (Bloom's Level 5); exceptional structured output with hierarchical sections; proactively flags evidence gaps; best at decomposing complex questions into sub-components.
+**Weaknesses:** More verbose than Gemini -- higher token cost for similar factual content.
 
-**Strengths:**
-- Consistently the highest cognitive sophistication — operates at Bloom's **Evaluate** level
-- Exceptional structure: uses markdown headers, bold labels, numbered lists, and logical groupings
-- Proactively flags limitations in its own evidence base ("context appears incomplete")
-- Balances depth with readability — verbose but never wasteful
-- Best at decomposing complex questions into sub-components
+### Gemini Flash 2.5 -- "The Efficient Extractor"
+**Strengths:** Best information-to-word ratio; tight, accurate responses; fast and cost-effective; strong on specific technical details (e.g., chunking parameters).
+**Weaknesses:** Tends to deep-dive on one aspect while missing breadth; flat organizational structure; no self-awareness about coverage gaps.
 
-**Weaknesses:**
-- Slightly verbose compared to Gemini's tighter output
-- Requires `max_tokens` parameter in API calls (caught as a bug in this session)
+### OpenAI GPT-4o -- "Not Scored (Simulation for RAG)"
+**Note:** RAG queries ran through MockRetrievalQAResult. The model did successfully retrieve real arXiv papers for the scientific research task, demonstrating functional live API integration. With a live RAG chain, GPT-4o would likely be competitive.
 
-**Best for:** Tasks requiring analytical depth, structured decision support, compliance documentation, and any scenario where missing something is worse than being verbose.
-
----
-
-### Gemini Flash 2.5 — "The Efficient Extractor"
-
-**Strengths:**
-- Excellent conciseness — highest information-to-word ratio
-- Fast and cost-effective for high-volume tasks
-- Strong factual accuracy with tight source grounding
-- Good at technical detail extraction (e.g., chunking parameters)
-
-**Weaknesses:**
-- Tends to go deep on one aspect while missing breadth (e.g., focused on chunking, missed security/latency)
-- Flat organizational structure — rarely uses hierarchical sections
-- Less likely to add qualifications or acknowledge gaps
-- Embedding model required attention (`embedding-001` → `gemini-embedding-001`)
-
-**Best for:** High-throughput extraction, summarization of focused topics, cost-sensitive deployments, and tasks where speed matters more than analytical depth.
+### DeepSeek V2 16B -- "The Pragmatic Summarizer"
+**Strengths:** Fully local execution; zero cost; correct fundamental facts; viable for prototyping.
+**Weaknesses:** Consistently shallow responses (Bloom's Level 2); minimal formatting; no self-awareness about completeness.
 
 ---
 
-### Ollama DeepSeek V2 16B — "The Pragmatic Summarizer"
-
-**Strengths:**
-- Runs entirely locally — zero cost, zero latency to cloud, full data privacy
-- No API key management needed
-- Correct on fundamental facts
-- Viable for educational and prototyping purposes
-
-**Weaknesses:**
-- Consistently the shallowest responses — operates at Bloom's **Understand** level
-- Misses important details, edge cases, and exclusions
-- Minimal structural formatting (single paragraphs)
-- No self-awareness about completeness or context limitations
-- Requires 16 GB+ RAM and local GPU for reasonable speed
-
-**Best for:** Offline development, privacy-sensitive data, rapid prototyping, educational exploration, and scenarios where data cannot leave the machine.
-
----
-
-## Bloom's Taxonomy Visual Summary
-
-```
-Level 6: Create      |
-Level 5: Evaluate    | ████████████ Claude Sonnet 4
-Level 4: Analyze     | ████████
-Level 3: Apply       | ████████████ Gemini Flash 2.5
-Level 2: Understand  | ████████████ DeepSeek V2 (Local)
-Level 1: Remember    |
-```
-
-Claude consistently demonstrates the highest cognitive sophistication, reaching Bloom's Level 5 (Evaluate) by assessing the relative importance of retrieved information, identifying gaps in its own evidence, and synthesizing mitigation strategies. Gemini operates solidly at Level 3 (Apply) — correctly mapping information to questions but rarely stepping back to evaluate. DeepSeek V2 stays at Level 2 (Understand) — accurate paraphrasing without deeper analysis.
-
----
-
-## Recommendations by Use Case
+## Recommendations
 
 | Use Case | Recommended Provider | Why |
 |---|---|---|
-| **Production RAG system** | Claude Sonnet 4 | Highest completeness and source grounding |
+| **Production RAG system** | Claude Sonnet 4 | Highest completeness, structure, and source grounding |
 | **High-volume document processing** | Gemini Flash 2.5 | Best speed/cost ratio with strong accuracy |
-| **Offline / air-gapped environments** | Ollama DeepSeek V2 | Only option that runs without cloud access |
-| **Research synthesis** | Claude Sonnet 4 | Deepest analytical output with quantitative claims |
-| **Rapid prototyping** | Ollama DeepSeek V2 | Zero setup cost, instant iteration |
+| **Offline / air-gapped environments** | DeepSeek V2 (Local) | Only option that runs without cloud access |
+| **Research synthesis** | Claude Sonnet 4 | Deepest analytical output with categorical reasoning |
 | **Cost-optimized production** | Gemini Flash 2.5 | Lowest per-token cost among cloud providers |
 | **Compliance-critical applications** | Claude Sonnet 4 | Best at surfacing caveats and edge cases |
 
 ---
 
-*Analysis based on Chapter 6 notebook outputs executed April 2026. Scores reflect specific task performance on Knowledge Agents (RAG, Document Intelligence, Scientific Research). Results may differ for other task types.*
+*Analysis based on Chapter 6 notebook outputs executed April 2026. Claude and Gemini ran in LIVE mode for RAG queries. OpenAI ran in Simulation Mode for RAG (but live for arXiv). DeepSeek ran with a real local Ollama model. Scores reflect actual notebook evidence.*

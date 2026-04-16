@@ -1,20 +1,20 @@
-# Chapter 16 — LLM Provider Comparison
+# Chapter 16 -- LLM Provider Comparison
 
 **Book:** *30 Agents Every AI Engineer Must Build* by Imran Ahmad (Packt Publishing, 2026)
 
-This document compares the performance of four LLM providers running the Chapter 16 Embodied Intelligence tasks: embodied intelligence agents, drone operations, and safety envelope management.
+This document compares the performance of two LLM providers running the Chapter 16 Embodied Intelligence tasks: warehouse robot manipulation with safety constraints, domain-transforming city infrastructure integration, and an Ottawa drone mission case study with a Unified Constraint Envelope.
 
 ---
 
 ## Agent Tasks in This Chapter
 
-- **Embodied Intelligence Agent** — Physical world reasoning, spatial navigation, and object manipulation planning
-- **Drone Operations Agent** — Flight path planning, obstacle avoidance, and mission execution
-- **Safety Envelope Agent** — Real-time constraint monitoring, emergency response, and operational boundary enforcement
+- **Embodied Intelligence Agent** -- Three-layer control hierarchy (strategic reasoning, motion planning, low-level control) with safety-constrained execution
+- **Domain-Transforming Integration Agent** -- Cross-domain city infrastructure (energy, transportation, emergency) with influence propagation
+- **Ottawa Drone Case Study** -- Unified Constraint Envelope across 5 domains (weather, battery, airspace, parks, mission) with conservative constraint fusion
 
 ## Scoring Dimensions
 
-Each provider is rated 0–10 across eight dimensions:
+Each provider is rated 0--10 across eight dimensions:
 
 | Dimension | What It Measures |
 |---|---|
@@ -40,105 +40,89 @@ Each provider is rated 0–10 across eight dimensions:
 
 ---
 
-## Key Observation: Heavily Deterministic Safety-Critical Logic
+## Key Observation: Both Providers Use MockChatOpenAI with Identical Outputs
 
-Chapter 16 is **one of the most deterministic chapters**:
-- **Flight path calculations** (waypoints, distances, battery constraints) are mathematical
-- **Safety envelope monitoring** (boundary checks, speed limits, altitude constraints) is rule-based
-- **Obstacle avoidance** uses deterministic algorithms
-- **LLM-dependent cells** include: mission briefing generation, situation assessment narratives, and emergency response prioritization
+Despite different SIMULATION_MODE settings, both active providers use the same MockChatOpenAI backend:
 
-In safety-critical systems, the LLM provides interpretive commentary, not control decisions. The critical safety logic is never LLM-dependent.
+- **OpenAI GPT-4o**: SIMULATION_MODE = True, "LLM initialized: MockChatOpenAI" -- 26 output cells
+- **Gemini Flash 2.5**: SIMULATION_MODE = False (Google API key detected), but `get_llm()` still returned MockChatOpenAI -- 22 output cells
+- **Claude Sonnet 4**: 0 output cells (notebook not executed)
+- **DeepSeek V2 16B**: 0 output cells (notebook not executed)
 
-**Execution mode note:** No notebooks have saved output cells. Analysis is based on code structure and cross-chapter performance patterns.
+**Evidence of identical outputs:**
 
----
+1. **Warehouse robot task** -- Both providers produce identical tool-calling sequences:
+   - [1] AIMessage -> tool_calls=['query_world_model']
+   - [2] ToolMessage: {"package_A_pose": {"x": 2.3, "y": 1.1, "z": 0.8}...}
+   - [3] AIMessage -> tool_calls=['check_safety_constraints']
+   - [4] ToolMessage: {"is_safe": true, "reason": "All constraints satisfied"...}
+   - [5] AIMessage -> tool_calls=['dispatch_motion_command']
+   - [6] ToolMessage: {"success": true, "target": "shelf_B"...}
+   - [7] AIMessage: "Mission complete. Package A has been picked from its current location and placed on shelf B. All safety constraints were..."
 
-## Provider Performance
+2. **Ottawa drone mission** -- Both produce identical output:
+   "Mission authorized and first waypoint dispatched. Unified Constraint Envelope: ALL GREEN. Weather: -6.2C (limit -10C), wind 18.5 km/h (limit 25 km/h), no precipitation. Battery SoC: 82% (floor 30%)."
 
-### Claude Sonnet 4
+3. **Failure scenarios** -- Both correctly demonstrate:
+   - Wind RED: wind_speed_kmh exceeds mission threshold
+   - Battery RED: 22% SoC below 30% departure floor
+   - Stale data RED: 12+ hour old weather data treated as RED by conservative fusion
 
-| Dimension | Score | Rationale |
-|---|---|---|
-| Factual Accuracy | 9 | Strong physical reasoning; correct spatial relationships |
-| Completeness | 9 | Comprehensive safety factor enumeration |
-| Structure & Organization | 9 | Professional operational briefing format |
-| Conciseness | 8 | Appropriate detail for mission briefings |
-| Source Grounding | 9 | Follows chapter's safety-critical architecture |
-| Bloom's Level | **5 — Evaluate** | Assessed risk levels and evaluated operational feasibility |
-| Nuance & Caveats | 9 | Environmental uncertainty; sensor reliability margins; abort criteria |
-| Practical Utility | 8 | Good supplementary briefing material (not for direct control) |
-
-> *Scores estimated from code structure and Claude's cross-chapter performance.*
-
----
-
-### Gemini Flash 2.5
-
-| Dimension | Score | Rationale |
-|---|---|---|
-| Factual Accuracy | 8 | Correct physical reasoning |
-| Completeness | 7 | Good main safety factors |
-| Structure & Organization | 8 | Clean operational output |
-| Conciseness | 9 | Efficient operational communication |
-| Source Grounding | 8 | Follows patterns |
-| Bloom's Level | **3 — Apply** | Applied safety frameworks |
-| Nuance & Caveats | 6 | Basic safety margins noted |
-| Practical Utility | 7 | Functional operational summaries |
-
-> *Scores estimated from code structure and Gemini's cross-chapter performance.*
+The 4-cell difference in output count (26 vs 22) reflects cell splitting differences, not substantive output differences.
 
 ---
 
-### DeepSeek V2 16B (Local)
+## Provider Availability
 
-| Dimension | Score | Rationale |
-|---|---|---|
-| Factual Accuracy | 7 | Basic physical reasoning |
-| Completeness | 5 | Limited safety factor coverage |
-| Structure & Organization | 6 | Basic operational format |
-| Conciseness | 8 | Brief outputs |
-| Source Grounding | 6 | Partial adherence |
-| Bloom's Level | **2 — Understand** | Understood concepts but limited application to scenarios |
-| Nuance & Caveats | 3 | Minimal safety margin communication |
-| Practical Utility | 4 | Insufficient for safety-critical documentation |
-
-> *Scores estimated from code structure and DeepSeek's cross-chapter performance.*
+| Provider | Output Cells | Mode | Status |
+|---|---|---|---|
+| OpenAI GPT-4o | 26 | Simulation (MockChatOpenAI) | Identical outputs |
+| Gemini Flash 2.5 | 22 | Simulation (MockChatOpenAI despite live key) | Identical outputs |
+| Claude Sonnet 4 | 0 | Not executed | Excluded from scoring |
+| DeepSeek V2 16B | 0 | Not executed | Excluded from scoring |
 
 ---
 
-### OpenAI GPT-4o
+## Shared Simulation Output Quality
+
+The simulation outputs demonstrate strong embodied agent architecture:
+
+- **Tool-calling precision:** MockChatOpenAI correctly sequences query_world_model -> check_safety_constraints -> dispatch_motion_command (3-step plan matching the control hierarchy)
+- **Safety enforcement:** Safety-Constrained Execution (Listing 16.3) validates each proposed action against A_safe(s) before execution, correctly reporting GREEN/RED
+- **Conservative constraint fusion:** Single RED domain correctly vetoes the entire envelope across all failure scenarios
+- **Cross-domain integration:** Influence propagation traced through Energy -> Transportation -> Emergency domains, identifying 2 critical, 14 high, 1 moderate impact entities
+- **Unified Constraint Envelope:** All 5 domains (weather, battery, airspace, parks, mission) checked with specific thresholds from the book
+
+### Unified Score (Both Active Providers)
 
 | Dimension | Score | Rationale |
 |---|---|---|
-| Factual Accuracy | 9 | Good physical and spatial reasoning |
-| Completeness | 8 | Solid safety factor coverage |
-| Structure & Organization | 8 | Professional operational format |
-| Conciseness | 8 | Balanced detail |
-| Source Grounding | 8 | Follows patterns |
-| Bloom's Level | **4 — Analyze** | Analyzed operational scenarios and identified risks |
-| Nuance & Caveats | 7 | Good safety awareness |
-| Practical Utility | 8 | Useful operational briefing support |
-
-> *Scores estimated from GPT-4o's known reasoning capabilities.*
+| Factual Accuracy | 8 | Correct physical reasoning; accurate constraint thresholds (temp > -10C, wind < 25 km/h, battery >= 30%) |
+| Completeness | 8 | Full embodied agent pipeline: warehouse robot, city infrastructure, drone mission, 3 failure scenarios |
+| Structure & Organization | 8 | Clean tool-calling traces; color-coded constraint status (GREEN/RED); structured audit trail |
+| Conciseness | 8 | Operational communication is appropriately terse; constraint fusion reports are clear |
+| Source Grounding | 9 | Explicit page references throughout (pp. 458-490); Listing numbers (16.1-16.7) cited |
+| Bloom's Level | **4 -- Analyze** | Agent decomposes tasks into tool-call sequences and analyzes constraint domains independently |
+| Nuance & Caveats | 8 | Conservative fusion treats stale data as RED; escalation threshold logic prevents false confidence |
+| Practical Utility | 7 | Good architecture demo; MockChatOpenAI tool-calling matches LangGraph react agent pattern |
 
 ---
 
 ## Overall Scorecard
 
-| Dimension | Claude Sonnet 4 | Gemini Flash 2.5 | DeepSeek V2 (Local) | OpenAI GPT-4o |
-|---|---|---|---|---|
-| Factual Accuracy | **9.0** | **8.0** | **7.0** | **9.0** |
-| Completeness | **9.0** | **7.0** | **5.0** | **8.0** |
-| Structure & Organization | **9.0** | **8.0** | **6.0** | **8.0** |
-| Conciseness | **8.0** | **9.0** | **8.0** | **8.0** |
-| Source Grounding | **9.0** | **8.0** | **6.0** | **8.0** |
-| Bloom's Taxonomy Level | **5.0 (Evaluate)** | **3.0 (Apply)** | **2.0 (Understand)** | **4.0 (Analyze)** |
-| Nuance & Caveats | **9.0** | **6.0** | **3.0** | **7.0** |
-| Practical Utility | **8.0** | **7.0** | **4.0** | **8.0** |
-| **WEIGHTED AVERAGE** | **8.3** | **7.0** | **5.1** | **7.5** |
+| Dimension | OpenAI GPT-4o | Gemini Flash 2.5 |
+|---|---|---|
+| Factual Accuracy | **8.0** | **8.0** |
+| Completeness | **8.0** | **8.0** |
+| Structure & Organization | **8.0** | **8.0** |
+| Conciseness | **8.0** | **8.0** |
+| Source Grounding | **9.0** | **9.0** |
+| Bloom's Taxonomy Level | **4.0 (Analyze)** | **4.0 (Analyze)** |
+| Nuance & Caveats | **8.0** | **8.0** |
+| Practical Utility | **7.0** | **7.0** |
+| **WEIGHTED AVERAGE** | **7.5** | **7.5** |
 
-> *Note: Safety-critical logic (flight paths, boundaries, obstacle avoidance) is entirely deterministic. Scores reflect LLM-generated briefings, situation assessments, and emergency response narratives only.*
+> *Both providers use MockChatOpenAI and produce identical outputs. Claude and DeepSeek excluded (0 output cells).*
 
 ---
 
@@ -146,18 +130,14 @@ In safety-critical systems, the LLM provides interpretive commentary, not contro
 
 ```
 Level 6: Create      |
-Level 5: Evaluate    | ████████████ Claude Sonnet 4
-Level 4: Analyze     | ████████████ OpenAI GPT-4o
-Level 3: Apply       | ████████████ Gemini Flash 2.5
-Level 2: Understand  | ████████████ DeepSeek V2 (Local)
+Level 5: Evaluate    |
+Level 4: Analyze     | oooooooooooo O, G (both identical simulation)
+Level 3: Apply       |
+Level 2: Understand  |
 Level 1: Remember    |
 ```
 
-Embodied intelligence requires evaluating environmental risks and making safety judgments. Claude reaches Level 5 with comprehensive risk evaluation. GPT-4o analyzes scenarios at Level 4. Gemini applies safety frameworks at Level 3. DeepSeek understands concepts at Level 2.
-
----
-
-
+The embodied agent pipeline reaches Level 4 (Analyze) through constraint domain decomposition: each domain (weather, battery, airspace, parks, mission) is analyzed independently, then fused via conservative conjunction. The tool-calling agent decomposes tasks into sequential tool invocations. It does not reach Level 5 because the agent does not evaluate trade-offs between mission objectives and safety constraints -- it follows a strict safety-first rule.
 
 ---
 
@@ -167,87 +147,64 @@ Embodied intelligence requires evaluating environmental risks and making safety 
 
 ```
   Provider              Score  Visual
-  ────────────────────  ─────  ──────────────────────────────
-  🥇 Claude Sonnet 4        8.3  ████████████████████████░░░░░░
-  🥈 OpenAI GPT-4o          7.5  ██████████████████████░░░░░░░░
-  🥉 Gemini Flash 2.5       7.0  █████████████████████░░░░░░░░░
-     DeepSeek V2 (Local)    5.1  ███████████████░░░░░░░░░░░░░░░
+  --------------------  -----  ------------------------------
+  OpenAI GPT-4o          7.5  ██████████████████████░░░░░░░░░
+  Gemini Flash 2.5       7.5  ██████████████████████░░░░░░░░░
+  Claude Sonnet 4        N/A  (no saved outputs)
+  DeepSeek V2 (Local)    N/A  (no saved outputs)
 ```
 
 ### Bloom's Taxonomy Tower
 
 ```
   Level  Name          Providers at this level
-  ─────  ────────────  ──────────────────────────
-  L6 Create       │ 
-  L5 Evaluate     ┃ C
-  L4 Analyze      ┃ C O
-  L3 Apply        ┃ C G O
-  L2 Understand   ┃ C G D O
-  L1 Remember     ┃ C G D O
+  -----  ------------  --------------------------
+  L6 Create       |
+  L5 Evaluate     |
+  L4 Analyze      | O G (identical)
+  L3 Apply        | O G
+  L2 Understand   | O G
+  L1 Remember     | O G
 ```
 
-Legend: **C** = Claude Sonnet 4, **G** = Gemini Flash 2.5, **D** = DeepSeek V2, **O** = OpenAI GPT-4o
-
-### Cross-Chapter Context
-
-How this chapter compares to the book-wide average:
-
-```
-  Provider              Ch Score  Book Avg  Delta
-  ────────────────────  ────────  ────────  ─────
-  Claude Sonnet 4          8.3       8.5    ▼+0.2
-  Gemini Flash 2.5         7.0       7.2    ▼+0.2
-  DeepSeek V2 (Local)      5.1       5.7    ▼+0.6
-  OpenAI GPT-4o            7.5       7.4    ▲+0.1
-```
+Legend: **O** = OpenAI GPT-4o, **G** = Gemini Flash 2.5
 
 ---
 
-## Winner: Claude Sonnet 4
+## Winner: Tie (OpenAI / Gemini)
 
 | | |
 |---|---|
-| **Chapter 16 Winner** | **Claude Sonnet 4** |
-| **Score** | **8.3 / 10** |
-| **Bloom's Level** | **Level 5 — Evaluate** |
+| **Chapter 16 Winner** | **Tie -- Both Active Providers** |
+| **Score** | **7.5 / 10** |
+| **Bloom's Level** | **Level 4 -- Analyze** |
 
-**Why Claude Sonnet 4 wins this chapter:**
-- Highest weighted average across all 8 scoring dimensions
-- Bloom's Level 5 (Evaluate) — the deepest cognitive sophistication
-- 0.8-point lead over runner-up OpenAI GPT-4o (7.5)
-
-**Runner-up:** OpenAI GPT-4o (7.5/10)
-
-**Third place:** Gemini Flash 2.5 (7.0/10)
+**Why this is a tie:**
+- Both notebooks use MockChatOpenAI despite Gemini's live API key detection
+- Tool-calling sequences are identical (query_world_model -> check_safety -> dispatch_motion)
+- Constraint envelope outputs are byte-identical
+- Failure scenario demonstrations produce the same RED/GREEN patterns
 
 ### Best Provider by Scenario
 
 | Scenario | Best Choice | Why |
 |---|---|---|
-| Maximum quality | Claude Sonnet 4 | Highest scores across all dimensions |
-| Cost-efficient production | Gemini Flash 2.5 | Best quality-per-dollar ratio |
-| Air-gapped / private data | DeepSeek V2 (Local) | Only option with zero cloud dependency |
-| Rapid prototyping | DeepSeek V2 (Local) | No API key, instant iteration, zero cost |
-
+| Maximum quality | Any (identical) | Simulation outputs are the same |
+| Cost-efficient production | Gemini Flash 2.5 | Lowest per-token cost for equivalent output |
+| Air-gapped / private data | DeepSeek V2 (Local) | Zero cloud dependency (no saved outputs for this chapter) |
+| Rapid prototyping | Any mock mode | Zero cost, instant iteration |
 
 ## Provider Profiles for This Chapter
 
-### Claude Sonnet 4 — "The Safety Officer"
-**Strengths:** Best risk evaluation; comprehensive abort criteria; detailed environmental uncertainty communication.
-**Weaknesses:** May be too detailed for real-time operational communication.
+### OpenAI GPT-4o and Gemini Flash 2.5 -- "The Safety Pipeline"
+**Strengths:** Correct tool-calling sequences; comprehensive constraint envelope with conservative fusion; proper failure scenario handling (wind, battery, stale data); cross-domain influence propagation.
+**Weaknesses:** No live LLM differentiation; identical MockChatOpenAI outputs; mock tool-calling does not test actual LLM planning capability.
 
-### OpenAI GPT-4o — "The Operations Planner"
-**Strengths:** Good scenario analysis; balanced operational communication; effective risk identification.
-**Weaknesses:** Less comprehensive on edge-case safety scenarios.
+### Claude Sonnet 4 -- Not Evaluated
+**Status:** 0 output cells saved. Notebook was not executed.
 
-### Gemini Flash 2.5 — "The Quick Briefer"
-**Strengths:** Fast operational summaries; efficient for real-time status updates.
-**Weaknesses:** Limited depth in risk evaluation.
-
-### DeepSeek V2 16B — "Not Recommended for Safety-Critical"
-**Strengths:** Zero-cost for testing pipeline logic.
-**Weaknesses:** Insufficient safety awareness; should never generate operational briefings for real systems.
+### DeepSeek V2 16B -- Not Evaluated
+**Status:** 0 output cells saved. Notebook was not executed.
 
 ---
 
@@ -255,14 +212,14 @@ How this chapter compares to the book-wide average:
 
 | Use Case | Recommended Provider | Why |
 |---|---|---|
-| **Safety evaluation** | Claude Sonnet 4 | Most comprehensive risk assessment |
-| **Mission briefings** | Claude or GPT-4o | Best professional operational communication |
-| **Real-time status** | Gemini Flash 2.5 | Fastest response for status summaries |
-| **Flight path planning** | Any (deterministic) | Output is identical — computed mathematically |
-| **Pipeline testing only** | Ollama DeepSeek V2 | ONLY for code testing — never for operational output |
+| **Safety evaluation** | Any -- then add live LLM | Constraint logic is deterministic; live LLM would add narrative quality |
+| **Mission briefings** | Any -- then add live LLM | Pipeline architecture is identical |
+| **Flight path planning** | Any (deterministic) | Waypoint computation is mathematical, not LLM-dependent |
+| **Failure testing** | Any mock mode | Conservative fusion demonstrations are deterministic |
+| **Pipeline development** | Any mock mode | Zero cost for testing embodied agent architecture |
 
-> **Safety Note:** LLM outputs in this chapter are supplementary commentary only. All safety-critical decisions (flight paths, boundaries, emergency response) are deterministic and do not depend on LLM output.
+> **Safety Note:** LLM outputs in this chapter are supplementary tool-calling orchestration only. All safety-critical decisions (constraint envelope, emergency halt, conservative fusion) are deterministic and do not depend on LLM output quality. In production, the LLM would plan high-level actions, but every action passes through the deterministic A_safe(s) safety check before execution.
 
 ---
 
-*Analysis based on Chapter 16 notebook code structure, April 2026. No notebooks had saved execution outputs. Safety-critical logic is entirely deterministic — LLM provides narrative interpretation only.*
+*Analysis based on Chapter 16 notebook outputs executed April 2026. Both providers (OpenAI, Gemini) use MockChatOpenAI and produce identical simulation-mode outputs. Safety-critical logic is entirely deterministic. The tool-calling agent (create_react_agent) sequences are identical across providers.*

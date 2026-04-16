@@ -1,21 +1,22 @@
-# Chapter 12 — LLM Provider Comparison
+# Chapter 12 -- LLM Provider Comparison
 
 **Book:** *30 Agents Every AI Engineer Must Build* by Imran Ahmad (Packt Publishing, 2026)
 
-This document compares the performance of four LLM providers running the Chapter 12 Ethical Agent tasks: ethical reasoning, explainable agents, bias detection, and compliance monitoring.
+This document compares the performance of four LLM providers running the Chapter 12 Ethical Agent tasks: deontic logic, ethical reasoning, EU AI Act compliance, bias detection, and fair hiring.
 
 ---
 
 ## Agent Tasks in This Chapter
 
-- **Ethical Reasoning Agent** — Analyzing decisions through multiple ethical frameworks (utilitarian, deontological, virtue ethics)
-- **Explainable Agent** — Providing transparent reasoning traces for agent decisions
-- **Bias Detection Agent** — Identifying demographic and cognitive biases in data and model outputs
-- **Compliance Agent** — Checking decisions against regulatory frameworks
+- **Deontic Operator Verification** -- Testing obligatory, permitted, and forbidden operators with axiom propagation
+- **Ethical Reasoning Agent** -- Principle-based action checking (human rights, accountability) with mitigation
+- **EU AI Act Compliance** -- Seven-requirement compliance checking with regression detection
+- **Bias Detection and Monitoring** -- Disparate impact ratio, demographic parity, equal opportunity metrics
+- **Fair Hiring Agent** -- LLM-assisted candidate evaluation with bias mitigation (reweighting) and anonymization
 
 ## Scoring Dimensions
 
-Each provider is rated 0–10 across eight dimensions:
+Each provider is rated 0-10 across eight dimensions:
 
 | Dimension | What It Measures |
 |---|---|
@@ -41,105 +42,107 @@ Each provider is rated 0–10 across eight dimensions:
 
 ---
 
-## Key Observation: Deterministic Framework with LLM Ethical Reasoning
+## Key Observation: Deterministic Pipeline Dominates -- LLM Minimally Involved
 
-Chapter 12 uses a **deterministic compliance pipeline** with LLM-generated ethical analysis:
-- **Bias detection metrics** (disparate impact ratios, statistical parity) are computed deterministically
-- **Ethical framework application** is LLM-dependent — the model must reason about trade-offs between frameworks
-- **Compliance checking** uses rule-based evaluation with LLM-generated explanations
-- **Explainability traces** combine deterministic decision paths with LLM-generated natural language explanations
+Chapter 12 uses a **heavily deterministic ethical reasoning pipeline**. The core components are all rule-based:
 
-**Execution mode note:** Claude has saved outputs (17 output cells). Other notebooks may have limited output.
+1. **Deontic operators**: Pure logic -- `O(phi)`, `P(phi)`, `F(phi)` with axiom propagation (zero LLM involvement)
+2. **Ethical reasoning agent**: Keyword-based principle checking with string-match violation detection (zero LLM involvement)
+3. **EU AI Act compliance**: Static requirement checkers with threshold-based pass/fail (zero LLM involvement)
+4. **Bias detection**: Statistical computation -- disparate impact ratio, demographic parity, equal opportunity (zero LLM involvement)
+5. **Bias monitoring pipeline**: Sliding-window metric emission with threshold alerting (zero LLM involvement)
+6. **Fair Hiring Agent**: Uses MockLLM for candidate evaluation even in "Live Mode" notebooks -- all providers use `MockLLM initialized with 7 handler methods`
 
----
-
-## Provider Performance
-
-### Claude Sonnet 4
-
-**Response characteristics:**
-- Ethical reasoning: Applied multiple frameworks simultaneously with explicit tension identification
-- Explainability: Detailed reasoning traces with causal chains
-- Bias detection: Identified both statistical and cognitive biases with remediation suggestions
-- Compliance: Mapped decisions to specific regulatory requirements
-
-| Dimension | Score | Rationale |
-|---|---|---|
-| Factual Accuracy | 9 | Correct ethical framework applications; accurate bias metrics interpretation |
-| Completeness | 10 | All ethical perspectives covered; cross-framework comparison |
-| Structure & Organization | 10 | Structured ethical analysis with framework sections, tension identification |
-| Conciseness | 7 | Thorough but verbose — ethics requires depth |
-| Source Grounding | 9 | Follows chapter's multi-framework approach precisely |
-| Bloom's Level | **5 — Evaluate** | Evaluated competing ethical claims and judged which framework is most applicable |
-| Nuance & Caveats | 10 | Explicit tension between frameworks; acknowledged irreconcilable trade-offs |
-| Practical Utility | 9 | Usable by ethics review boards for decision documentation |
+**Critical finding:** Even the three "Live Mode" notebooks (Claude, Gemini, DeepSeek) use MockLLM for the FairHiringAgent. The LLM provider key enables Live Mode initialization, but the actual ethical reasoning pipeline is entirely deterministic. The only differences between notebook outputs are timestamps.
 
 ---
 
-### Gemini Flash 2.5
+## Provider Execution Status
 
-| Dimension | Score | Rationale |
-|---|---|---|
-| Factual Accuracy | 8 | Correct framework applications |
-| Completeness | 7 | Covers main frameworks but less cross-referencing |
-| Structure & Organization | 8 | Clean ethical analysis structure |
-| Conciseness | 9 | Efficient ethical summaries |
-| Source Grounding | 8 | Follows patterns |
-| Bloom's Level | **4 — Analyze** | Analyzed decision through different ethical lenses |
-| Nuance & Caveats | 6 | Some tension identification but less depth |
-| Practical Utility | 7 | Good summary for quick ethical review |
+| Provider | Output Cells | Mode | Actual LLM Usage |
+|---|---|---|---|
+| Claude Sonnet 4 | 14 | Live Mode (Anthropic) | MockLLM for FairHiringAgent |
+| Gemini Flash 2.5 | 14 | Live Mode (Google) | MockLLM for FairHiringAgent |
+| DeepSeek V2 16B | 14 | Live Mode (Ollama) | MockLLM for FairHiringAgent |
+| OpenAI GPT-4o | 14 | Simulation Mode | MockLLM for FairHiringAgent |
 
-> *Scores estimated from code structure and Gemini's cross-chapter performance.*
+**Note on Ch12 notebooks:** Only `ch12_01_ethical_reasoning_agent` has provider notebooks. `ch12_02_explainable_agent` only has a Simulation notebook.
 
 ---
 
-### DeepSeek V2 16B (Local)
+## Observed Outputs (Functionally Identical Across All Providers)
 
-| Dimension | Score | Rationale |
-|---|---|---|
-| Factual Accuracy | 7 | Basic ethical framework knowledge |
-| Completeness | 5 | Tends to favor one framework over multi-perspective analysis |
-| Structure & Organization | 6 | Basic analysis structure |
-| Conciseness | 8 | Brief ethical assessments |
-| Source Grounding | 6 | Partial framework coverage |
-| Bloom's Level | **3 — Apply** | Applied single ethical framework without comparison |
-| Nuance & Caveats | 3 | Limited acknowledgment of competing perspectives |
-| Practical Utility | 5 | Too thin for ethics review use |
+### Deontic Operator Verification (Cell 3)
+- All three axioms verified: `O(prioritize_emergency) <-> F(omit_prioritize_emergency)`, `P(adjust_crosswalk) <-> not F(adjust_crosswalk)`, conditional obligation propagation
+- Output is pure logic -- identical across all providers
 
-> *Scores estimated from code structure and DeepSeek's cross-chapter performance.*
+### Ethical Consistency Theorem (Cell 5)
+- `a1` (general explanation): consistent=True, permitted=True
+- `a2` (share medical details): consistent=False, permitted=False, blocked
+- Identical across all providers
+
+### Ethical Reasoning Agent (Cells 7-8)
+- Compliant action (`send_general_explanation_to_patient`): passes all 5 ethical checks
+- Single violation (`share_medical_details with external employer`): human_rights violation, mitigated to `[REDACTED]`
+- Multi-violation (`bypass_consent and disable_audit to share_medical_details`): 2 violations (human_rights, accountability), mitigated
+- Audit log: 3 entries recorded -- identical across all providers
+
+### EU AI Act Compliance (Cell 10)
+- Initial: COMPLIANT (7/7)
+- After regression: NON_COMPLIANT (5/7) -- transparency and diversity_fairness failing
+- Failure details: "Explanation generation timeout for 12% of decisions" and "Disparate impact ratio dropped to 0.73"
+- Identical across all providers
+
+### Bias Detection (Cells 14-15)
+- Dataset: 200 candidates, gender distribution: female=81, male=111, non_binary=8
+- Disparate Impact Ratio: 0.7321 (female/male) -- VIOLATION of four-fifths rule
+- Severity: HIGH. DI=0.642, demographic parity difference=0.2685
+- Recommendations: reweighting, anonymization review, threshold adjustment per group
+- Identical across all providers
+
+### Bias Monitoring Pipeline (Cell 18)
+- 2 CRITICAL alerts fired: DI=0.785 and DI=0.708 (both below 0.8 threshold)
+- Identical across all providers
+
+### Fair Hiring Agent (Cells 20-22)
+- MockLLM used by ALL providers (including "Live" ones)
+- 200 candidates evaluated for "Senior Data Scientist"
+- Bias detected (severity=HIGH), FairnessEnforcer applies reweighting
+- Anonymization removes `education_institution` and `gender` fields
+- Mitigation effective: DI improved from 0.732 to 2.136
+- Identical across all providers
 
 ---
 
-### OpenAI GPT-4o
+## Scoring
+
+Because the entire ethical reasoning pipeline is deterministic and all providers produce functionally identical outputs (differing only in timestamps), individual provider scoring is not meaningful.
+
+### Pipeline Quality Assessment (Applies to All Providers)
 
 | Dimension | Score | Rationale |
 |---|---|---|
-| Factual Accuracy | 9 | Strong ethical reasoning accuracy |
-| Completeness | 8 | Good multi-framework coverage |
-| Structure & Organization | 8 | Well-organized ethical analysis |
-| Conciseness | 8 | Balanced depth |
-| Source Grounding | 8 | Follows chapter patterns |
-| Bloom's Level | **5 — Evaluate** | Evaluates ethical trade-offs between frameworks |
-| Nuance & Caveats | 8 | Good tension identification |
-| Practical Utility | 8 | Useful for ethics documentation |
+| Factual Accuracy | 8 | Deontic logic is formally correct. Bias metrics (DI, demographic parity, equal opportunity) are computed accurately. Four-fifths rule violation correctly identified at DI=0.7321. |
+| Completeness | 8 | Covers deontic logic, principle-based reasoning, EU AI Act (7 requirements), three fairness metrics, monitoring pipeline, mitigation, and anonymization. Only missing: explainable agent (separate notebook). |
+| Structure & Organization | 8 | Well-structured audit trails, severity-coded logging, and clear compliance status reports. The monitoring pipeline emits Prometheus-style gauges. |
+| Conciseness | 7 | Some sections (reweighting log) are verbose -- 20+ FairnessEnforcer lines for individual score adjustments. Could summarize. |
+| Source Grounding | 9 | Faithfully implements the chapter's ethical frameworks -- deontic operators from SDL, EU AI Act requirements, EEOC four-fifths rule. |
+| Bloom's Level | **4 -- Analyze** | The pipeline analyzes decisions through multiple ethical lenses (human rights, accountability, transparency, fairness) and identifies conflicts. But analysis is rule-based, not LLM-reasoned. |
+| Nuance & Caveats | 7 | The impossibility theorem visualization shows trade-offs between fairness criteria. Recommendations include multiple mitigation strategies. But nuance is pre-authored, not dynamically generated. |
+| Practical Utility | 8 | The bias detection and monitoring pipeline is production-grade. Disparate impact alerts, audit trails, and anonymization are directly useful for compliance teams. |
 
-> *Scores estimated from code structure and GPT-4o's cross-chapter performance.*
+**Pipeline Weighted Average: 7.6 / 10**
 
 ---
 
 ## Overall Scorecard
 
-| Dimension | Claude Sonnet 4 | Gemini Flash 2.5 | DeepSeek V2 (Local) | OpenAI GPT-4o |
+| Dimension | Claude Sonnet 4 | Gemini Flash 2.5 | DeepSeek V2 | OpenAI GPT-4o |
 |---|---|---|---|---|
-| Factual Accuracy | **9.0** | **8.0** | **7.0** | **9.0** |
-| Completeness | **10.0** | **7.0** | **5.0** | **8.0** |
-| Structure & Organization | **10.0** | **8.0** | **6.0** | **8.0** |
-| Conciseness | **7.0** | **9.0** | **8.0** | **8.0** |
-| Source Grounding | **9.0** | **8.0** | **6.0** | **8.0** |
-| Bloom's Taxonomy Level | **5.0 (Evaluate)** | **4.0 (Analyze)** | **3.0 (Apply)** | **5.0 (Evaluate)** |
-| Nuance & Caveats | **10.0** | **6.0** | **3.0** | **8.0** |
-| Practical Utility | **9.0** | **7.0** | **5.0** | **8.0** |
-| **WEIGHTED AVERAGE** | **8.6** | **7.1** | **5.4** | **7.8** |
+| All dimensions | Deterministic | Deterministic | Deterministic | Deterministic |
+| **WEIGHTED AVERAGE** | 7.6 | 7.6 | 7.6 | 7.6 |
+
+> *All four providers produce functionally identical outputs. The ethical reasoning pipeline is entirely deterministic. Scores reflect pipeline quality, not provider capability.*
 
 ---
 
@@ -147,121 +150,69 @@ Chapter 12 uses a **deterministic compliance pipeline** with LLM-generated ethic
 
 ```
 Level 6: Create      |
-Level 5: Evaluate    | ████████████ Claude Sonnet 4, OpenAI GPT-4o
-Level 4: Analyze     | ████████████ Gemini Flash 2.5
-Level 3: Apply       | ████████████ DeepSeek V2 (Local)
+Level 5: Evaluate    |
+Level 4: Analyze     | ############ Deterministic pipeline (all providers)
+Level 3: Apply       |
 Level 2: Understand  |
 Level 1: Remember    |
 ```
 
-Ethical reasoning inherently requires evaluation (Level 5) — judging between competing ethical claims. Claude and GPT-4o both reach this level, with Claude being more explicit about irreconcilable tensions. Gemini analyzes through frameworks at Level 4. DeepSeek applies a single framework at Level 3.
-
----
-
-
+The pipeline reaches Level 4 (Analyze) through multi-framework ethical analysis -- checking actions against human rights, accountability, transparency, fairness, and privacy principles, then identifying which principles conflict. However, this analysis is rule-based rather than LLM-generated.
 
 ---
 
 ## Visual Summary
 
-### Overall Score Comparison
+### Execution Status
 
 ```
-  Provider              Score  Visual
-  ────────────────────  ─────  ──────────────────────────────
-  🥇 Claude Sonnet 4        8.6  █████████████████████████░░░░░
-  🥈 OpenAI GPT-4o          7.8  ███████████████████████░░░░░░░
-  🥉 Gemini Flash 2.5       7.1  █████████████████████░░░░░░░░░
-     DeepSeek V2 (Local)    5.4  ████████████████░░░░░░░░░░░░░░
-```
-
-### Bloom's Taxonomy Tower
-
-```
-  Level  Name          Providers at this level
-  ─────  ────────────  ──────────────────────────
-  L6 Create       │ 
-  L5 Evaluate     ┃ C
-  L4 Analyze      ┃ C G O
-  L3 Apply        ┃ C G D O
-  L2 Understand   ┃ C G D O
-  L1 Remember     ┃ C G D O
-```
-
-Legend: **C** = Claude Sonnet 4, **G** = Gemini Flash 2.5, **D** = DeepSeek V2, **O** = OpenAI GPT-4o
-
-### Cross-Chapter Context
-
-How this chapter compares to the book-wide average:
-
-```
-  Provider              Ch Score  Book Avg  Delta
-  ────────────────────  ────────  ────────  ─────
-  Claude Sonnet 4          8.6       8.5    ▲+0.1
-  Gemini Flash 2.5         7.1       7.2    ▼+0.1
-  DeepSeek V2 (Local)      5.4       5.7    ▼+0.3
-  OpenAI GPT-4o            7.8       7.4    ▲+0.4
+  Provider              Outputs  Declared Mode   Actual LLM Usage
+  --------------------  -------  -------------   ----------------
+  Claude Sonnet 4          14   Live (Anthropic)  MockLLM
+  Gemini Flash 2.5         14   Live (Google)     MockLLM
+  DeepSeek V2 (Local)      14   Live (Ollama)     MockLLM
+  OpenAI GPT-4o            14   Simulation        MockLLM
 ```
 
 ---
 
-## Winner: Claude Sonnet 4
+## Winner: No Winner -- Pipeline Is Provider-Agnostic
 
 | | |
 |---|---|
-| **Chapter 12 Winner** | **Claude Sonnet 4** |
-| **Score** | **8.6 / 10** |
-| **Bloom's Level** | **Level 5 — Evaluate** |
+| **Chapter 12 Winner** | **No winner declared** |
+| **Reason** | All providers produce identical outputs from a deterministic pipeline |
 
-**Why Claude Sonnet 4 wins this chapter:**
-- Highest weighted average across all 8 scoring dimensions
-- Bloom's Level 5 (Evaluate) — the deepest cognitive sophistication
-- 0.8-point lead over runner-up OpenAI GPT-4o (7.8)
+The ethical reasoning pipeline in Chapter 12 is **designed to be provider-agnostic**. This is actually a strength -- ethical guardrails should not depend on which LLM is behind them. The deontic logic, bias metrics, and compliance checks are mathematically grounded and deterministic.
 
-**Runner-up:** OpenAI GPT-4o (7.8/10)
+### Where LLMs Would Differentiate (If Pipeline Were Extended)
 
-**Third place:** Gemini Flash 2.5 (7.1/10)
+1. **Ethical dilemma analysis**: Asking the LLM to reason about trolley-problem-style trade-offs
+2. **Natural language explanations**: Generating human-readable justifications for compliance decisions
+3. **Counterfactual reasoning**: "What would change if we lowered the threshold?"
+4. **Stakeholder impact assessment**: Analyzing how decisions affect different groups
 
 ### Best Provider by Scenario
 
 | Scenario | Best Choice | Why |
 |---|---|---|
-| Maximum quality | Claude Sonnet 4 | Highest scores across all dimensions |
-| Cost-efficient production | Gemini Flash 2.5 | Best quality-per-dollar ratio |
-| Air-gapped / private data | DeepSeek V2 (Local) | Only option with zero cloud dependency |
-| Rapid prototyping | DeepSeek V2 (Local) | No API key, instant iteration, zero cost |
-
-
-## Provider Profiles for This Chapter
-
-### Claude Sonnet 4 — "The Ethics Board"
-**Strengths:** Multi-framework reasoning with explicit tension identification; best bias detection explanations; comprehensive compliance mapping.
-**Weaknesses:** Verbose ethical analyses may be too detailed for quick decisions.
-
-### OpenAI GPT-4o — "The Principled Advisor"
-**Strengths:** Good ethical evaluation with balanced perspectives; clear trade-off articulation.
-**Weaknesses:** Slightly less explicit about framework conflicts than Claude.
-
-### Gemini Flash 2.5 — "The Quick Assessor"
-**Strengths:** Fast ethical screening; efficient for high-volume compliance checking.
-**Weaknesses:** Less depth in multi-framework comparison.
-
-### DeepSeek V2 16B — "The Single Lens"
-**Strengths:** Zero-cost local ethical screening; basic compliance checking.
-**Weaknesses:** Tends toward single-framework analysis; limited nuance for complex ethical dilemmas.
+| Bias detection | Any provider | Pipeline is deterministic |
+| EU AI Act compliance | Any provider | Rule-based checking |
+| Ethical reasoning | Any provider | Principle matching is keyword-based |
+| Production deployment | Any cloud provider | For audit trail persistence and monitoring |
+| Air-gapped compliance | DeepSeek V2 (Local) | Zero cloud dependency for sensitive data |
 
 ---
 
 ## Recommendations
 
-| Use Case | Recommended Provider | Why |
+| Use Case | Recommended Action | Why |
 |---|---|---|
-| **Ethics review documentation** | Claude Sonnet 4 | Most comprehensive multi-framework analysis |
-| **Compliance monitoring** | Claude or GPT-4o | Best at mapping decisions to regulations |
-| **Bias detection** | Claude Sonnet 4 | Strongest at identifying subtle biases |
-| **High-volume screening** | Gemini Flash 2.5 | Fast compliance checking at scale |
-| **Local ethics testing** | Ollama DeepSeek V2 | Zero cost for basic ethical screening |
+| **Comparing ethical reasoning** | Integrate LLM for dilemma analysis | Current pipeline does not use LLM for ethical reasoning |
+| **Bias monitoring** | Use pipeline as-is | Deterministic metrics are more reliable than LLM-based detection |
+| **Compliance auditing** | Use pipeline as-is | Rule-based checking is appropriate for regulatory compliance |
+| **Explainability** | Run ch12_02 with live providers | Only simulation notebook exists for explainable agent |
 
 ---
 
-*Analysis based on Chapter 12 notebook outputs executed April 2026. Claude has saved outputs. Bias detection metrics are deterministic — LLM differentiation is in ethical reasoning and explanation quality.*
+*Analysis based on Chapter 12 notebook execution outputs, April 2026. Three providers (Claude, Gemini, DeepSeek) ran in Live Mode but the ethical reasoning pipeline uses MockLLM for all LLM calls. OpenAI ran in Simulation Mode. All four providers produce functionally identical outputs differing only in timestamps. The pipeline is intentionally deterministic -- ethical guardrails should be mathematically grounded, not LLM-dependent.*

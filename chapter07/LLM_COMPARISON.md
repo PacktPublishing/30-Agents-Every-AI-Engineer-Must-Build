@@ -1,24 +1,24 @@
-# Chapter 7 — LLM Provider Comparison
+# Chapter 7 -- LLM Provider Comparison
 
 **Book:** *30 Agents Every AI Engineer Must Build* by Imran Ahmad (Packt Publishing, 2026)
 
-This document compares the performance of four LLM providers running the Chapter 7 Tool Orchestration tasks: tool-using agents, chain-of-agents, and agentic workflows.
+This document compares the performance of three LLM providers running the Chapter 7 Tool Orchestration tasks: tool-using agents, chain-of-agents, and agentic workflows. DeepSeek V2 16B produced 0 output cells and is excluded from scoring.
 
 ---
 
 ## Agent Tasks in This Chapter
 
-- **Tool-Using Agent** — Selecting and invoking the correct tool from a registry based on user intent
-- **Chain-of-Agents** — Sequential agent pipeline where each agent's output feeds the next
-- **Agentic Workflows** — Conditional branching, retry logic, and parallel tool execution
+- **Tool-Using Agent** (Section 7.1-7.3) -- Selecting and invoking the correct tool from a registry based on user intent, via a Think/Plan/Act cycle
+- **Chain-of-Agents** (Section 7.4-7.5) -- Sequential agent pipeline where each specialist agent (Finance, News, Sentiment) feeds results to a Manager agent for conflict-resolution synthesis
+- **Agentic Workflows** (Section 7.6-7.7) -- Order-processing pipeline with inventory validation, LLM-based fraud risk assessment, and human-in-the-loop escalation
 
 ## Scoring Dimensions
 
-Each provider is rated 0–10 across eight dimensions:
+Each provider is rated 0-10 across eight dimensions:
 
 | Dimension | What It Measures |
 |---|---|
-| **Factual Accuracy** | Correctness of tool selections and parameter extraction |
+| **Factual Accuracy** | Correctness of tool selections, risk assessments, and parameter extraction |
 | **Completeness** | Coverage of all workflow branches and edge cases |
 | **Structure & Organization** | Quality of tool call JSON and workflow state management |
 | **Conciseness** | Information density without unnecessary padding |
@@ -40,118 +40,121 @@ Each provider is rated 0–10 across eight dimensions:
 
 ---
 
-## Key Observation: Deterministic Orchestration Logic
+## Key Finding: Heavily Deterministic with LLM Failures in Live Mode
 
-Chapter 7's tool orchestration is **heavily deterministic**. The workflow engine, tool registry, chain-of-agents pipeline, and retry logic are all rule-based. The LLM is used for:
+Chapter 7's tool orchestration is **predominantly deterministic**:
+- **Tool selection** uses `parse_query()` -- a template-based keyword matcher, not LLM-dependent
+- **Chain-of-agents** specialist agents (Finance, News, Sentiment) return hardcoded mock data
+- **Synthesize_report** uses a rule-based conflict score formula
+- The **only LLM-dependent task** is the `llm_analyst_agent` risk assessment in Section 7.7
 
-1. **Tool selection** — Interpreting user intent to choose the correct tool from the registry
-2. **Parameter extraction** — Extracting structured parameters from natural language
-3. **Result synthesis** — Summarizing multi-tool execution results
+### LLM Risk Assessment Results
 
-**Execution mode note:** Claude ran in LIVE mode. OpenAI ran in SIMULATION mode. Gemini and DeepSeek notebooks have outputs from LIVE/SIMULATION mixed execution.
+The `llm_analyst_agent` asks the LLM to assess fraud risk for orders and return structured JSON (`{"risk_level": "low|medium|high", "reason": "..."}`).
+
+| Provider | Mode | Order 1001 | Order 1002 | Order 1003 | Notes |
+|---|---|---|---|---|---|
+| **OpenAI GPT-4o** | SIMULATION | low | medium | high | Rule-based mock correctly differentiated all 3 risk levels |
+| **Claude Sonnet 4** | LIVE | high (fail) | high (fail) | high (fail) | JSON parse error: "Expecting value: line 1 column 1 (char 0)" |
+| **Gemini Flash 2.5** | LIVE | high (fail) | high (fail) | high (fail) | API error: "'GenerativeModel' object has no attribute 'chat'" |
+
+**Analysis:** Both live-mode providers (Claude and Gemini) failed on the only LLM-dependent task. Claude's failure was a JSON parsing error (the model likely returned non-JSON text), while Gemini's was an API integration bug (wrong method call). The simulation mode (OpenAI) ironically produced the most useful output because the rule-based mock correctly applied the chapter's risk criteria (address mismatch, high value, new customer).
 
 ---
 
 ## Provider Performance
 
-### Claude Sonnet 4
+### OpenAI GPT-4o
 
-**LLM-dependent cell behavior:**
-- Tool selection: Correctly identified all tools with explicit reasoning about selection criteria
-- Parameter extraction: Produced well-typed JSON with all required and optional fields
-- Result synthesis: Coherent multi-tool summaries with execution metadata
-- Ran in LIVE mode
+**Execution mode:** SIMULATION MODE. Rule-based mock for risk assessment. All other logic deterministic.
+
+**Key outputs:**
+- Risk assessment: Correctly classified ORD-1001 as low risk ("Standard order parameters. No risk indicators detected"), ORD-1002 as medium ("Order total exceeds typical range for a new customer"), ORD-1003 as high ("Shipping/billing address mismatch combined with high order value")
+- All tool calls, chain-of-agents, and workflow orchestration completed successfully
+- Workflow Results: All 3 orders COMPLETED
 
 | Dimension | Score | Rationale |
 |---|---|---|
-| Factual Accuracy | 9 | All tool selections correct; parameters well-typed |
-| Completeness | 9 | Handled all scenarios including ambiguous multi-tool cases |
-| Structure & Organization | 9 | Clean tool call JSON with proper schema adherence |
-| Conciseness | 8 | Thorough but efficient tool call formatting |
-| Source Grounding | 9 | Follows chapter's registry and orchestration patterns |
-| Bloom's Level | **4 — Analyze** | Analyzed user intent to differentiate between similar tools |
-| Nuance & Caveats | 8 | Noted ambiguous cases and confidence in tool selection |
-| Practical Utility | 9 | Production-ready tool orchestration output |
+| Factual Accuracy | 8 | Rule-based risk correctly applies chapter criteria; all tool selections correct |
+| Completeness | 8 | Full coverage of all workflow branches including escalation paths |
+| Structure & Organization | 8 | Clean workflow logs, proper state transitions |
+| Conciseness | 8 | Appropriately detailed -- no verbose padding |
+| Source Grounding | 8 | Follows chapter's orchestration patterns precisely |
+| Bloom's Level | **3 -- Apply** | Applied risk criteria rules correctly to varied order scenarios |
+| Nuance & Caveats | 7 | Differentiated 3 risk levels with specific reasons |
+| Practical Utility | 8 | Correct risk differentiation would be useful in production triage |
+
+> *Scores reflect rule-based mock output, not actual GPT-4o capabilities. However, the mock correctly implements the chapter's risk assessment logic.*
+
+---
+
+### Claude Sonnet 4
+
+**Execution mode:** LIVE MODE for LLM calls. Tool selection and workflow logic are deterministic.
+
+**Key outputs:**
+- Risk assessment: FAILED for all 3 orders with "Expecting value: line 1 column 1 (char 0)" -- Claude returned non-JSON text that could not be parsed
+- Defaulted to "high" risk for all orders, causing unnecessary HITL escalation
+- All tool calls and chain-of-agents worked correctly (deterministic)
+- Workflow Results: All 3 orders COMPLETED (workflow is resilient to risk assessment failure)
+
+| Dimension | Score | Rationale |
+|---|---|---|
+| Factual Accuracy | 6 | Deterministic outputs correct; LLM risk assessment failed entirely |
+| Completeness | 6 | Tool pipeline complete but risk assessment produced no useful differentiation |
+| Structure & Organization | 7 | Workflow logs clean; risk assessment output is error messages |
+| Conciseness | 7 | Deterministic output appropriate; error messages add noise |
+| Source Grounding | 7 | Follows patterns for deterministic parts; LLM portion diverges |
+| Bloom's Level | **2 -- Understand** | Deterministic logic applied; LLM could not demonstrate higher reasoning |
+| Nuance & Caveats | 3 | All orders classified as "high" -- no nuance in risk differentiation |
+| Practical Utility | 5 | Risk assessment failure means all orders escalated -- useless for triage |
 
 ---
 
 ### Gemini Flash 2.5
 
-**LLM-dependent cell behavior:**
-- Tool selection: Fast, correct selections with minimal reasoning
-- Parameter extraction: Valid JSON with required fields
-- Mixed execution mode
+**Execution mode:** LIVE MODE for LLM calls. Tool selection and workflow logic are deterministic.
+
+**Key outputs:**
+- Risk assessment: FAILED for all 3 orders with "'GenerativeModel' object has no attribute 'chat'" -- an API integration bug
+- Defaulted to "high" risk for all orders
+- All tool calls and chain-of-agents worked correctly (deterministic)
+- Workflow Results: All 3 orders COMPLETED
 
 | Dimension | Score | Rationale |
 |---|---|---|
-| Factual Accuracy | 8 | Correct tool selections |
-| Completeness | 7 | Basic coverage without edge case handling |
-| Structure & Organization | 8 | Valid tool call JSON |
-| Conciseness | 9 | Minimal overhead per tool call |
-| Source Grounding | 8 | Follows orchestration patterns |
-| Bloom's Level | **3 — Apply** | Applied tool matching rules |
-| Nuance & Caveats | 5 | No ambiguity handling |
-| Practical Utility | 8 | Functional for straightforward orchestration |
+| Factual Accuracy | 6 | Deterministic outputs correct; LLM risk assessment failed |
+| Completeness | 6 | Tool pipeline complete; risk differentiation absent |
+| Structure & Organization | 7 | Clean workflow logs; error messages in risk section |
+| Conciseness | 7 | Deterministic output fine; error messages add noise |
+| Source Grounding | 7 | Follows deterministic patterns; LLM portion fails |
+| Bloom's Level | **2 -- Understand** | Deterministic logic applied; LLM not exercised |
+| Nuance & Caveats | 3 | All orders classified as "high" -- zero nuance |
+| Practical Utility | 5 | Risk assessment failure renders triage useless |
 
 ---
 
 ### DeepSeek V2 16B (Local)
 
-**LLM-dependent cell behavior:**
-- Tool selection: Generally correct for obvious cases; less reliable for nuanced selection
-- Parameter extraction: Valid JSON but occasionally missing optional parameters
-- Mixed execution mode
+**Execution mode:** 0 output cells in the notebook. Cannot be scored.
 
-| Dimension | Score | Rationale |
-|---|---|---|
-| Factual Accuracy | 7 | Mostly correct; occasional wrong tool for ambiguous cases |
-| Completeness | 6 | Basic tool calls without edge case coverage |
-| Structure & Organization | 7 | Valid but minimal JSON |
-| Conciseness | 9 | Very compact tool calls |
-| Source Grounding | 7 | Follows basic patterns |
-| Bloom's Level | **2 — Understand** | Understood tool descriptions but didn't analyze nuances |
-| Nuance & Caveats | 3 | No confidence or ambiguity handling |
-| Practical Utility | 6 | Needs validation layer for production use |
-
----
-
-### OpenAI GPT-4o
-
-**LLM-dependent cell behavior:**
-- Ran in SIMULATION mode — outputs are from MockLLM
-- Deterministic workflow cells produced identical results
-- MockLLM provided standard tool selection responses
-
-| Dimension | Score | Rationale |
-|---|---|---|
-| Factual Accuracy | 8 | MockLLM responses correct (pre-authored) |
-| Completeness | 7 | Standard MockLLM coverage |
-| Structure & Organization | 7 | MockLLM formatting |
-| Conciseness | 8 | Appropriately sized |
-| Source Grounding | 8 | Follows patterns |
-| Bloom's Level | **3 — Apply** | MockLLM applies without analysis |
-| Nuance & Caveats | 5 | Basic MockLLM caveats |
-| Practical Utility | 7 | Demonstration quality |
-
-> *OpenAI ran in Simulation Mode — scores reflect MockLLM output.*
+> *DeepSeek notebook has no saved outputs. Excluded from scoring.*
 
 ---
 
 ## Overall Scorecard
 
-| Dimension | Claude Sonnet 4 | Gemini Flash 2.5 | DeepSeek V2 (Local) | OpenAI GPT-4o |
-|---|---|---|---|---|
-| Factual Accuracy | **9.0** | **8.0** | **7.0** | **8.0*** |
-| Completeness | **9.0** | **7.0** | **6.0** | **7.0*** |
-| Structure & Organization | **9.0** | **8.0** | **7.0** | **7.0*** |
-| Conciseness | **8.0** | **9.0** | **9.0** | **8.0*** |
-| Source Grounding | **9.0** | **8.0** | **7.0** | **8.0*** |
-| Bloom's Taxonomy Level | **4.0 (Analyze)** | **3.0 (Apply)** | **2.0 (Understand)** | **3.0 (Apply)*** |
-| Nuance & Caveats | **8.0** | **5.0** | **3.0** | **5.0*** |
-| Practical Utility | **9.0** | **8.0** | **6.0** | **7.0*** |
-| **WEIGHTED AVERAGE** | **8.1** | **7.0** | **5.9** | **6.6*** |
-
-> *\* OpenAI scores reflect MockLLM (Simulation Mode) output.*
+| Dimension | OpenAI GPT-4o | Claude Sonnet 4 | Gemini Flash 2.5 |
+|---|---|---|---|
+| Factual Accuracy | **8.0** | **6.0** | **6.0** |
+| Completeness | **8.0** | **6.0** | **6.0** |
+| Structure & Organization | **8.0** | **7.0** | **7.0** |
+| Conciseness | **8.0** | **7.0** | **7.0** |
+| Source Grounding | **8.0** | **7.0** | **7.0** |
+| Bloom's Taxonomy Level | **3.0 (Apply)** | **2.0 (Understand)** | **2.0 (Understand)** |
+| Nuance & Caveats | **7.0** | **3.0** | **3.0** |
+| Practical Utility | **8.0** | **5.0** | **5.0** |
+| **WEIGHTED AVERAGE** | **7.3** | **5.4** | **5.4** |
 
 ---
 
@@ -160,17 +163,13 @@ Chapter 7's tool orchestration is **heavily deterministic**. The workflow engine
 ```
 Level 6: Create      |
 Level 5: Evaluate    |
-Level 4: Analyze     | ████████████ Claude Sonnet 4
-Level 3: Apply       | ████████████ Gemini Flash 2.5, OpenAI* (MockLLM)
-Level 2: Understand  | ████████████ DeepSeek V2 (Local)
+Level 4: Analyze     |
+Level 3: Apply       | ============ OpenAI GPT-4o (mock -- correct risk differentiation)
+Level 2: Understand  | ============ Claude Sonnet 4, Gemini Flash 2.5 (LLM failures)
 Level 1: Remember    |
 ```
 
-Claude analyzes user intent to differentiate between similar tools in the registry, demonstrating Level 4 reasoning. Gemini applies tool matching rules at Level 3. DeepSeek understands tool descriptions but struggles with nuanced selection.
-
----
-
-
+OpenAI's simulation mode reaches Level 3 (Apply) by correctly applying the chapter's multi-criteria risk assessment to differentiate three distinct order profiles. Claude and Gemini stay at Level 2 because their LLM calls failed, leaving only deterministic (non-reasoning) outputs.
 
 ---
 
@@ -180,86 +179,78 @@ Claude analyzes user intent to differentiate between similar tools in the regist
 
 ```
   Provider              Score  Visual
-  ────────────────────  ─────  ──────────────────────────────
-  🥇 Claude Sonnet 4        8.1  ████████████████████████░░░░░░
-  🥈 Gemini Flash 2.5       7.0  █████████████████████░░░░░░░░░
-  🥉 OpenAI GPT-4o          6.6  ███████████████████░░░░░░░░░░░
-     DeepSeek V2 (Local)    5.9  █████████████████░░░░░░░░░░░░░
+  --------------------  -----  ------------------------------
+  OpenAI GPT-4o          7.3   =====================.........
+  Claude Sonnet 4        5.4   ================..............
+  Gemini Flash 2.5       5.4   ================..............
 ```
 
 ### Bloom's Taxonomy Tower
 
 ```
   Level  Name          Providers at this level
-  ─────  ────────────  ──────────────────────────
-  L6 Create       │ 
-  L5 Evaluate     │ 
-  L4 Analyze      ┃ C
-  L3 Apply        ┃ C G O
-  L2 Understand   ┃ C G D O
-  L1 Remember     ┃ C G D O
+  -----  ------------  --------------------------
+  L6 Create       |
+  L5 Evaluate     |
+  L4 Analyze      |
+  L3 Apply        | O
+  L2 Understand   | O C G
+  L1 Remember     | O C G
 ```
 
-Legend: **C** = Claude Sonnet 4, **G** = Gemini Flash 2.5, **D** = DeepSeek V2, **O** = OpenAI GPT-4o
-
-### Cross-Chapter Context
-
-How this chapter compares to the book-wide average:
-
-```
-  Provider              Ch Score  Book Avg  Delta
-  ────────────────────  ────────  ────────  ─────
-  Claude Sonnet 4          8.1       8.5    ▼+0.4
-  Gemini Flash 2.5         7.0       7.2    ▼+0.2
-  DeepSeek V2 (Local)      5.9       5.7    ▲+0.2
-  OpenAI GPT-4o            6.6       7.4    ▼+0.8
-```
+Legend: **O** = OpenAI GPT-4o, **C** = Claude Sonnet 4, **G** = Gemini Flash 2.5
 
 ---
 
-## Winner: Claude Sonnet 4
+## Winner: OpenAI GPT-4o (via Simulation Mode)
 
 | | |
 |---|---|
-| **Chapter 7 Winner** | **Claude Sonnet 4** |
-| **Score** | **8.1 / 10** |
-| **Bloom's Level** | **Level 4 — Analyze** |
+| **Chapter 7 Winner** | **OpenAI GPT-4o** |
+| **Score** | **7.3 / 10** |
+| **Bloom's Level** | **Level 3 -- Apply** |
 
-**Why Claude Sonnet 4 wins this chapter:**
-- Highest weighted average across all 8 scoring dimensions
-- Bloom's Level 4 (Analyze) — the deepest cognitive sophistication
-- 1.1-point lead over runner-up Gemini Flash 2.5 (7.0)
+**Why OpenAI GPT-4o wins this chapter:**
+- Only provider to produce differentiated risk assessments (low/medium/high)
+- Rule-based mock correctly implemented the chapter's risk criteria
+- 1.9-point lead over Claude and Gemini (both 5.4)
 
-**Runner-up:** Gemini Flash 2.5 (7.0/10)
+**Important caveats:**
+1. OpenAI's advantage comes from the simulation mode's rule-based mock, not from the actual GPT-4o model
+2. Claude and Gemini's failures are **integration bugs**, not model quality issues -- Claude's JSON parsing error and Gemini's API method error would both be fixable
+3. With corrected integrations, Claude and Gemini would likely produce superior risk assessments to the rule-based mock
+4. The vast majority of Chapter 7 logic is deterministic and provider-independent
 
-**Third place:** OpenAI GPT-4o (6.6/10)
+**Runner-up:** Claude Sonnet 4 / Gemini Flash 2.5 (tied at 5.4/10)
 
 ### Best Provider by Scenario
 
 | Scenario | Best Choice | Why |
 |---|---|---|
-| Maximum quality | Claude Sonnet 4 | Highest scores across all dimensions |
-| Cost-efficient production | Gemini Flash 2.5 | Best quality-per-dollar ratio |
-| Air-gapped / private data | DeepSeek V2 (Local) | Only option with zero cloud dependency |
-| Rapid prototyping | DeepSeek V2 (Local) | No API key, instant iteration, zero cost |
+| Current notebook execution | OpenAI GPT-4o (simulation) | Only one with working risk differentiation |
+| After fixing integration bugs | Claude or Gemini (LIVE) | Live LLM would outperform rule-based mock |
+| Deterministic tool orchestration | Any (identical) | Tool selection, chain-of-agents, workflow logic are all rule-based |
+| Air-gapped / local | DeepSeek V2 (not tested) | Zero cloud dependency when Ollama is available |
 
 
 ## Provider Profiles for This Chapter
 
-### Claude Sonnet 4 — "The Precise Orchestrator"
-**Strengths:** Best tool selection accuracy including ambiguous cases; clean JSON schemas; confidence-annotated selections.
-**Weaknesses:** Slightly more tokens per tool call than Gemini.
+### OpenAI GPT-4o -- "The Reliable Mock"
+**Strengths:** Rule-based mock correctly differentiates risk levels; clean workflow execution; all orders properly triaged.
+**Weaknesses:** Not actually exercising GPT-4o -- the simulation mode is the winner, not the model.
 
-### Gemini Flash 2.5 — "The Fast Dispatcher"
-**Strengths:** Fastest tool call generation; good for high-throughput orchestration.
-**Weaknesses:** No ambiguity handling; binary tool selection.
+### Claude Sonnet 4 -- "Integration Bug"
+**Strengths:** All deterministic pipeline stages work correctly; resilient workflow design keeps orders flowing despite LLM failure.
+**Weaknesses:** LLM returned non-JSON output that caused parse failure; all orders defaulted to "high" risk.
+**Root cause:** "Expecting value: line 1 column 1 (char 0)" suggests Claude returned markdown or natural language instead of raw JSON.
 
-### DeepSeek V2 16B — "The Basic Caller"
-**Strengths:** Zero-cost local execution; valid JSON output.
-**Weaknesses:** Unreliable for nuanced tool selection; missing optional parameters.
+### Gemini Flash 2.5 -- "API Integration Bug"
+**Strengths:** Same as Claude for deterministic stages.
+**Weaknesses:** "'GenerativeModel' object has no attribute 'chat'" indicates the code used the wrong Gemini SDK method.
+**Root cause:** The `llm.generate()` wrapper uses a `.chat` attribute that doesn't exist on the Gemini `GenerativeModel` object.
 
-### OpenAI GPT-4o — "Not Scored (Simulation)"
-**Note:** Ran in Simulation Mode. With a valid API key, GPT-4o would likely perform at the Analyze level for tool orchestration.
+### DeepSeek V2 16B -- "Not Tested"
+**Note:** Notebook has 0 output cells. Cannot be scored.
 
 ---
 
@@ -267,11 +258,12 @@ How this chapter compares to the book-wide average:
 
 | Use Case | Recommended Provider | Why |
 |---|---|---|
-| **Complex tool orchestration** | Claude Sonnet 4 | Best disambiguation and parameter extraction |
-| **High-throughput tool dispatch** | Gemini Flash 2.5 | Fastest with acceptable accuracy |
-| **Local tool testing** | Ollama DeepSeek V2 | Zero cost for pipeline development |
-| **Workflow logic** | Any (deterministic) | Orchestration engine is provider-independent |
+| **Tool orchestration** | Any (deterministic) | parse_query, tool registry, and workflow engine are provider-independent |
+| **Risk assessment (current code)** | OpenAI GPT-4o (simulation) | Only one with functional risk differentiation |
+| **Risk assessment (fixed code)** | Claude or Gemini | Live LLM would produce richer analysis than rule-based mock |
+| **Chain-of-agents** | Any (deterministic) | Specialist agents and synthesis are rule-based |
+| **Local prototyping** | DeepSeek V2 (when available) | Zero cost, data stays local |
 
 ---
 
-*Analysis based on Chapter 7 notebook outputs executed April 2026. Claude ran in LIVE mode; OpenAI ran in SIMULATION mode. The majority of orchestration logic is deterministic.*
+*Analysis based on Chapter 7 notebook outputs executed April 2026. Claude and Gemini ran in LIVE mode but their LLM calls failed due to integration bugs. OpenAI ran in Simulation Mode with a rule-based mock. DeepSeek produced no outputs. The majority of Chapter 7 logic is deterministic and provider-independent.*
