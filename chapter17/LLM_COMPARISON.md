@@ -8,11 +8,11 @@ This document compares the performance of four LLM providers running the Chapter
 
 ## Agent Tasks in This Chapter
 
-- **Self-Architecting Agent** -- Meta-optimization over an architecture registry to find optimal pipeline configurations
-- **Agent Society Simulation** -- DeGroot weighted belief averaging with emergent specialization
-- **Ethics Circuit Breaker** -- Behavioral drift detection (KS statistic) with graduated autonomy restriction
-- **Memory Consolidation** -- Episodic-to-semantic memory transfer with analogical pattern extraction
-- **Human-AI Collaboration Spectrum** -- Task classification (autonomous, collaborative, escalated) with the crawl-walk-run maturity model
+- **Self-Architecting Agent** -- Meta-optimization over a 6-candidate architecture registry with alignment constraint filtering (C_1: network access, C_3: shell execution)
+- **Agent Society Simulation** -- DeGroot weighted belief averaging (5 agents, 20 rounds), distributed reputation ledger, spontaneous specialization via comparative advantage
+- **Ethics Circuit Breaker** -- Behavioral drift detection using KS statistic (4 escalation phases: log alert, oversight, restrict autonomy, halt operation)
+- **Memory Consolidation** -- Episodic-to-semantic transfer: 12 episodes replayed, 4 generalizable patterns extracted (retry-with-backoff, cache-before-call, escalate-to-human, parallel-tool-invocation)
+- **Human-AI Collaboration Spectrum** -- Task classification (15 tasks: 9 autonomous, 4 collaborative, 2 escalated) with Quandri-inspired efficiency metrics and crawl-walk-run maturity model
 
 ## Scoring Dimensions
 
@@ -20,13 +20,13 @@ Each provider is rated 0--10 across eight dimensions:
 
 | Dimension | What It Measures |
 |---|---|
-| **Factual Accuracy** | Correctness of architecture descriptions and behavior predictions |
-| **Completeness** | Coverage of all evolutionary mechanisms and emergent patterns |
-| **Structure & Organization** | Quality of architecture diagrams (text) and evolution reports |
+| **Factual Accuracy** | Correctness of architecture descriptions, convergence mechanics, and behavior predictions |
+| **Completeness** | Coverage of all evolutionary mechanisms, emergent patterns, and escalation levels |
+| **Structure & Organization** | Quality of architecture catalogs, convergence reports, and escalation summaries |
 | **Conciseness** | Appropriate depth for forward-looking research content |
 | **Source Grounding** | Adherence to the chapter's future agent frameworks |
 | **Cognitive Sophistication (Bloom's)** | Highest Bloom's taxonomy level demonstrated |
-| **Nuance & Caveats** | Handling of speculation vs. established research, safety concerns |
+| **Nuance & Caveats** | Handling of alignment vs. performance trade-offs, safety margins, and ethical boundaries |
 | **Practical Utility** | How useful outputs would be for researchers exploring next-generation agents |
 
 ### Bloom's Taxonomy Reference
@@ -42,51 +42,56 @@ Each provider is rated 0--10 across eight dimensions:
 
 ---
 
-## Key Observation: All Four Providers Produce Identical Simulation Outputs
+## Provider Execution Status
 
-Chapter 17 uses a shared `MockLLM` from `mock_engine.py` across all four provider notebooks:
+| Provider | Output Cells | LLM Mode | Key Observation |
+|---|---|---|---|
+| OpenAI GPT-4o | 7 | Live API key detected | "Live API key detected. Running in LIVE MODE." All simulations use deterministic code paths; LLM analysis lines are `[SIMULATION MODE]` prefixed mock responses. |
+| Claude Sonnet 4 | 7 | Live API key detected | Identical outputs to OpenAI. Same `[SIMULATION MODE]` mock analysis. |
+| Gemini Flash 2.5 | 7 | Live API key detected | Identical outputs to OpenAI. Same `[SIMULATION MODE]` mock analysis. |
+| DeepSeek V2 16B | 7 | Live API key detected | Identical outputs to OpenAI. Same `[SIMULATION MODE]` mock analysis. |
 
-- All four notebooks call `MockLLM.generate(prompt)` which routes by keyword matching to pre-authored responses
-- The `RESPONSE_REGISTRY` is defined in `mock_engine.py` (shared module) -- identical across all providers
-- No live LLM API calls are made in any notebook
-- All four notebooks have exactly **8 output cells** each
+### Critical Finding: All Providers Produce Identical Outputs
 
-**Evidence -- all four providers produce these identical LLM Analysis outputs:**
+Chapter 17 uses a shared `MockLLM` from `mock_engine.py` with a `RESPONSE_REGISTRY` keyed by prompt keywords. All five simulations (self-architecting, agent society, ethics circuit breaker, memory consolidation, collaboration spectrum) use deterministic algorithms with mock LLM analysis appended. The `[SIMULATION MODE]` prefix on all LLM analysis lines confirms that no actual API calls were made for the substantive outputs, despite live API keys being detected.
 
-1. **Architecture search**: "The meta-optimization search evaluated 6 candidate pipelines from the architecture registry. Pipeline 'ReAct-v3 + FAISS-memory' emerged as winner..."
-
-2. **Agent society**: "After 20 rounds of DeGroot weighted belief averaging, the 5-agent society converged to consensus belief vector [0.72, 0.74, 0.71, 0.73, 0.72]. Agent-3 emerged as the dominant specialist in 'code-review' tasks (reputation: 0.94)..."
-
-3. **Ethics circuit breaker**: "Behavioral drift detected across 4 phases. KS statistic escalated from 0.08 to 0.55. Graduated response triggered: Phase 1 -> log alert, Phase 2 -> increased oversight, Phase 3 -> autonomy restricted, Phase 4 -> full halt."
-
-4. **Memory consolidation**: "Consolidation batch complete. 12 episodes replayed, 4 generalizable patterns extracted to semantic memory, 8 fully consolidated episodes pruned. Analogical transfer: 'retry-with-backoff' generalized from API-call domain to database-connection domain."
-
-5. **Human-AI collaboration**: "Task routing complete. 15 tasks classified: 9 autonomous (routine), 4 collaborative (complex multi-step), 2 escalated to human (high-stakes). Estimated efficiency gain: 74%. Modeled after Quandri case study: 99.9% accuracy, <15 min processing."
+All four notebooks produce identical outputs:
+- Architecture search: ReAct-v3 + FAISS-Memory + CodeInterpreter selected (P(a) = 0.91); 2 candidates excluded (Unconstrained-Optimizer violates C_3, MCTS-Planner violates C_1)
+- DeGroot convergence: beliefs converge to [0.544, 0.544, 0.544, 0.544, 0.544] by round 6
+- Specialization: Agent-3 -> coding (0.95), Agent-4 -> review (0.94), Agent-1 -> research (0.92), Agent-0 -> analysis (0.88)
+- Ethics cascade: KS statistic escalates 0.345 -> 0.565 -> 0.885 -> 0.970 across 4 phases
+- Memory consolidation: 12 episodes -> 4 semantic patterns, 11 pruned, 1 retained
+- Collaboration spectrum: 9 autonomous (60%), 4 collaborative, 2 escalated; $30,000/month estimated value
 
 ---
 
 ## Shared Simulation Output Quality
 
-The simulation outputs demonstrate the chapter's five key future agent concepts:
+### Simulation 1: Self-Architecting Agent
+- **Architecture registry:** 6 candidates with performance scores, alignment compliance status, and human-readable descriptions
+- **Constrained search:** Correctly excludes 2 high-scoring but non-compliant candidates (P(a) = 0.96 and 0.93) in favor of the highest-scoring compliant candidate (P(a) = 0.91)
+- **Key insight:** Demonstrates that raw performance optimization without alignment constraints would select a dangerous pipeline (unrestricted shell execution)
 
-- **Self-architecting agents:** Architecture registry search correctly selects optimal pipeline from 6 candidates based on fitness evaluation
-- **Emergent specialization:** DeGroot convergence produces meaningful specialization (Agent-3 in code-review at 0.94 reputation, Agent-1 in research at 0.89)
-- **Graduated governance:** KS statistic correctly escalates through 4 severity phases with proportional autonomy restriction
-- **Memory transfer:** Episodic-to-semantic transfer with analogical generalization (retry-with-backoff pattern generalized across domains)
-- **Task classification:** Crawl-walk-run model correctly triages 15 tasks with appropriate confidence levels (9/4/2 split)
+### Simulation 2: Agent Society
+- **DeGroot convergence:** Mathematically correct weighted belief averaging; beliefs converge to 0.544 (consensus) from diverse starting points (0.2, 0.9, 0.5, 0.7, 0.3) by round 6
+- **Reputation ledger:** 5 agents with distinct specializations assigned based on task-specific scores
+- **Spontaneous specialization:** Comparative advantage correctly assigns agents to highest-reputation tasks
 
-### Unified Score (All Providers)
+### Simulation 3: Ethics Circuit Breaker
+- **Graduated response:** 4 escalation levels clearly demonstrated with KS statistic thresholds
+- **Escalation summary table:** Clean presentation with phase, KS statistic, level, and response columns
+- **Key insight:** Level 3 restricts to "pre-approved action set only"; Level 4 is "FULL HALT. Agent suspended pending human review"
 
-| Dimension | Score | Rationale |
-|---|---|---|
-| Factual Accuracy | 8 | Correct DeGroot convergence mechanics; valid KS statistic interpretation; proper memory consolidation terminology |
-| Completeness | 8 | All 5 future agent themes demonstrated; each with quantitative simulation outputs |
-| Structure & Organization | 7 | Simulation outputs are concise but lack the structured report format of earlier chapters |
-| Conciseness | 8 | Appropriately brief for simulation summaries; each output is 2-3 sentences |
-| Source Grounding | 9 | Every output includes explicit chapter references (pp.2-8); Quandri case study cited |
-| Bloom's Level | **3 -- Apply** | Simulations apply described patterns (DeGroot, KS statistic, SM-2) to specific scenarios but do not analyze trade-offs |
-| Nuance & Caveats | 6 | Limited nuance -- outputs report results without discussing limitations or uncertainty in the simulations |
-| Practical Utility | 7 | Good conceptual demos; would need live LLM for actual research synthesis or architecture evaluation |
+### Simulation 4: Memory Consolidation
+- **Episodic replay:** 12 episodes with diverse categories (API timeouts, cache hits, ethical dilemmas, parallel execution)
+- **Pattern extraction:** 4 patterns with source episode attribution and generalization scope
+- **Pruning:** 11 of 12 episodes pruned after consolidation; 1 retained (the ethical dilemma, appropriately -- hardest to generalize)
+- **Analogical transfer:** retry-with-backoff generalized from API-call domain to database-connection domain
+
+### Simulation 5: Collaboration Spectrum
+- **Task routing:** 15 tasks across 3 complexity/stakes tiers, correctly classified
+- **Quandri-inspired metrics:** 60% autonomous, 99.9% accuracy, ~$30,000/month value, 12 min avg processing
+- **Crawl-walk-run model:** Progressive maturity assessment demonstrated
 
 ---
 
@@ -95,16 +100,29 @@ The simulation outputs demonstrate the chapter's five key future agent concepts:
 | Dimension | OpenAI GPT-4o | Claude Sonnet 4 | Gemini Flash 2.5 | DeepSeek V2 (Local) |
 |---|---|---|---|---|
 | Factual Accuracy | **8.0** | **8.0** | **8.0** | **8.0** |
-| Completeness | **8.0** | **8.0** | **8.0** | **8.0** |
-| Structure & Organization | **7.0** | **7.0** | **7.0** | **7.0** |
-| Conciseness | **8.0** | **8.0** | **8.0** | **8.0** |
-| Source Grounding | **9.0** | **9.0** | **9.0** | **9.0** |
-| Bloom's Taxonomy Level | **3.0 (Apply)** | **3.0 (Apply)** | **3.0 (Apply)** | **3.0 (Apply)** |
-| Nuance & Caveats | **6.0** | **6.0** | **6.0** | **6.0** |
-| Practical Utility | **7.0** | **7.0** | **7.0** | **7.0** |
-| **WEIGHTED AVERAGE** | **7.0** | **7.0** | **7.0** | **7.0** |
+| Completeness | **9.0** | **9.0** | **9.0** | **9.0** |
+| Structure & Organization | **8.0** | **8.0** | **8.0** | **8.0** |
+| Conciseness | **7.0** | **7.0** | **7.0** | **7.0** |
+| Source Grounding | **8.0** | **8.0** | **8.0** | **8.0** |
+| Bloom's Taxonomy Level | **5.0 (Evaluate)** | **5.0 (Evaluate)** | **5.0 (Evaluate)** | **5.0 (Evaluate)** |
+| Nuance & Caveats | **9.0** | **9.0** | **9.0** | **9.0** |
+| Practical Utility | **8.0** | **8.0** | **8.0** | **8.0** |
+| **WEIGHTED AVERAGE** | **7.8** | **7.8** | **7.8** | **7.8** |
 
-> *All four providers produce byte-identical simulation outputs from shared MockLLM. Scores reflect shared output quality.*
+> *All four providers produce identical outputs. Scores reflect shared simulation quality.*
+
+### Score Rationale
+
+| Dimension | Score | Rationale |
+|---|---|---|
+| Factual Accuracy | 8 | DeGroot convergence is mathematically correct. KS statistic escalation is well-calibrated. Architecture search correctly filters by alignment constraints. Memory consolidation pattern extraction is logically sound. |
+| Completeness | 9 | Five distinct simulations covering self-architecting, society formation, ethical governance, memory consolidation, and collaboration spectrum. Each simulation has multiple phases (architecture search has 6 candidates; ethics has 4 escalation levels; memory has 12 episodes -> 4 patterns). |
+| Structure & Organization | 8 | Clean section headers for each simulation. Escalation summary table is well-formatted. Architecture registry uses consistent format (name, score, compliance, description). Task routing uses color-coded severity levels. |
+| Conciseness | 7 | Some simulations are redundant: the collaboration spectrum is run 3 times (routing, efficiency metrics, maturity assessment) with identical task routing output repeated each time. This is the main verbosity issue. |
+| Source Grounding | 8 | Each `[SIMULATION MODE]` LLM analysis references chapter sections (e.g., "Ref: Ch.17, pp.1-2, 'Autonomous agent evolution and adaptation'"). Page references are consistent. |
+| Bloom's Level | 5 (Evaluate) | Architecture search evaluates alignment vs. performance trade-offs (excluding P(a)=0.96 in favor of P(a)=0.91 for safety). Ethics circuit breaker evaluates behavioral drift severity and judges appropriate response level. Memory consolidation evaluates which episodes contain generalizable patterns. |
+| Nuance & Caveats | 9 | Strongest feature across all simulations. Architecture search explicitly shows that the highest-performing pipeline is the most dangerous. Ethics circuit breaker uses graduated response (not binary on/off). Memory consolidation retains the ethical dilemma episode (hardest to generalize). Collaboration spectrum routes high-stakes tasks to human escalation. |
+| Practical Utility | 8 | Architecture registry format is directly usable. Ethics circuit breaker escalation table is deployable. Collaboration spectrum with Quandri metrics provides concrete ROI estimates. Memory consolidation pattern library is a useful design pattern. |
 
 ---
 
@@ -112,16 +130,20 @@ The simulation outputs demonstrate the chapter's five key future agent concepts:
 
 ```
 Level 6: Create      |
-Level 5: Evaluate    |
+Level 5: Evaluate    | oooooooooo All Providers (alignment trade-offs + ethical escalation)
 Level 4: Analyze     |
-Level 3: Apply       | oooooooooooo All Providers (identical simulation)
+Level 3: Apply       |
 Level 2: Understand  |
 Level 1: Remember    |
 ```
 
-The simulation outputs reach Level 3 (Apply) -- they apply established algorithms (DeGroot averaging, KS test, memory consolidation) to specific scenarios and report results. They do not reach Level 4 because the MockLLM outputs do not compare or contrast approaches (e.g., "DeGroot vs. other consensus mechanisms" or "KS test vs. chi-squared for drift detection"). The outputs state what happened without analyzing why one approach was chosen over alternatives.
+The simulations reach Level 5 (Evaluate) through multiple evaluative mechanisms:
+1. **Architecture search:** Evaluates the trade-off between raw performance (P(a)=0.96) and alignment compliance, explicitly choosing a lower-scoring but safe pipeline
+2. **Ethics circuit breaker:** Evaluates behavioral drift severity using KS statistic and judges when to restrict vs. halt agent autonomy
+3. **Memory consolidation:** Evaluates which episodic patterns are generalizable enough to promote to semantic memory
+4. **Collaboration spectrum:** Evaluates task complexity and stakes to judge appropriate autonomy level (autonomous vs. collaborative vs. escalated)
 
-This is a notable limitation for a chapter about "future agents" -- one would expect Level 5 (Evaluate) or Level 6 (Create) outputs that assess which future directions are most promising or synthesize novel architectural proposals. The simulation framework constrains cognitive depth.
+The simulations do not reach Level 6 (Create) because they follow pre-defined evaluation frameworks rather than generating novel architectures or governance structures.
 
 ---
 
@@ -132,10 +154,10 @@ This is a notable limitation for a chapter about "future agents" -- one would ex
 ```
   Provider              Score  Visual
   --------------------  -----  ------------------------------
-  OpenAI GPT-4o          7.0  █████████████████████░░░░░░░░░░
-  Claude Sonnet 4        7.0  █████████████████████░░░░░░░░░░
-  Gemini Flash 2.5       7.0  █████████████████████░░░░░░░░░░
-  DeepSeek V2 (Local)    7.0  █████████████████████░░░░░░░░░░
+  OpenAI GPT-4o          7.8  ███████████████████████░░░░░░░░
+  Claude Sonnet 4        7.8  ███████████████████████░░░░░░░░
+  Gemini Flash 2.5       7.8  ███████████████████████░░░░░░░░
+  DeepSeek V2 (Local)    7.8  ███████████████████████░░░░░░░░
 ```
 
 ### Bloom's Taxonomy Tower
@@ -144,9 +166,9 @@ This is a notable limitation for a chapter about "future agents" -- one would ex
   Level  Name          Providers at this level
   -----  ------------  --------------------------
   L6 Create       |
-  L5 Evaluate     |
-  L4 Analyze      |
-  L3 Apply        | O C G D (all identical)
+  L5 Evaluate     | O C G D (all identical)
+  L4 Analyze      | O C G D
+  L3 Apply        | O C G D
   L2 Understand   | O C G D
   L1 Remember     | O C G D
 ```
@@ -160,34 +182,35 @@ Legend: **O** = OpenAI GPT-4o, **C** = Claude Sonnet 4, **G** = Gemini Flash 2.5
 | | |
 |---|---|
 | **Chapter 17 Winner** | **Tie -- All Providers** |
-| **Score** | **7.0 / 10** |
-| **Bloom's Level** | **Level 3 -- Apply** |
+| **Score** | **7.8 / 10** |
+| **Bloom's Level** | **Level 5 -- Evaluate** |
 
 **Why this is a tie:**
-- All four provider notebooks use the same `MockLLM` from `mock_engine.py`
-- The `RESPONSE_REGISTRY` routes by keyword to identical pre-authored responses
-- All four notebooks have exactly 8 output cells with byte-identical content
-- No live LLM API calls differentiate the providers
+- All four providers produce identical outputs from the shared `mock_engine.py` RESPONSE_REGISTRY
+- All simulations use deterministic algorithms (DeGroot averaging, KS statistic, constrained search) with mock LLM analysis appended
+- No live LLM calls were made for any substantive output despite live API keys being detected
+- The `[SIMULATION MODE]` prefix on all LLM analysis lines confirms uniform mock behavior
 
-**To differentiate providers, this chapter would need:**
-1. Live LLM calls for architecture evaluation commentary
-2. Provider-specific research synthesis on future agent directions
-3. Open-ended prompts where LLM creativity and nuance would vary
+**Why the score is high (7.8):**
+- Five distinct simulations covering the full scope of future agent research
+- Evaluative reasoning demonstrated across multiple dimensions (alignment, ethics, memory, collaboration)
+- Strong nuance: alignment vs. performance trade-offs, graduated ethical response, selective memory retention
+- Practical utility: architecture registry format, escalation table, and ROI metrics are directly deployable
 
 ### Best Provider by Scenario
 
 | Scenario | Best Choice | Why |
 |---|---|---|
-| Maximum quality | Any (identical) | Simulation outputs are the same |
+| Maximum quality | Any (identical) | All produce the same simulation outputs |
 | Cost-efficient production | Gemini Flash 2.5 | Lowest per-token cost for equivalent output |
-| Air-gapped / private data | DeepSeek V2 (Local) | Only option with zero cloud dependency |
-| Rapid prototyping | DeepSeek V2 (Local) | No API key, instant iteration, zero cost |
+| Air-gapped / private data | DeepSeek V2 (Local) | Zero cloud dependency |
+| Rapid prototyping | DeepSeek V2 (Local) | No API key needed, instant iteration, zero cost |
 
 ## Provider Profiles for This Chapter
 
-### All Providers -- "The Simulation Engine"
-**Strengths:** Demonstrates 5 key future agent concepts with quantitative simulation outputs; correct application of DeGroot averaging, KS statistics, and memory consolidation; explicit chapter references throughout.
-**Weaknesses:** No live LLM differentiation; simulation outputs are formulaic summaries rather than creative research synthesis; Bloom's Level 3 is low for a chapter about future research directions.
+### All Providers -- "The Future Simulation Suite"
+**Strengths:** Five well-designed simulations covering the frontier of agent research. Architecture search demonstrates constrained optimization with alignment awareness. Ethics circuit breaker provides a graduated response framework. Memory consolidation shows analogical transfer across domains. Collaboration spectrum includes concrete ROI metrics.
+**Weaknesses:** All outputs are simulation-mode; no live LLM differentiation. Collaboration spectrum output is repeated 3 times (verbosity). Mock LLM analysis text is generic and does not match the actual simulation numbers in some cases (e.g., mock analysis reports convergence to [0.72, 0.74] but simulation shows [0.544, 0.544]).
 
 ---
 
@@ -195,12 +218,14 @@ Legend: **O** = OpenAI GPT-4o, **C** = Claude Sonnet 4, **G** = Gemini Flash 2.5
 
 | Use Case | Recommended Provider | Why |
 |---|---|---|
-| **Research direction synthesis** | Any -- then add live LLM | Simulation provides structure; live LLM would add evaluative depth |
-| **Architecture evaluation** | Any -- then add live LLM | Meta-optimization results are deterministic |
-| **Quick concept demo** | Any mock mode | All 5 simulations run in seconds |
-| **Future agent prototyping** | Any mock mode | Zero cost for exploring the architecture |
-| **Local experimentation** | Ollama DeepSeek V2 | Zero cost, identical simulation results |
+| **Architecture registry design** | Any (deterministic) | Constrained search is algorithmic, not LLM-dependent |
+| **Agent society simulation** | Any (deterministic) | DeGroot convergence is mathematical |
+| **Ethics governance prototyping** | Any -- then add live LLM | Graduated response framework is code-identical; live LLM could enhance behavioral analysis |
+| **Memory architecture research** | Any -- then add live LLM | Pattern extraction is algorithmic; live LLM could improve analogical transfer quality |
+| **Pipeline development** | DeepSeek V2 (Local) | Zero cost, identical functionality |
+
+> **Research Note:** The mock LLM analysis text in Simulation 2 reports different convergence values ([0.72, 0.74]) than the actual simulation output ([0.544, 0.544]). This discrepancy exists across all providers since the mock text is shared. The simulation output is correct; the mock analysis text should be updated for consistency.
 
 ---
 
-*Analysis based on Chapter 17 notebook outputs executed April 2026. All four providers (OpenAI, Claude, Gemini, DeepSeek) produce identical simulation-mode outputs from shared MockLLM (mock_engine.py). Evolution simulations, society dynamics, and governance mechanisms are entirely deterministic. No live LLM calls were made in any notebook.*
+*Analysis based on Chapter 17 notebook outputs executed April 2026. All four providers (OpenAI, Claude, Gemini, DeepSeek) produce identical simulation-mode outputs from the shared mock_engine.py response registry. Five simulations demonstrate future agent architectures at Bloom's Level 5 (Evaluate) through alignment trade-offs, ethical escalation, and selective memory consolidation.*

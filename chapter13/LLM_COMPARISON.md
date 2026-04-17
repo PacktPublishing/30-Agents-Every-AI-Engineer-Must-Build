@@ -39,47 +39,36 @@ Each provider is rated 0--10 across eight dimensions:
 
 ---
 
-## Key Observation: All Providers Produce Identical Simulation-Mode Outputs
+## Key Observation: Deterministic Simulation Pipeline with Provider-Agnostic Outputs
 
-Chapter 13 uses a **deterministic simulation pipeline** for all providers:
+All four provider notebooks were executed with live API keys detected:
 
-- All four notebooks (OpenAI, Claude, Gemini, DeepSeek) were executed in **live API mode** (API keys detected), but the agent code paths use deterministic simulation stubs regardless of the API key.
-- The `MockLLM` response registry is identical across all four notebooks, containing the same 6 context-type responses (diagnostic, drug_interaction, patient_summary, literature_synthesis, knowledge_gap, hypothesis).
-- `llm = None` in live mode -- the actual LLM client is never instantiated for agent calls.
-- All deterministic components (Bayesian belief update, Platt-calibrated confidence scoring, FHIR normalization, safety escalation) produce byte-identical outputs across all 4 providers.
+- **OpenAI GPT-4o**: "Live API mode active. Key loaded (ends ...RNQA)." / "Live OpenAI LLM client initialized (gpt-4o)."
+- **Claude Sonnet 4**: "Live API mode active. Key loaded (ends ...tAAA)." / "Live Anthropic LLM client initialized (claude-sonnet-4-20250514)."
+- **Gemini Flash 2.5**: "Live API mode active. Key loaded (ends ...s9hA)." / "Live Gemini LLM client initialized (gemini-2.5-flash)."
+- **DeepSeek V2 16B**: "SIMULATION MODE ACTIVE" / "MockLLM initialized with 6-context response registry."
 
-**Evidence:** All four notebooks show identical outputs:
-- Bayesian posterior: urosepsis 0.412, pneumonia_sepsis 0.327, biliary_sepsis 0.136
-- Safety escalation triggered for sepsis (confidence 0.82, threshold 0.15)
-- Clinician explanation: "SAFETY ALERT -- Escalation required. Primary concern: Sepsis..."
-- Patient explanation: "Your temperature, heart rate, and blood test results together suggest your body may be fighting a serious infection."
-- 5 hypotheses generated, all passing min consistency (>=0.7) and testability (>=0.6) thresholds
+Despite three providers initializing live LLM clients, the chapter's agent pipeline uses deterministic simulation stubs for all substantive outputs. The live LLM client is instantiated but never called for the core healthcare/scientific tasks. All diagnostic reasoning, FHIR normalization, safety escalation, literature synthesis, knowledge gap detection, hypothesis generation, and experimental feedback use hard-coded simulation paths that produce identical results regardless of provider.
 
-**Because all four providers produce identical outputs, a meaningful per-provider comparison is not possible for this chapter.** The scores below reflect the shared simulation output quality.
+**Evidence of identical substantive outputs across all four providers:**
+- Bayesian posterior: urosepsis 0.412, pneumonia_sepsis 0.327, biliary_sepsis 0.136, viral_syndrome 0.080, dehydration 0.045
+- Safety escalation: 8 critical alerts for urosepsis (confidence 0.70) and pneumonia_sepsis (confidence 0.24)
+- Knowledge gaps: 3 detected -- block copolymer architectures (composite 0.817), humidity-dependent degradation (0.73), long-term creep behavior (0.653)
+- Hypotheses: 5 generated with consistency >= 0.70 and testability >= 0.60
+- Closed-loop feedback: error reduction 11.1% -> 3.8% -> 1.0% across 3 rounds
+
+The only differences between provider notebooks are initialization messages (API key suffix, client name, provider label in log lines). No LLM-generated content varies.
 
 ---
 
 ## Shared Simulation Output Quality
 
 The simulation outputs demonstrate:
-- **Factual Accuracy:** Correct Bayesian inference mechanics, proper sepsis clinical presentation, appropriate drug interaction warnings (warfarin + aspirin bleeding risk)
-- **Completeness:** Full diagnostic pipeline from FHIR normalization through Bayesian belief update, differential generation, confidence calibration, safety escalation, and audience-adapted explanation
-- **Structure:** Professional clinical report format with SHAP-attributed clinician explanation, plain-language patient explanation, and immutable audit trail
-- **Safety Awareness:** Escalation threshold of 0.15 correctly triggers for sepsis; 4 critical conditions monitored (myocardial_infarction, pulmonary_embolism, sepsis, stroke)
-- **Scientific Rigor:** 5 hypotheses with consistency and testability scoring, closed-loop experimental feedback across 3 rounds
-
-### Unified Score (All Providers)
-
-| Dimension | Score | Rationale |
-|---|---|---|
-| Factual Accuracy | 8 | Correct medical terminology, accurate Bayesian mechanics, proper drug interaction severity |
-| Completeness | 8 | Full pipeline coverage; both healthcare and scientific agents demonstrated end-to-end |
-| Structure & Organization | 9 | Excellent clinical report format; SHAP attribution for clinicians, plain language for patients |
-| Conciseness | 7 | Appropriately detailed for medical context; some simulation scaffolding is verbose |
-| Source Grounding | 9 | All outputs explicitly reference chapter sections (SS13.1-13.8); page numbers cited |
-| Bloom's Level | **4 -- Analyze** | Pipeline analyzes clinical data through multiple lenses (Bayesian, safety, explanation) but does not evaluate trade-offs between approaches |
-| Nuance & Caveats | 8 | Safety escalation with explicit thresholds; confidence calibration via Platt scaling; audit trail |
-| Practical Utility | 7 | Good demonstration of architecture; would need live LLM integration for actual clinical use |
+- **Factual Accuracy:** Correct Bayesian inference mechanics; proper sepsis clinical presentation (tachycardia, hypotension, fever); appropriate drug interaction warnings (warfarin + aspirin bleeding risk, evidence grade 1A)
+- **Completeness:** Full diagnostic pipeline from FHIR normalization through Bayesian belief update, differential generation, Platt-calibrated confidence scoring, safety escalation, and audience-adapted explanation (clinician + patient)
+- **Structure:** Professional clinical report format; SHAP-attributed clinician explanation; plain-language patient explanation ("Your temperature, heart rate, and blood test results together suggest your body may be fighting a serious infection"); immutable audit trail with hash
+- **Safety Awareness:** Escalation threshold of 0.15 correctly triggers for sepsis-related conditions; 4 critical conditions monitored (myocardial_infarction, pulmonary_embolism, sepsis, stroke)
+- **Scientific Rigor:** Literature scan across 4 databases (PubMed, arXiv, Scopus, IEEE) with 15 papers in 5 thematic clusters; 3 knowledge gaps via 3 detection strategies (negative space, cross-domain, temporal trend); 5 hypotheses with abductive reasoning; closed-loop experimental feedback across 3 rounds showing prediction refinement
 
 ---
 
@@ -97,7 +86,20 @@ The simulation outputs demonstrate:
 | Practical Utility | **7.0** | **7.0** | **7.0** | **7.0** |
 | **WEIGHTED AVERAGE** | **7.5** | **7.5** | **7.5** | **7.5** |
 
-> *All four providers produce byte-identical simulation outputs. Scores reflect shared output quality, not LLM differentiation.*
+> *All four providers produce identical simulation outputs. Scores reflect shared output quality, not LLM differentiation.*
+
+### Score Rationale
+
+| Dimension | Score | Rationale |
+|---|---|---|
+| Factual Accuracy | 8 | Correct Bayesian mechanics (posterior sums to 1.0); accurate sepsis presentation; proper drug interaction severity (warfarin + aspirin = high bleeding risk). Deducted 2 for simulation-only data (no real literature retrieval). |
+| Completeness | 8 | Full pipeline coverage: FHIR normalization, Bayesian belief update, differential generation, confidence calibration, safety escalation, audience-adapted explanation, literature synthesis, gap detection, hypothesis generation, experimental feedback. Both healthcare and scientific agents demonstrated end-to-end. |
+| Structure & Organization | 9 | Excellent clinical report format with clear sections; SHAP attribution for clinicians; plain language for patients; well-structured knowledge gap report with composite scores. |
+| Conciseness | 7 | Appropriately detailed for medical context; simulation scaffolding (46 mock stub classes, 9 mock datasets) adds verbosity to execution trace. |
+| Source Grounding | 9 | All outputs explicitly reference chapter sections (SS13.1--13.8); page numbers cited (pp. 367, 374--375, 387). |
+| Bloom's Level | 4 (Analyze) | Pipeline analyzes clinical data through multiple lenses (Bayesian, safety, explanation); hypothesis generator analyzes gaps across domains. Does not evaluate trade-offs between diagnostic approaches. |
+| Nuance & Caveats | 8 | Safety escalation with explicit thresholds (0.15); confidence calibration via Platt scaling; audit trail with hash; guideline conflict flagged rather than auto-resolved ("agent amplifies clinical judgment rather than replacing it"). |
+| Practical Utility | 7 | Good demonstration of architecture; closed-loop feedback shows prediction refinement. Would need live LLM integration for actual clinical use. |
 
 ---
 
@@ -112,7 +114,7 @@ Level 2: Understand  |
 Level 1: Remember    |
 ```
 
-The simulation pipeline reaches Level 4 (Analyze) through multi-dimensional clinical analysis (Bayesian belief update, differential generation, confidence calibration, safety escalation). It does not reach Level 5 because the simulation does not evaluate trade-offs between diagnostic approaches or weigh competing clinical evidence -- it follows a fixed pipeline.
+The simulation pipeline reaches Level 4 (Analyze) through multi-dimensional clinical analysis (Bayesian belief update across 5 diagnoses, safety escalation across 4 critical conditions, knowledge gap detection via 3 strategies). It does not reach Level 5 because the simulation follows a fixed pipeline without evaluating trade-offs between diagnostic approaches or weighing competing clinical evidence.
 
 ---
 
@@ -155,15 +157,10 @@ Legend: **O** = OpenAI GPT-4o, **C** = Claude Sonnet 4, **G** = Gemini Flash 2.5
 | **Bloom's Level** | **Level 4 -- Analyze** |
 
 **Why this is a tie:**
-- All four provider notebooks produce byte-identical simulation outputs
-- The `llm = None` in live mode means no actual LLM calls differentiate the providers
-- The MockLLM response registry is the same 6-context set across all notebooks
-- All deterministic pipeline components (Bayesian update, FHIR normalization, safety escalation) are code-identical
-
-**To differentiate providers, this chapter would need:**
-1. Live LLM integration for clinical narrative generation
-2. Provider-specific interpretation of diagnostic results
-3. Separate prompt-response evaluation outside the simulation framework
+- All four provider notebooks produce identical simulation outputs for all substantive agent tasks
+- The live LLM client is instantiated for OpenAI, Claude, and Gemini but never called for core agent operations
+- DeepSeek runs in explicit simulation mode with MockLLM, producing the same results
+- All deterministic pipeline components (Bayesian update, FHIR normalization, safety escalation, literature scan, gap detection, hypothesis generation, experimental feedback) are code-identical
 
 ### Best Provider by Scenario
 
@@ -172,12 +169,12 @@ Legend: **O** = OpenAI GPT-4o, **C** = Claude Sonnet 4, **G** = Gemini Flash 2.5
 | Maximum quality | Any (identical) | Simulation outputs are the same |
 | Cost-efficient production | Gemini Flash 2.5 | Lowest per-token cost for equivalent output |
 | Air-gapped / private data | DeepSeek V2 (Local) | Only option with zero cloud dependency |
-| Rapid prototyping | DeepSeek V2 (Local) | No API key, instant iteration, zero cost |
+| Rapid prototyping | DeepSeek V2 (Local) | No API key needed, instant iteration, zero cost |
 
 ## Provider Profiles for This Chapter
 
 ### All Providers -- "The Simulation Pipeline"
-**Strengths:** Well-architected healthcare and scientific discovery pipeline; correct Bayesian mechanics; proper safety escalation; audience-adapted explanations; closed-loop hypothesis feedback.
+**Strengths:** Well-architected healthcare and scientific discovery pipeline; correct Bayesian mechanics; proper safety escalation with configurable thresholds; audience-adapted explanations (clinician vs. patient); closed-loop hypothesis feedback with error reduction demonstration.
 **Weaknesses:** No live LLM differentiation; identical outputs make provider comparison impossible; simulation scaffolding adds verbosity.
 
 ---
@@ -196,4 +193,4 @@ Legend: **O** = OpenAI GPT-4o, **C** = Claude Sonnet 4, **G** = Gemini Flash 2.5
 
 ---
 
-*Analysis based on Chapter 13 notebook outputs executed April 2026. All four providers (OpenAI, Claude, Gemini, DeepSeek) produce identical simulation-mode outputs. The retrieval pipeline, Bayesian inference, and safety escalation are entirely deterministic. No live LLM calls were made in any notebook.*
+*Analysis based on Chapter 13 notebook outputs executed April 2026. All four providers (OpenAI, Claude, Gemini, DeepSeek) produce identical simulation-mode agent outputs despite three having live API clients initialized. The retrieval pipeline, Bayesian inference, safety escalation, and scientific discovery components are entirely deterministic.*

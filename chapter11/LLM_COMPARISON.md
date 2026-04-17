@@ -40,19 +40,19 @@ Each provider is rated 0-10 across eight dimensions:
 
 ---
 
-## Key Observation: All Providers Ran in Simulation Mode with Identical Outputs
+## Key Observation: All Four Providers Ran in Simulation Mode with Byte-Identical Outputs
 
-Chapter 11 uses **mock backends** for all multimodal processing (vision, audio, sensor fusion). The mock system activates because torch is not installed and no HUGGINGFACE_TOKEN is in the environment. All four provider notebooks produce byte-identical outputs (verified via MD5 hash comparison).
+Chapter 11 uses **mock backends** for all multimodal processing. The mock system activates because `torch` is not installed and no `HUGGINGFACE_TOKEN` is present in the environment. The LLM provider selection has zero effect on outputs.
 
-**Execution mode for all providers:**
+**Mode banner (identical for all four providers):**
 ```
 Simulation Mode active. Reasons: torch not installed; No valid HUGGINGFACE_TOKEN in environment
 All agents will use mock backends from mock_backends.py. No GPU or API token required.
 ```
 
-**Hash verification:** All four notebooks (OpenAI, Claude, Gemini, DeepSeek) produce identical output with MD5 hash `d278b7a08b19ba6aa755975260bd38dc` and total character count of 10,675.
+**Verification:** All four notebooks (Claude Sonnet 4, OpenAI GPT-4o, Gemini Flash 2.5, DeepSeek V2 16B) produce byte-identical outputs -- 10,676 characters of combined output text, with zero character differences across any provider pair.
 
-This means the LLM is not invoked at all -- the mock backends return pre-authored responses for vision queries, audio transcription, and sentiment analysis. Provider differentiation is zero.
+The LLM is never invoked. Mock backends return pre-authored responses for vision queries, audio transcription, and sentiment analysis regardless of which provider notebook is run.
 
 ---
 
@@ -60,8 +60,8 @@ This means the LLM is not invoked at all -- the mock backends return pre-authore
 
 | Provider | Output Cells | Mode | Outputs Identical |
 |---|---|---|---|
-| OpenAI GPT-4o | 30 | Simulation (mock backends) | Yes -- byte-identical |
 | Claude Sonnet 4 | 30 | Simulation (mock backends) | Yes -- byte-identical |
+| OpenAI GPT-4o | 30 | Simulation (mock backends) | Yes -- byte-identical |
 | Gemini Flash 2.5 | 30 | Simulation (mock backends) | Yes -- byte-identical |
 | DeepSeek V2 16B | 30 | Simulation (mock backends) | Yes -- byte-identical |
 
@@ -69,18 +69,19 @@ This means the LLM is not invoked at all -- the mock backends return pre-authore
 
 ## Observed Outputs (Mock Backends -- Identical Across All Providers)
 
-### Vision-Language Agent
-- **Scene description**: "This is a cluttered workspace containing a laptop, papers, a coffee cup precariously balanced on a stack of documents, and a desk lamp." Chain-of-thought reasoning traces are included.
+### Vision-Language Agent (Section 11.1)
+- **Test image**: Programmatic 640x480 RGB image with colored rectangles simulating workspace objects
+- **Scene description**: "This is a cluttered workspace containing a laptop, papers, a coffee cup precariously balanced on a stack of documents, and a desk lamp." Includes chain-of-thought reasoning traces.
 - **People counting**: "2 people are visible in the image" with systematic left-to-right scanning reasoning
-- **Spatial relationships**: Describes laptop center, coffee cup right, desk lamp upper-left with distance estimates (15cm from laptop edge)
-- **Error handling**: @graceful_fallback correctly catches NoneType image input after 2 retry attempts
+- **Spatial relationships**: Describes laptop (center), coffee cup (right, 15cm from laptop edge), desk lamp (upper-left)
+- **Error handling**: `@graceful_fallback` correctly catches NoneType image input after 2 retry attempts
 
-### Audio Processing Agent
-- **Clean mode**: Removes filler words. 4 segments with confidence 0.91-0.98. "Yes I've been waiting for three weeks now and nobody has called me back."
+### Audio Processing Agent (Section 11.2)
+- **Clean mode**: Removes filler words. 4 segments with confidence 0.91-0.98. Output: "Yes I've been waiting for three weeks now and nobody has called me back."
 - **Verbatim mode**: Preserves filler words ("So um the Q3 results are in and uh we exceeded targets"). 3 segments with confidence 0.90-0.95.
 - **Sentiment analysis**: Detects "angry" emotion with 0.975 confidence. Prosodic features: pitch 260Hz, rate 6.2 words/sec.
 
-### Physical World Sensing Agent
+### Physical World Sensing Agent (Section 11.3)
 - **Normal office**: 72F, CO2 650ppm -- 0 alerts, 0 commands (within deadband)
 - **Server room overheat**: 96.5F -- CRITICAL alert, cooling at 100% intensity
 - **After-hours intrusion**: Occupancy 0.9 at 23:00 -- unexpected occupancy alert, heating 40%
@@ -88,20 +89,22 @@ This means the LLM is not invoked at all -- the mock backends return pre-authore
 
 ---
 
-## Mock Response Quality Assessment
+## Scoring
 
-Since all providers produce identical outputs, a single quality assessment applies:
+Because all four providers produce byte-identical outputs from mock backends, individual provider scoring is meaningless. A single quality assessment applies:
+
+### Mock Backend Response Quality
 
 | Dimension | Score | Rationale |
 |---|---|---|
-| Factual Accuracy | 7 | Mock descriptions are plausible and internally consistent. People count, spatial relationships, and sentiment analysis are reasonable for simulated data. |
-| Completeness | 7 | All three modalities (vision, audio, sensor) are covered with multiple scenarios. Vision has 3 queries + error demo; audio has 2 transcription modes + sentiment; sensors have 4 scenarios. |
-| Structure & Organization | 8 | Outputs are well-structured with clear CoT reasoning, segmented transcriptions with timestamps and confidence scores, and structured zone state reports. |
-| Conciseness | 8 | Mock outputs are appropriately sized -- scene descriptions are focused, transcriptions are clean, sensor reports are tabular. |
-| Source Grounding | 8 | Mock responses faithfully implement the chapter's multimodal agent patterns. |
-| Bloom's Level | **3 -- Apply** | Mock responses apply multimodal processing patterns without analyzing or evaluating. Real LLMs would show differentiation in reasoning quality. |
-| Nuance & Caveats | 6 | Confidence scores are included for transcription segments and sentiment. Zone monitoring has proper deadband logic. But uncertainty is simulated, not genuinely reasoned. |
-| Practical Utility | 7 | Mock outputs demonstrate the pipeline architecture well. Sensor fusion scenarios are realistic and actionable. |
+| Factual Accuracy | 7 | Mock descriptions are internally consistent. People count, spatial relationships, and sentiment scores are plausible for simulated data. Sensor thresholds produce correct alert levels. |
+| Completeness | 7 | All three modalities (vision, audio, sensor) are covered with multiple scenarios. Vision has 3 queries + error handling demo. Audio has 2 transcription modes + sentiment. Sensors have 4 zone scenarios. |
+| Structure & Organization | 8 | Clear chain-of-thought reasoning in vision outputs. Segmented transcriptions with per-segment timestamps and confidence scores. Structured zone state reports with alert severity levels. |
+| Conciseness | 8 | Scene descriptions are focused. Transcriptions are clean. Sensor reports use tabular format without padding. No unnecessary verbosity in any modality. |
+| Source Grounding | 8 | Mock responses implement the chapter's multimodal agent patterns faithfully: VisionQuestionAnsweringAgent with CoT, AudioProcessingAgent with clean/verbatim modes, and zone monitoring with deadband logic. |
+| Bloom's Level | **3 -- Apply** | Mock responses apply multimodal processing patterns without analysis or evaluation. CoT traces are pre-authored, not genuinely reasoned. Real LLMs would show differentiation in reasoning depth. |
+| Nuance & Caveats | 6 | Confidence scores are included for transcription segments (0.90-0.98) and sentiment (0.975). Zone monitoring uses proper deadband logic to avoid alert chatter. But uncertainty is simulated, not genuinely assessed. |
+| Practical Utility | 7 | Mock outputs validate the pipeline architecture. Sensor fusion scenarios are realistic and actionable (CRITICAL cooling command, after-hours intrusion alert). Demonstrates the full multimodal agent pattern. |
 
 **Mock Response Weighted Average: 6.8 / 10**
 
@@ -109,7 +112,7 @@ Since all providers produce identical outputs, a single quality assessment appli
 
 ## Overall Scorecard
 
-| Dimension | OpenAI GPT-4o | Claude Sonnet 4 | Gemini Flash 2.5 | DeepSeek V2 |
+| Dimension | Claude Sonnet 4 | OpenAI GPT-4o | Gemini Flash 2.5 | DeepSeek V2 |
 |---|---|---|---|---|
 | All dimensions | Mock backends | Mock backends | Mock backends | Mock backends |
 | **WEIGHTED AVERAGE** | 6.8 | 6.8 | 6.8 | 6.8 |
@@ -129,10 +132,7 @@ Level 2: Understand  |
 Level 1: Remember    |
 ```
 
-Mock backends apply pre-authored multimodal processing patterns. In live mode, providers would differentiate significantly:
-- **Vision**: Claude and GPT-4o have native vision; Gemini has strong multimodal integration; DeepSeek V2 is text-only
-- **Audio**: Whisper-based transcription would be identical; sentiment analysis would vary
-- **Sensors**: LLM synthesis of sensor data would show quality differences
+Mock backends apply pre-authored multimodal processing patterns. In live mode, providers would differentiate significantly in vision understanding and reasoning quality.
 
 ---
 
@@ -141,49 +141,49 @@ Mock backends apply pre-authored multimodal processing patterns. In live mode, p
 ### Execution Status
 
 ```
-  Provider              Outputs  Mode                 Hash Match
-  --------------------  -------  -------------------  ----------
-  OpenAI GPT-4o            30   Mock backends         d278b7a0...
-  Claude Sonnet 4          30   Mock backends         d278b7a0...
-  Gemini Flash 2.5         30   Mock backends         d278b7a0...
-  DeepSeek V2 (Local)      30   Mock backends         d278b7a0...
+  Provider              Outputs  Mode                 Identical
+  --------------------  -------  -------------------  ---------
+  Claude Sonnet 4          30   Mock backends         Yes
+  OpenAI GPT-4o            30   Mock backends         Yes
+  Gemini Flash 2.5         30   Mock backends         Yes
+  DeepSeek V2 (Local)      30   Mock backends         Yes
 ```
 
 ---
 
-## Winner: No Winner -- All Outputs Identical
+## Winner: No Winner -- All Outputs Byte-Identical
 
 | | |
 |---|---|
 | **Chapter 11 Winner** | **No winner declared** |
 | **Reason** | All four providers produce byte-identical mock outputs |
 
-**All notebooks ran on mock backends (no torch, no HuggingFace token).** The multimodal mock system bypasses the LLM entirely, returning pre-authored responses for vision, audio, and sensor tasks.
+**All notebooks ran on mock backends** because `torch` is not installed and no `HUGGINGFACE_TOKEN` is available. The multimodal mock system bypasses the LLM entirely, returning pre-authored responses for vision, audio, and sensor tasks. The LLM provider key is irrelevant for this chapter's execution.
+
+### Why This Chapter Is Provider-Agnostic
+
+Chapter 11 uses HuggingFace models (LLaVA for vision, Whisper for audio) rather than cloud LLM APIs. The provider-specific notebooks differ only in the `LLM_PROVIDER` environment variable, which controls the text LLM -- but Chapter 11's multimodal agents use dedicated multimodal models, not the text LLM. Even in live mode, the provider choice would only matter for any text-based reasoning layers, not for the core vision/audio processing.
 
 ### Expected Differentiation in Live Mode
 
-If run with live multimodal backends, provider differences would emerge in:
+If run with `torch` installed and a valid `HUGGINGFACE_TOKEN`:
 
-1. **Vision-Language** (strongest differentiator):
-   - GPT-4o and Claude have native vision APIs with direct image understanding
-   - Gemini Flash has integrated multimodal processing
-   - DeepSeek V2 16B is text-only and would need caption-based fallback
+| Component | Differentiation Level | Notes |
+|---|---|---|
+| Vision-Language (LLaVA) | None across providers | Uses HuggingFace model, not provider API |
+| Audio Transcription (Whisper) | None across providers | Uses HuggingFace model, not provider API |
+| Sentiment Analysis | None across providers | Uses HuggingFace model, not provider API |
+| Sensor Fusion | None (deterministic) | Threshold-based alerting, no LLM involvement |
 
-2. **Audio Processing** (moderate differentiator):
-   - All providers would use Whisper for transcription (similar quality)
-   - Sentiment analysis from prosodic features would vary by LLM reasoning quality
+**Key insight:** Even with live backends, this chapter would show minimal provider differentiation because the multimodal models are HuggingFace-hosted, not provider-specific. Only if the architecture were redesigned to use GPT-4o Vision, Claude Vision, or Gemini multimodal APIs would provider differences emerge.
 
-3. **Sensor Fusion** (weakest differentiator):
-   - Threshold-based alerting is deterministic
-   - LLM synthesis of multi-zone summaries would show minor quality differences
-
-### Best Provider by Scenario (Estimated for Live Mode)
+### If Redesigned for Cloud Multimodal APIs
 
 | Scenario | Likely Best Choice | Why |
 |---|---|---|
-| Vision-language tasks | GPT-4o or Gemini | Strong native vision capabilities |
-| Audio transcription | Any provider | Whisper-based; provider-agnostic |
-| Sensor fusion | Any cloud provider | Deterministic pipeline dominates |
+| Vision-language tasks | GPT-4o or Gemini Flash | Native multimodal APIs with strong image understanding |
+| Audio transcription | Any provider | Whisper-based transcription is provider-agnostic |
+| Combined vision + text reasoning | Claude Sonnet 4 | Strong at structured analysis of visual content |
 | Local multimodal | DeepSeek + local models | Zero cloud dependency |
 
 ---
@@ -192,11 +192,11 @@ If run with live multimodal backends, provider differences would emerge in:
 
 | Use Case | Recommended Action | Why |
 |---|---|---|
-| **Comparing multimodal providers** | Re-run with torch + HF token | Current outputs bypass LLM entirely |
-| **Pipeline validation** | Use current mock outputs | Mock mode proves architecture correctness |
-| **Vision capabilities** | Test GPT-4o and Gemini first | Native multimodal APIs |
-| **Production deployment** | Benchmark with actual images/audio | Mock data cannot predict real-world quality |
+| **Comparing multimodal providers** | Install torch + obtain HF token, or redesign for cloud vision APIs | Current outputs bypass all models entirely |
+| **Pipeline validation** | Use current mock outputs | Mock mode proves architecture correctness for all three modalities |
+| **Production multimodal agents** | Benchmark with actual images and audio | Mock data cannot predict real-world model quality |
+| **Vision capabilities comparison** | Use provider-native vision APIs (GPT-4V, Gemini, Claude) | HuggingFace LLaVA is provider-agnostic |
 
 ---
 
-*Analysis based on Chapter 11 notebook execution outputs, April 2026. All four provider notebooks ran on mock backends (torch not installed, no HuggingFace token) producing byte-identical outputs. No LLM provider comparison is possible from current data. Provider differentiation would require live multimodal backends with actual image, audio, and sensor inputs.*
+*Analysis based on Chapter 11 notebook execution outputs, April 2026. All four provider notebooks ran on mock backends (torch not installed, no HuggingFace token) producing byte-identical outputs with 10,676 total characters. No LLM provider comparison is possible from current data. The chapter uses HuggingFace multimodal models, making it inherently provider-agnostic even in live mode.*

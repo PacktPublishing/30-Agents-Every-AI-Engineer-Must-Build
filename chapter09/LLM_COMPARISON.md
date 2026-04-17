@@ -41,34 +41,52 @@ Each provider is rated 0-10 across eight dimensions:
 
 ---
 
-## Key Observation: Mixed Live and Simulation Mode Outputs
+## Execution Modes
 
-Chapter 9 uses a **deterministic orchestration pipeline** with LLM-generated code as the key differentiator. The compliance scanning (policy engine, data flow analysis) and self-improvement pipeline (sensing, critic, HITL) are largely deterministic, but the LLM drives code generation, semantic analysis, and hypothesis generation.
+All three providers with outputs ran in **Live Mode** with real API calls. Claude Sonnet 4 had no saved outputs (notebook never executed).
 
-**Execution modes observed:**
-- **Gemini Flash 2.5**: Live Mode (ChatGoogleGenerativeAI) -- real LLM outputs for all code generation and analysis tasks
-- **DeepSeek V2 16B**: Live Mode (ChatOllama) -- real LLM outputs, running locally
-- **OpenAI GPT-4o**: Simulation Mode (MockLLM) -- pre-authored responses only
-- **Claude Sonnet 4**: No saved outputs (0 output cells)
+| Provider | Output Cells | Mode | LLM Backend |
+|---|---|---|---|
+| Gemini Flash 2.5 | 32 | Live Mode | ChatGoogleGenerativeAI |
+| OpenAI GPT-4o | 32 | Live Mode | ChatOpenAI |
+| DeepSeek V2 16B | 32 | Live Mode | ChatOllama (local) |
+| Claude Sonnet 4 | 0 | Not executed | -- |
 
-Only Gemini and DeepSeek provide actual LLM-generated outputs for comparison. OpenAI ran on MockLLM (identical to simulation). Claude notebook was not executed.
+**Note:** Compliance scanning (PolicyEngine, DataFlowAnalyzer), remediation, audit trails, sensing, critic KPI evaluation, and HITL checkpoint sections use deterministic pipelines and are identical across all providers. The LLM differentiates in code generation, test synthesis, semantic analysis, and hypothesis generation. All three providers encountered JSON parse failures in the PlannerAgent, triggering identical fallback hypotheses.
 
 ---
 
 ## Provider Performance
 
+### OpenAI GPT-4o
+
+| Dimension | Score | Rationale |
+|---|---|---|
+| Factual Accuracy | 8 | Code synthesis produces a correct `calculate_shipping(cart_total, weight)` with proper formula: `base_rate + weight * weight_cost_per_unit`, discount tiers at $50 and $100. The refined version correctly adds `ValueError` for negative weight. Semantic analysis accurately identifies four retained PII fields (email, phone_number, date_of_birth, ip_address). |
+| Completeness | 7 | Initial code covers base rate, weight cost, and tiered discounts but lacks type annotations and docstrings. Test suite covers 5 cases including `test_negative_weight` with `pytest.raises`. The refined version drops the `cart_total` parameter entirely, reducing to `calculate_shipping(weight)` -- a significant spec regression. |
+| Structure & Organization | 7 | Code is clean with inline comments explaining each step. Flask API starts with model definition (SQLAlchemy). React component uses TypeScript interfaces with `useState`/`useEffect` hooks. However, the refined function is oversimplified. |
+| Conciseness | 8 | Initial code is compact (20 lines) without over-engineering. The task assignment prompt, while detailed, stays focused on requirements. Semantic analysis at 1830 chars is well-scoped. |
+| Source Grounding | 7 | Follows the TDG cycle correctly. The initial code-then-test-then-refine loop works as designed. But the PlannerAgent fails JSON parsing (char 0), falling back to generic "Investigate and improve X" hypotheses identical to other providers. |
+| Bloom's Level | **4 -- Analyze** | Semantic analysis breaks down the anonymization function's behavior vs. its docstring claim, identifying specific retained fields and their regulatory implications under HIPAA/GDPR. The task assignment prompt structures requirements into base cost, discounts, and edge cases. |
+| Nuance & Caveats | 7 | Semantic analysis identifies "Incomplete Anonymization" and "Misleading Documentation" as separate violation categories. The task assignment includes explicit edge cases (weight over 20 kg, minimum shipping cost). |
+| Practical Utility | 7 | Initial code is production-usable. React component with TypeScript interfaces is well-structured for real frontend work. The Flask API starts at the model layer, which is appropriate. However, the refined function dropping `cart_total` would break integration. |
+
+> *Scores based on actual Live Mode outputs from ChatOpenAI (GPT-4o).*
+
+---
+
 ### Gemini Flash 2.5
 
 | Dimension | Score | Rationale |
 |---|---|---|
-| Factual Accuracy | 8 | Code generation is correct with proper type annotations and docstrings. The `calculate_shipping` function uses appropriate constants and validation. However, test suite uses mismatched parameters (weight, distance vs cart_total, weight). |
-| Completeness | 8 | Comprehensive code with extensive docstrings, input validation, examples in docstrings, and configurable constants. Generates parametrized test classes. But the LLM occasionally drifts from the spec -- the refined version adds an `item_type` parameter not in the original spec. |
-| Structure & Organization | 8 | Well-organized code with clear sections, named constants, and comprehensive docstrings. Flask API uses proper factory pattern with blueprints, models, and error handlers. |
-| Conciseness | 6 | Verbose. Code generation includes extensive configuration parameters, setup instructions, and explanatory prose. The Flask API response is a full multi-file project layout rather than a focused code snippet. The React component output includes mock API setup instructions instead of just the component. |
-| Source Grounding | 7 | Follows the chapter's TDG pattern but diverges in details. Semantic analysis produces a compliance report format instead of the compact structured output. The Planner Agent failed to parse LLM response (JSON parse error), triggering fallback with generic hypotheses. |
-| Bloom's Level | **4 -- Analyze** | Analyzes code structure in semantic compliance scanning (identifying retained fields, regulatory implications). Breaks down the problem into components. But hypotheses are generic ("Investigate and improve X") rather than specific actionable changes. |
-| Nuance & Caveats | 7 | Code includes good caveats -- "CUSTOMIZE THESE TO YOUR BUSINESS RULES", validation edge cases, and separate error messages for different invalid inputs. Semantic analysis identifies the docstring-vs-behavior mismatch well. |
-| Practical Utility | 7 | Generated code is mostly production-adjacent. The Flask API is over-engineered for the task (full migration, config system). The Planner failing JSON parse means the self-improvement loop degraded to fallback behavior. Encountered a 504 DEADLINE_EXCEEDED timeout during workflow execution. |
+| Factual Accuracy | 8 | Code synthesis produces a correct function with type annotations, `ValueError` for negative inputs, named constants (`BASE_RATE = 5.00`, `WEIGHT_UNIT_COST = 0.50`), and tiered discounts. Semantic analysis produces a 5068-char compliance report correctly identifying "severe semantic compliance violations" in the anonymization function. |
+| Completeness | 8 | Most thorough code generation of all providers: comprehensive docstrings with Args/Returns/Raises sections, input validation from the start, and configurable constants. Test suite uses `@pytest.mark.parametrize` with multiple tiers (basic, tier one, tier two). However, the refined version adds `distance` and `bulky_item_surcharge` parameters not in the original spec. |
+| Structure & Organization | 8 | Best organization of all providers. Code uses named constants, explicit discount tier thresholds, and complete type annotations. The Flask API attempts a full project layout with blueprints and factory pattern. Semantic analysis is formatted as a structured compliance report with code block, findings summary, and violation details. |
+| Conciseness | 6 | Most verbose provider. The initial code has extensive docstrings (good for production, but increases output size). Flask API response includes full multi-file project scaffolding instead of focused code. React output includes mock API setup instructions rather than just the component. The refined function adds 3 extra parameters. |
+| Source Grounding | 7 | Follows the TDG pattern with proper test parametrization. Semantic analysis uses a structured compliance report format aligned with the chapter's scan-evaluate-remediate pattern. The PlannerAgent also fails JSON parsing, falling back to generic hypotheses. |
+| Bloom's Level | **4 -- Analyze** | Semantic compliance analysis identifies the docstring-vs-behavior mismatch, enumerates retained HIPAA identifiers, and categorizes the violation. The parametrized test suite shows systematic analysis of boundary conditions across discount tiers. |
+| Nuance & Caveats | 7 | Code includes "CUSTOMIZE THESE TO YOUR BUSINESS RULES" comments and separate validation for each input parameter. The initial task assignment caveats that "specific shipping rates and discount rules were not provided." Semantic analysis distinguishes severity levels. |
+| Practical Utility | 7 | Generated code is closest to production-ready with type annotations, docstrings, and input validation. But over-engineering is a concern -- Flask output is an entire project scaffold, and the refined function drifts from the spec by adding unrequested parameters. |
 
 > *Scores based on actual Live Mode outputs from ChatGoogleGenerativeAI.*
 
@@ -78,51 +96,34 @@ Only Gemini and DeepSeek provide actual LLM-generated outputs for comparison. Op
 
 | Dimension | Score | Rationale |
 |---|---|---|
-| Factual Accuracy | 5 | Code has logic errors. The initial `calculate_shipping` uses `(cart_total * weight)` in the formula -- multiplying the cart total by weight is mathematically wrong for a shipping cost. The discount logic applies the discount percentage inconsistently (only when cart_total > 100, despite calculating it for lower tiers). |
-| Completeness | 5 | Basic code with some comments but missing type annotations, docstrings, and examples. Test suite has hard-coded expected values that don't match the function's actual formula. The refined version reduces the function to a single-parameter `calculate_shipping(weight)` -- dropping cart_total entirely. |
-| Structure & Organization | 5 | Minimal code structure. Flask API uses `flask_restx` but has syntax errors (`fields.integer` should be `fields.Integer`). React component output is mostly prose instructions rather than actual code. Integration agent output is a description, not code. |
-| Conciseness | 7 | Code is compact and not over-engineered. The shipping function is straightforward, and the Flask API is a reasonable skeleton. Less verbose than Gemini. |
-| Source Grounding | 6 | Follows the basic TDG pattern. The initial test run correctly fails on `test_negative_weight` (the mock runner simulates the expected failure). However, the Planner Agent also failed JSON parsing, falling back to generic hypotheses. |
-| Bloom's Level | **3 -- Apply** | Applies coding patterns to specifications but does not analyze or evaluate. The semantic code analysis identifies the anonymization issue but uses hedging language ("appears to be attempting") rather than definitive analysis. |
-| Nuance & Caveats | 4 | Minimal commentary. The shipping function includes a comment about "adjust these rules according to your needs" but lacks the detailed caveats Gemini provides. Semantic analysis mentions "potential issues" without specificity. |
-| Practical Utility | 4 | Code would need significant revision for production. Formula errors, syntax errors in Flask code, and the refined function dropping a required parameter make outputs unreliable. |
+| Factual Accuracy | 5 | Initial `calculate_shipping` has a logic error: applies discount as `cart_total * (discount / 100)` instead of applying the percentage to the shipping cost. This means a $120 cart with 10 units of weight would subtract $24 (20% of cart_total) from a $10 shipping cost, yielding a negative result. Test suite references a `discount` parameter that the function does not accept (`calculate_shipping(100, 50, discount=0.2)`). |
+| Completeness | 5 | Basic implementation with no type annotations, no docstrings, and no input validation in the initial version. The refined version reduces to a single-parameter `calculate_shipping(weight)` with a trivial `weight * 1.23` formula, losing all business logic. Test assertions use hard-coded expected values that do not match the function's formula. |
+| Structure & Organization | 5 | Minimal code structure. Flask API output is prose instructions ("Step 4: Implement Error Handling") rather than actual code. React component output starts with project setup instructions before showing any code. Integration agent output is a single sentence about wrapping with Router. |
+| Conciseness | 7 | The most compact outputs of all providers. Code is short and direct. No unnecessary scaffolding or configuration. The downside is that brevity comes at the cost of correctness and completeness. |
+| Source Grounding | 6 | Follows the basic TDG cycle. The initial test run simulates expected failure on `test_negative_weight`. But the PlannerAgent also fails JSON parsing (char 1), and the test suite references parameters the function does not accept. |
+| Bloom's Level | **3 -- Apply** | Applies basic coding patterns to the specification without analyzing requirements or evaluating edge cases. Semantic analysis uses hedging ("appears to be attempting") rather than definitive identification of violations. Does not break down the problem into structured categories. |
+| Nuance & Caveats | 4 | Minimal commentary. One comment about "adjust these rules according to your needs." No mention of trade-offs, limitations, or edge cases. The semantic analysis mentions "potential issues" without specifying regulatory frameworks. |
+| Practical Utility | 4 | Code would need significant revision. The core shipping formula is wrong, the refined version drops required parameters, test assertions are mismatched, and frontend/backend outputs are instructions rather than code. Only usable as rough scaffolding. |
 
-> *Scores based on actual Live Mode outputs from ChatOllama (DeepSeek V2 16B local).*
-
----
-
-### OpenAI GPT-4o
-
-| Dimension | Score | Rationale |
-|---|---|---|
-| Factual Accuracy | 7 | Ran in Simulation Mode (MockLLM). All outputs are pre-authored mock responses, not GPT-4o generated. The mock code is correct -- `calculate_shipping` uses the proper formula `(base_rate + weight_cost) * (1 - discount)`. |
-| Completeness | 7 | Mock outputs include clean code, test suites, and workflow completion. But these are the same MockLLM responses that any provider would get in simulation mode. |
-| Structure & Organization | 7 | MockLLM outputs are well-structured with proper formatting. |
-| Conciseness | 8 | Mock outputs are concise and focused. |
-| Source Grounding | 8 | Mock responses are specifically authored for this chapter, so they follow patterns perfectly. |
-| Bloom's Level | **4 -- Analyze** | Mock responses include structured analysis (KPI evaluation, hypothesis generation with confidence scores). The Planner generates 3 specific hypotheses with evidence counts. |
-| Nuance & Caveats | 7 | Mock responses include specific trade-offs and confidence levels. |
-| Practical Utility | 7 | Mock outputs demonstrate the pipeline well but cannot be attributed to GPT-4o's actual capabilities. |
-
-> *IMPORTANT: This notebook ran in Simulation Mode (MockLLM). Scores reflect mock response quality, not GPT-4o's actual performance. Included for pipeline completeness only.*
+> *Scores based on actual Live Mode outputs from ChatOllama (DeepSeek V2 16B, running locally).*
 
 ---
 
 ## Overall Scorecard
 
-| Dimension | Gemini Flash 2.5 | DeepSeek V2 (Local) | OpenAI GPT-4o* |
+| Dimension | OpenAI GPT-4o | Gemini Flash 2.5 | DeepSeek V2 (Local) |
 |---|---|---|---|
-| Factual Accuracy | **8.0** | **5.0** | *7.0* |
-| Completeness | **8.0** | **5.0** | *7.0* |
-| Structure & Organization | **8.0** | **5.0** | *7.0* |
-| Conciseness | **6.0** | **7.0** | *8.0* |
-| Source Grounding | **7.0** | **6.0** | *8.0* |
-| Bloom's Taxonomy Level | **4.0 (Analyze)** | **3.0 (Apply)** | *4.0 (Analyze)* |
-| Nuance & Caveats | **7.0** | **4.0** | *7.0* |
-| Practical Utility | **7.0** | **4.0** | *7.0* |
-| **WEIGHTED AVERAGE** | **6.9** | **4.9** | *6.9* |
+| Factual Accuracy | 8.0 | 8.0 | 5.0 |
+| Completeness | 7.0 | 8.0 | 5.0 |
+| Structure & Organization | 7.0 | 8.0 | 5.0 |
+| Conciseness | 8.0 | 6.0 | 7.0 |
+| Source Grounding | 7.0 | 7.0 | 6.0 |
+| Bloom's Taxonomy Level | 4.0 (Analyze) | 4.0 (Analyze) | 3.0 (Apply) |
+| Nuance & Caveats | 7.0 | 7.0 | 4.0 |
+| Practical Utility | 7.0 | 7.0 | 4.0 |
+| **WEIGHTED AVERAGE** | **6.9** | **6.9** | **4.9** |
 
-> *OpenAI GPT-4o ran in Simulation Mode -- scores reflect MockLLM, not actual GPT-4o output. Claude Sonnet 4 had no saved outputs and is excluded.*
+> *Claude Sonnet 4 had no saved outputs and is excluded.*
 
 ---
 
@@ -131,23 +132,24 @@ Only Gemini and DeepSeek provide actual LLM-generated outputs for comparison. Op
 ```
 Level 6: Create      |
 Level 5: Evaluate    |
-Level 4: Analyze     | ############ Gemini Flash 2.5
+Level 4: Analyze     | ############ OpenAI GPT-4o, Gemini Flash 2.5
 Level 3: Apply       | ############ DeepSeek V2 (Local)
 Level 2: Understand  |
 Level 1: Remember    |
 ```
 
-Gemini reaches Level 4 by analyzing code structure and identifying compliance violations with specific regulatory citations. DeepSeek applies coding patterns at Level 3 but does not break down problems systematically. OpenAI (MockLLM) is excluded from Bloom's ranking since outputs are pre-authored.
+OpenAI and Gemini both reach Level 4 through structured semantic analysis of code behavior vs. documentation claims, identifying specific regulatory implications. DeepSeek applies coding patterns at Level 3 but does not systematically analyze or evaluate.
 
 ---
 
 ## Visual Summary
 
-### Overall Score Comparison (Live Providers Only)
+### Overall Score Comparison
 
 ```
   Provider              Score  Visual
   --------------------  -----  ------------------------------
+  OpenAI GPT-4o          6.9  ####################..........
   Gemini Flash 2.5       6.9  ####################..........
   DeepSeek V2 (Local)    4.9  ##############................
 ```
@@ -159,56 +161,57 @@ Gemini reaches Level 4 by analyzing code structure and identifying compliance vi
   -----  ------------  --------------------------
   L6 Create       |
   L5 Evaluate     |
-  L4 Analyze      | G
-  L3 Apply        | G D
-  L2 Understand   | G D
-  L1 Remember     | G D
+  L4 Analyze      | O G
+  L3 Apply        | O G D
+  L2 Understand   | O G D
+  L1 Remember     | O G D
 ```
 
-Legend: **G** = Gemini Flash 2.5, **D** = DeepSeek V2
+Legend: **O** = OpenAI GPT-4o, **G** = Gemini Flash 2.5, **D** = DeepSeek V2
 
 ---
 
-## Winner: Gemini Flash 2.5
+## Winner: Tied -- OpenAI GPT-4o and Gemini Flash 2.5
 
 | | |
 |---|---|
-| **Chapter 9 Winner** | **Gemini Flash 2.5** |
+| **Chapter 9 Winner** | **Tied: OpenAI GPT-4o and Gemini Flash 2.5** |
 | **Score** | **6.9 / 10** |
 | **Bloom's Level** | **Level 4 -- Analyze** |
 
-**Why Gemini Flash 2.5 wins this chapter:**
-- Only live cloud provider with actual outputs (Claude had no outputs, OpenAI ran on MockLLM)
-- Generated well-structured, documented code with type annotations and comprehensive docstrings
-- Produced meaningful semantic compliance analysis identifying retained HIPAA identifiers
-- 2.0-point lead over DeepSeek V2 (4.9)
+**Why the tie:** Both providers score identically at 6.9. They trade strengths in complementary areas: OpenAI produces more concise, focused code (8.0 vs 6.0 on Conciseness), while Gemini produces more complete, documented code (8.0 vs 7.0 on Completeness and Structure). Both achieve Level 4 Bloom's through semantic compliance analysis. Both suffer from PlannerAgent JSON parse failures.
 
-**Runner-up:** DeepSeek V2 16B (4.9/10) -- functional but significant accuracy issues
+**Key differentiators:**
+- **OpenAI GPT-4o**: Cleaner initial code, better-scoped outputs, TypeScript React component with interfaces. But the refined function drops `cart_total`, a notable spec regression.
+- **Gemini Flash 2.5**: Best documentation with type annotations, parametrized tests, and structured compliance reports. But over-engineers outputs (full project scaffolding, unrequested parameters in refinement).
 
-**Not ranked (Simulation Mode):** OpenAI GPT-4o (MockLLM only), Claude Sonnet 4 (no outputs)
+**Third place:** DeepSeek V2 16B (4.9/10) -- functional but has formula errors, mismatched test parameters, and outputs that are instructions rather than code.
+
+**Not ranked:** Claude Sonnet 4 (no saved outputs)
 
 ### Best Provider by Scenario
 
 | Scenario | Best Choice | Why |
 |---|---|---|
-| Maximum quality | Gemini Flash 2.5 | Only live cloud provider with real outputs |
+| Maximum code quality | Gemini Flash 2.5 | Type annotations, docstrings, comprehensive validation |
+| Concise code generation | OpenAI GPT-4o | Compact, focused output without over-engineering |
 | Air-gapped / private data | DeepSeek V2 (Local) | Zero cloud dependency; code stays on machine |
 | Rapid prototyping | DeepSeek V2 (Local) | No API key, instant iteration, zero cost |
-| Cost-efficient production | Gemini Flash 2.5 | Competitive pricing with solid code quality |
-
+| Semantic compliance analysis | Gemini Flash 2.5 or OpenAI GPT-4o | Both produce structured, regulation-aware analysis |
 
 ## Provider Profiles for This Chapter
 
-### Gemini Flash 2.5 -- "The Verbose Architect"
-**Strengths:** Comprehensive code generation with extensive documentation; good semantic analysis; proper input validation.
-**Weaknesses:** Overly verbose -- generates full project scaffolding when focused snippets are needed; occasional spec drift (adding unrequested parameters); Planner JSON parsing failures requiring fallback; timeout errors during workflow execution.
+### OpenAI GPT-4o -- "The Pragmatic Coder"
+**Strengths:** Concise, readable code; proper discount logic; TypeScript React component with interfaces; well-scoped semantic analysis (1830 chars).
+**Weaknesses:** No type annotations or docstrings in initial code; refined version drops `cart_total` parameter entirely; PlannerAgent JSON parse failure at char 0.
 
-### DeepSeek V2 16B -- "The Rough Draft Generator"
-**Strengths:** Compact code; fast local execution; zero API cost.
-**Weaknesses:** Formula errors in core logic; syntax errors in Flask code; refined code drops required parameters; generic prose instead of code for frontend tasks; Planner JSON parsing failures.
+### Gemini Flash 2.5 -- "The Thorough Documenter"
+**Strengths:** Type annotations, comprehensive docstrings, named constants, parametrized test cases, structured compliance report format (5068 chars).
+**Weaknesses:** Verbose -- Flask output is full project scaffold; refined version adds 3 unrequested parameters (`distance`, `shipping_rate_per_kg`, `bulky_item_surcharge`); PlannerAgent JSON parse failure.
 
-### OpenAI GPT-4o -- "Simulation Only"
-**Note:** Ran in Simulation Mode (MockLLM). All outputs are pre-authored mock responses identical to any simulation run. Cannot assess actual GPT-4o code generation quality from this chapter's outputs.
+### DeepSeek V2 16B -- "The Quick Sketcher"
+**Strengths:** Compact output; fast local execution; zero API cost.
+**Weaknesses:** Formula error (subtracts percentage of cart_total from shipping cost); test suite references non-existent `discount` parameter; refined version reduces to trivial `weight * 1.23`; frontend/backend outputs are prose instructions, not code.
 
 ---
 
@@ -216,11 +219,11 @@ Legend: **G** = Gemini Flash 2.5, **D** = DeepSeek V2
 
 | Use Case | Recommended Provider | Why |
 |---|---|---|
-| **Code generation** | Gemini Flash 2.5 | Best actual code quality observed in live outputs |
-| **Compliance scanning** | Gemini Flash 2.5 | Produced detailed semantic compliance analysis |
-| **Rapid local prototyping** | Ollama DeepSeek V2 | Zero cost; immediate feedback; acceptable for scaffolding |
-| **Self-improving agents** | Gemini Flash 2.5 | Better (though still imperfect) structured output parsing |
+| **Code generation** | OpenAI GPT-4o or Gemini Flash 2.5 | Both produce correct, usable code; choice depends on verbosity preference |
+| **Compliance scanning** | Gemini Flash 2.5 | Most detailed semantic compliance report (5068 chars vs 1830) |
+| **Rapid local prototyping** | DeepSeek V2 16B (Ollama) | Zero cost; immediate feedback; acceptable for quick scaffolding |
+| **Self-improving agents** | Any cloud provider | All three fail PlannerAgent JSON parsing; pipeline needs structured output enforcement |
 
 ---
 
-*Analysis based on actual Chapter 9 notebook execution outputs, April 2026. Gemini and DeepSeek ran in Live Mode with real LLM outputs. OpenAI ran in Simulation Mode (MockLLM). Claude had no saved outputs. Compliance scanning, data flow analysis, and measured outcomes sections use deterministic pipelines -- identical across providers.*
+*Analysis based on actual Chapter 9 notebook execution outputs, April 2026. Gemini, OpenAI, and DeepSeek all ran in Live Mode with real LLM outputs. Claude had no saved outputs. Compliance scanning, data flow analysis, sensing, critic, HITL, and learning sections use deterministic pipelines identical across all providers.*

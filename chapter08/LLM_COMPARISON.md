@@ -2,7 +2,7 @@
 
 **Book:** *30 Agents Every AI Engineer Must Build* by Imran Ahmad (Packt Publishing, 2026)
 
-This document compares the performance of three LLM providers running the Chapter 8 Data Analysis and Reasoning tasks: visualization recommendation, statistical interpretation, verification (NLI), fact-checking, and the General Problem Solver (GPS). DeepSeek V2 16B produced 0 output cells and is excluded from scoring.
+This document compares the performance of four LLM providers running the Chapter 8 Data Analysis and Reasoning tasks: visualization recommendation, statistical interpretation, verification (NLI), fact-checking, and the General Problem Solver (GPS).
 
 ---
 
@@ -10,9 +10,8 @@ This document compares the performance of three LLM providers running the Chapte
 
 - **Data Analysis Agent** (Section 8.1) -- Cognitive loop with visualization recommendation, OLS regression, anomaly detection, and LLM-powered statistical interpretation
 - **Verification & Validation Agent** (Section 8.2) -- NLI-based fact-checking using BART-MNLI for evidence scoring
-- **General Problem Solver** (Section 8.3) -- 5-stage meta-reasoning: decompose, find analogies, hypothesize, test, and meta-learn
-- **Case Study 1: News Fact-Checking** (Section 8.4) -- Claim extraction from news articles with verification pipeline
-- **Case Study 2: Cross-Disciplinary GPS** (Section 8.5) -- Hypothesis generation across research domains
+- **General Problem Solver** (Section 8.3-8.5) -- 5-stage meta-reasoning: decompose, find analogies, hypothesize, test, and meta-learn
+- **Case Study: News Fact-Checking** (Section 8.4) -- Claim extraction from news articles with verification pipeline
 
 ## Scoring Dimensions
 
@@ -42,32 +41,110 @@ Each provider is rated 0-10 across eight dimensions:
 
 ---
 
-## Critical Finding: All Providers Used MockLLM for LLM-Dependent Tasks
+## Critical Finding: Only OpenAI Achieved Live LLM Calls
 
-Despite API key initialization:
-- **Claude Sonnet 4:** "Anthropic client initialized. Running in LIVE mode." -- but all llm_call() routes through MockLLM because the `llm_call()` function in `mock_llm.py` only has a live path for OpenAI's `client.chat.completions.create` API format. The Anthropic client is incompatible.
-- **Gemini Flash 2.5:** "Gemini client initialized. Running in LIVE mode." -- same issue. The Gemini client does not match the OpenAI chat completions interface.
-- **OpenAI GPT-4o:** "No API key detected. Running in SIMULATION MODE." -- explicitly in simulation.
+Despite all providers initializing in LIVE MODE:
 
-**Evidence:** All three providers produce identical output text:
-- Statistical interpretation: "Marketing spend explains approximately 62% of the variation in revenue, indicating a strong positive correlation."
-- Claim extraction: 2 claims extracted (unemployment rate 5%, budget surplus $12M)
-- GPS decomposition, analogies, and hypotheses: all from MockLLM pre-authored responses
-- NLI scores: Precomputed values (entailment: 0.92, neutral: 0.05, contradiction: 0.03)
+| Provider | Init Message | Live LLM Calls? | Reason |
+|---|---|---|---|
+| **OpenAI GPT-4o** | "OpenAI client initialized. Running in LIVE mode." | YES | `llm_call()` uses `client.chat.completions.create()` -- compatible |
+| **Claude Sonnet 4** | "Anthropic client initialized. Running in LIVE mode." | NO | `'Anthropic' object has no attribute 'chat'` -- API incompatible with llm_call() |
+| **Gemini Flash 2.5** | "Gemini client initialized. Running in LIVE mode." | NO | `'GenerativeModel' object has no attribute 'chat'` -- API incompatible with llm_call() |
+| **DeepSeek V2 16B** | N/A | NO | 0 output cells in notebook |
 
-**Result:** No meaningful LLM-quality differentiation is possible for this chapter.
+**Root cause:** The `llm_call()` function in `mock_llm.py` uses `client.chat.completions.create()` -- the OpenAI API format. When the client is an Anthropic or Gemini object, the call fails and falls back to MockLLM. Claude and Gemini's error messages explicitly confirm: `Live API call failed: 'Anthropic' object has no attribute 'chat' -- falling back to MockLLM.`
 
-### What Components ARE Deterministic
+**Result:** OpenAI GPT-4o is the only provider with genuine LLM-generated outputs for statistical interpretation, claim extraction, and GPS reasoning. Claude and Gemini both fell back to MockLLM for every LLM-dependent task.
+
+---
+
+## What Components Are Deterministic
 
 | Component | Source | Identical Across Providers? |
 |---|---|---|
-| Visualization recommendation | Rule-based keyword matching | Yes |
-| OLS regression | statsmodels computation | Yes |
-| Anomaly detection | Z-score calculation | Yes |
-| Statistical interpretation | MockLLM (context_key: stats_interpretation) | Yes |
-| NLI verification | Precomputed scores (not actual BART-MNLI) | Yes |
-| Claim extraction | MockLLM (context_key: claim_extraction) | Yes |
-| GPS stages | MockLLM (context_key: gps_decompose, gps_analogies, gps_hypothesis) | Yes |
+| Visualization recommendation | Rule-based keyword matching | Yes (line, bar, scatter, table) |
+| OLS regression | statsmodels computation | Yes (R^2=0.774, coeff=2.4947) |
+| Anomaly detection | Z-score calculation | Yes (no anomalies at z>3.0) |
+| Descriptive statistics | pandas .describe() | Yes (mean sales 111.25, std 56.24) |
+| NLI verification | Precomputed scores | Yes (entailment 0.92, neutral 0.05, contradiction 0.03) |
+| Claim verification | Trusted database lookup | Yes (both claims contradicted) |
+
+---
+
+## LLM-Dependent Task 1: Statistical Interpretation
+
+### OpenAI GPT-4o (LIVE)
+
+**Actual output:** Multi-paragraph interpretation covering:
+- "strong positive relationship between marketing spending and revenue, with a correlation of 0.880"
+- "marketing efforts are likely effective in driving sales"
+- Standard deviation explanation: "moderate level of variability"
+- Absence of anomalies: "all sales figures fall within the expected range"
+- Conclusion: "marketing investments are paying off"
+
+**Assessment:** The interpretation correctly identifies the correlation strength (0.880) and draws appropriate causal inferences. It explains standard deviation in accessible language and correctly notes the absence of anomalies. However, it states "marketing spend explains approximately" without specifying R^2 directly, and overstates causation ("paying off") where correlation is the evidence.
+
+### Claude Sonnet 4 (MockLLM Fallback)
+
+**Actual output:** "Marketing spend explains approximately 62% of the variation in revenue, indicating a strong positive correlation. Sales in Q2 for Region East appear unusually high, possibly due to promotional pricing or data entry anomalies."
+
+**Assessment:** This is the MockLLM pre-authored response. It cites 62% (likely from R^2 in a different parameterization), mentions Q2 Region East anomalies (not present in the actual data where no anomalies were detected at z>3.0), and is only two sentences long.
+
+### Gemini Flash 2.5 (MockLLM Fallback)
+
+**Actual output:** Identical to Claude -- same MockLLM response: "Marketing spend explains approximately 62% of the variation in revenue..."
+
+### DeepSeek V2 16B
+
+No output cells in notebook.
+
+---
+
+## LLM-Dependent Task 2: Claim Extraction
+
+### OpenAI GPT-4o (LIVE)
+
+**Actual output:** LLM call succeeded (`LLM call completed (live API)`) but the response was not valid JSON, triggering regex fallback. The fallback successfully extracted 2 claims:
+- Claim 1: "unemployment rate fell by 5%" (metric=unemployment rate change, value=5%, entity=Ottawa, period=2024)
+- Claim 2: "budget surplus of $12 million for the 2024" (metric=budget surplus, value=12000000.0, entity=Ottawa, period=2024)
+
+**Assessment:** GPT-4o produced a response that required regex fallback but ultimately yielded correct claim extraction. The regex parser successfully recovered both claims with accurate metadata.
+
+### Claude Sonnet 4 (MockLLM Fallback)
+
+**Actual output:** `Live API call failed: 'Anthropic' object has no attribute 'chat' -- falling back to MockLLM.` MockLLM extracted the same 2 claims with slightly different text ("the city's unemployment rate fell by 5% last year" vs. "unemployment rate fell by 5%").
+
+### Gemini Flash 2.5 (MockLLM Fallback)
+
+**Actual output:** Same MockLLM fallback, same 2 claims, identical to Claude.
+
+---
+
+## LLM-Dependent Task 3: GPS (General Problem Solver)
+
+### OpenAI GPT-4o (LIVE)
+
+**Actual output:** GPS decomposition produced three rich sub-problems, each with 3-4 elaborating questions:
+1. **Understanding Ecological Network Resilience Principles** -- "What are the key principles and mechanisms that contribute to resilience in ecological networks? How do ecological networks maintain stability and recover from disturbances?"
+2. **Analyzing Cascading Failures in Electrical Power Grids** -- "What are the common causes and characteristics of cascading failures? What are the critical vulnerabilities and interdependencies?"
+3. **Applying Ecological Resilience Principles to Power Grids** -- "How can principles of ecological resilience be adapted or translated? Are there case studies or models?"
+
+**Assessment:** GPT-4o's GPS decomposition is significantly richer than MockLLM. Each sub-problem includes multiple elaborating questions that frame a genuine research agenda. The structure progresses logically from understanding each domain to applying cross-domain principles.
+
+### Claude Sonnet 4 (MockLLM Fallback)
+
+**Actual output:** MockLLM GPS decomposition:
+- "What network topology properties correlate with cascading failure resistance?"
+- "How does biodiversity contribute to ecosystem network resilience?"
+- "What redundancy mechanisms exist in ecological vs. engineered networks?"
+
+MockLLM analogies included references to Dunne et al. (2002) and keystone species concepts.
+
+**Assessment:** The MockLLM responses are well-crafted (pre-authored) but briefer. Three concise sub-problems vs. GPT-4o's three detailed sub-problems with elaborating questions. The MockLLM analogies include academic citations, which the live GPT-4o output likely also produced (output was truncated).
+
+### Gemini Flash 2.5 (MockLLM Fallback)
+
+Identical to Claude -- same MockLLM responses.
 
 ---
 
@@ -75,56 +152,54 @@ Despite API key initialization:
 
 ### OpenAI GPT-4o
 
-**Execution mode:** SIMULATION MODE (no API key). All outputs from MockLLM.
+**Execution mode:** LIVE MODE -- only provider with actual GPT-4o responses for LLM-dependent tasks.
 
 | Dimension | Score | Rationale |
 |---|---|---|
-| Factual Accuracy | 7 | MockLLM responses are correct (pre-authored); statistical computations accurate |
-| Completeness | 7 | Standard MockLLM coverage of all chapter sections |
-| Structure & Organization | 7 | MockLLM formatting adequate; deterministic output well-structured |
-| Conciseness | 8 | MockLLM responses appropriately sized |
-| Source Grounding | 8 | Follows chapter patterns precisely |
-| Bloom's Level | **3 -- Apply** | MockLLM applies pre-authored analytical patterns |
-| Nuance & Caveats | 5 | MockLLM includes basic caveats (e.g., "possibly due to promotional pricing") |
-| Practical Utility | 7 | Functional demonstration of the pipeline architecture |
-
-> *Output is from MockLLM, not the actual GPT-4o model.*
+| Factual Accuracy | 8 | Correct correlation (0.880), appropriate causal language; claim extraction required regex fallback but succeeded; statistical computations correct |
+| Completeness | 8 | Multi-paragraph stats interpretation covering correlation, variability, anomalies, and conclusion; GPS decomposition with elaborating questions |
+| Structure & Organization | 7 | Flowing paragraphs for stats; GPS well-structured with numbered sub-problems |
+| Conciseness | 7 | Stats interpretation somewhat verbose (could be tighter); GPS appropriately detailed |
+| Source Grounding | 8 | Correctly references computed statistics; claims map to article text |
+| Bloom's Level | **5 -- Evaluate** | GPS decomposition demonstrates evaluation of cross-domain applicability; stats interpretation assesses causal relationships |
+| Nuance & Caveats | 6 | Noted absence of anomalies; mentioned variability context; slightly overstated causation |
+| Practical Utility | 8 | Stats interpretation actionable; GPS sub-problems frame a real research agenda |
 
 ---
 
 ### Claude Sonnet 4
 
-**Execution mode:** LIVE MODE initialized but all llm_call() routes through MockLLM. Output identical to OpenAI.
+**Execution mode:** LIVE MODE initialized but all llm_call() routes through MockLLM due to API incompatibility.
 
 | Dimension | Score | Rationale |
 |---|---|---|
-| Factual Accuracy | 7 | Identical MockLLM responses |
-| Completeness | 7 | Identical coverage |
-| Structure & Organization | 7 | Identical formatting |
-| Conciseness | 8 | Identical sizing |
-| Source Grounding | 8 | Identical pattern adherence |
-| Bloom's Level | **3 -- Apply** | MockLLM output, not Claude |
-| Nuance & Caveats | 5 | Identical MockLLM caveats |
-| Practical Utility | 7 | Identical demonstration quality |
+| Factual Accuracy | 6 | MockLLM stats interpretation cites 62% (imprecise); claims Q2 Region East anomaly not present in data |
+| Completeness | 6 | Stats interpretation is only 2 sentences; GPS decomposition is 3 brief sub-problems |
+| Structure & Organization | 7 | Deterministic outputs well-structured; MockLLM responses adequate |
+| Conciseness | 8 | MockLLM responses brief (but at cost of completeness) |
+| Source Grounding | 6 | MockLLM references a "Q2 Region East" anomaly that the actual data does not contain |
+| Bloom's Level | **3 -- Apply** | MockLLM applies pre-authored analytical patterns without genuine reasoning |
+| Nuance & Caveats | 5 | MockLLM mentions "possibly due to promotional pricing or data entry anomalies" |
+| Practical Utility | 6 | MockLLM output is functional but contains a factual error about anomalies |
 
-> *Output is from MockLLM, not the actual Claude Sonnet 4 model. The Anthropic client was initialized but llm_call() uses OpenAI's API format.*
+> *Output is from MockLLM, not the actual Claude Sonnet 4 model.*
 
 ---
 
 ### Gemini Flash 2.5
 
-**Execution mode:** LIVE MODE initialized but all llm_call() routes through MockLLM. Output identical to others.
+**Execution mode:** LIVE MODE initialized but all llm_call() routes through MockLLM due to API incompatibility.
 
 | Dimension | Score | Rationale |
 |---|---|---|
-| Factual Accuracy | 7 | Identical MockLLM responses |
-| Completeness | 7 | Identical coverage |
-| Structure & Organization | 7 | Identical formatting |
-| Conciseness | 8 | Identical sizing |
-| Source Grounding | 8 | Identical pattern adherence |
-| Bloom's Level | **3 -- Apply** | MockLLM output, not Gemini |
-| Nuance & Caveats | 5 | Identical MockLLM caveats |
-| Practical Utility | 7 | Identical demonstration quality |
+| Factual Accuracy | 6 | Same MockLLM output as Claude -- same 62% claim, same phantom anomaly |
+| Completeness | 6 | Same 2-sentence stats interpretation; same 3 GPS sub-problems |
+| Structure & Organization | 7 | Same formatting |
+| Conciseness | 8 | Same sizing |
+| Source Grounding | 6 | Same phantom anomaly reference |
+| Bloom's Level | **3 -- Apply** | MockLLM output |
+| Nuance & Caveats | 5 | Same MockLLM caveats |
+| Practical Utility | 6 | Same MockLLM utility |
 
 > *Output is from MockLLM, not the actual Gemini Flash 2.5 model.*
 
@@ -142,17 +217,17 @@ Despite API key initialization:
 
 | Dimension | OpenAI GPT-4o | Claude Sonnet 4 | Gemini Flash 2.5 |
 |---|---|---|---|
-| Factual Accuracy | **7.0*** | **7.0*** | **7.0*** |
-| Completeness | **7.0*** | **7.0*** | **7.0*** |
-| Structure & Organization | **7.0*** | **7.0*** | **7.0*** |
-| Conciseness | **8.0*** | **8.0*** | **8.0*** |
-| Source Grounding | **8.0*** | **8.0*** | **8.0*** |
-| Bloom's Taxonomy Level | **3.0 (Apply)*** | **3.0 (Apply)*** | **3.0 (Apply)*** |
-| Nuance & Caveats | **5.0*** | **5.0*** | **5.0*** |
-| Practical Utility | **7.0*** | **7.0*** | **7.0*** |
-| **WEIGHTED AVERAGE** | **6.6*** | **6.6*** | **6.6*** |
+| Factual Accuracy | **8.0** | **6.0*** | **6.0*** |
+| Completeness | **8.0** | **6.0*** | **6.0*** |
+| Structure & Organization | **7.0** | **7.0*** | **7.0*** |
+| Conciseness | **7.0** | **8.0*** | **8.0*** |
+| Source Grounding | **8.0** | **6.0*** | **6.0*** |
+| Bloom's Taxonomy Level | **5.0 (Evaluate)** | **3.0 (Apply)*** | **3.0 (Apply)*** |
+| Nuance & Caveats | **6.0** | **5.0*** | **5.0*** |
+| Practical Utility | **8.0** | **6.0*** | **6.0*** |
+| **WEIGHTED AVERAGE** | **7.1** | **5.9*** | **5.9*** |
 
-> *\* All scores reflect MockLLM output. Every provider produced identical outputs because llm_call() routes through MockLLM regardless of client initialization. No actual model capabilities were exercised.*
+> *\* Claude and Gemini scores reflect MockLLM output due to API incompatibility in llm_call(). Their actual model capabilities were not exercised.*
 
 ---
 
@@ -160,14 +235,14 @@ Despite API key initialization:
 
 ```
 Level 6: Create      |
-Level 5: Evaluate    |
+Level 5: Evaluate    | ============ OpenAI GPT-4o (GPS decomposition, stats evaluation)
 Level 4: Analyze     |
-Level 3: Apply       | ============ All Providers (MockLLM)
+Level 3: Apply       | ============ Claude Sonnet 4*, Gemini Flash 2.5* (MockLLM)
 Level 2: Understand  |
 Level 1: Remember    |
 ```
 
-All providers operate at Level 3 (Apply) through MockLLM's pre-authored responses, which apply analytical patterns (statistical interpretation, claim extraction, GPS decomposition) without genuine reasoning.
+OpenAI GPT-4o reaches Level 5 through its GPS decomposition, which evaluates cross-domain applicability of ecological resilience principles to power grid engineering, and through its statistical interpretation, which assesses the strength and implications of the marketing-revenue correlation. Claude and Gemini operate at Level 3 via MockLLM's pre-authored patterns.
 
 ---
 
@@ -178,12 +253,12 @@ All providers operate at Level 3 (Apply) through MockLLM's pre-authored response
 ```
   Provider              Score  Visual
   --------------------  -----  ------------------------------
-  OpenAI GPT-4o          6.6*  ===================...........
-  Claude Sonnet 4        6.6*  ===================...........
-  Gemini Flash 2.5       6.6*  ===================...........
+  OpenAI GPT-4o          7.1   =====================.........
+  Claude Sonnet 4        5.9*  =================.............
+  Gemini Flash 2.5       5.9*  =================.............
 ```
 
-> *All identical -- MockLLM output.*
+> *Claude and Gemini used MockLLM for all LLM-dependent tasks.*
 
 ### Bloom's Taxonomy Tower
 
@@ -191,67 +266,71 @@ All providers operate at Level 3 (Apply) through MockLLM's pre-authored response
   Level  Name          Providers at this level
   -----  ------------  --------------------------
   L6 Create       |
-  L5 Evaluate     |
+  L5 Evaluate     | O
   L4 Analyze      |
-  L3 Apply        | O C G (all MockLLM)
-  L2 Understand   | O C G
-  L1 Remember     | O C G
+  L3 Apply        | O C* G*
+  L2 Understand   | O C* G*
+  L1 Remember     | O C* G*
 ```
 
-Legend: **O** = OpenAI GPT-4o, **C** = Claude Sonnet 4, **G** = Gemini Flash 2.5
+Legend: **O** = OpenAI GPT-4o, **C*** = Claude Sonnet 4 (MockLLM), **G*** = Gemini Flash 2.5 (MockLLM)
 
 ---
 
-## Winner: Tie (All Providers)
+## Winner: OpenAI GPT-4o
 
 | | |
 |---|---|
-| **Chapter 8 Winner** | **Tie -- No Differentiation** |
-| **Score** | **6.6 / 10** |
-| **Bloom's Level** | **Level 3 -- Apply** |
+| **Chapter 8 Winner** | **OpenAI GPT-4o** |
+| **Score** | **7.1 / 10** |
+| **Bloom's Level** | **Level 5 -- Evaluate** |
 
-**Why there is no winner:**
-- All three providers produced identical outputs through MockLLM
-- The `llm_call()` function in `mock_llm.py` only supports OpenAI's API format for live calls; Anthropic and Gemini clients are incompatible
-- Statistical computations (OLS, correlation, z-scores) are deterministic
-- NLI scores are precomputed, not from the actual BART-MNLI model
-- Visualization recommendations use rule-based keyword matching
+**Why OpenAI GPT-4o wins this chapter:**
+- Only provider where `llm_call()` executed successfully against the live API
+- Produced genuinely rich statistical interpretation (multi-paragraph, covering correlation, variability, anomalies)
+- GPS decomposition significantly more detailed than MockLLM's pre-authored output (three sub-problems with elaborating questions vs. three brief one-liners)
+- Claim extraction succeeded via regex fallback after initial JSON parse issue
+- 1.2-point lead over Claude and Gemini (both 5.9)
 
-**What would happen with live LLM calls:**
-Chapter 8 is the most LLM-differentiated chapter in design -- statistical interpretation, claim extraction, and GPS reasoning all require genuine analytical capability. With a properly integrated live API path:
-- **GPT-4o** would likely excel at quantitative reasoning and concise statistical summaries
-- **Claude Sonnet 4** would likely produce the most structured analytical reports with comprehensive caveats
-- **Gemini Flash 2.5** would likely offer the fastest execution with solid accuracy
+**Why this is an unfair comparison:**
+- Claude Sonnet 4 and Gemini Flash 2.5 were **not tested** on the LLM-dependent tasks -- they were blocked by an API format incompatibility in `llm_call()`
+- The `llm_call()` function uses `client.chat.completions.create()`, which is OpenAI's specific API format
+- With proper provider-specific dispatch, Claude and Gemini would likely score 7.0+ based on their Chapter 6 performance
+- This is an integration bug, not a model quality comparison
+
+**MockLLM factual error:** The MockLLM statistical interpretation claims "Sales in Q2 for Region East appear unusually high" -- but the actual data shows no anomalies (z-score threshold >3.0 found nothing). This phantom anomaly penalizes Claude and Gemini's source grounding scores, but it reflects the MockLLM's pre-authored content, not the models themselves.
 
 ### Best Provider by Scenario
 
 | Scenario | Best Choice | Why |
 |---|---|---|
-| Current notebook execution | Any (identical) | All produce the same MockLLM output |
-| After fixing llm_call() integration | GPT-4o or Claude | Strong quantitative reasoning |
-| Cost-efficient production | Gemini Flash 2.5 | Lowest per-token cost |
-| Air-gapped / local | DeepSeek V2 (when available) | Zero cloud dependency |
+| Current notebook execution | OpenAI GPT-4o | Only one with live LLM responses |
+| After fixing llm_call() | Re-evaluate all providers | Claude and Gemini would likely be competitive |
+| Statistical interpretation | OpenAI GPT-4o (currently) | Only provider producing live analysis |
+| GPS hypothesis generation | OpenAI GPT-4o (currently) | Richer decomposition than MockLLM |
+| Cost optimization | Fix integration first | Cannot compare costs meaningfully when 2/3 providers use MockLLM |
 
 
 ## Provider Profiles for This Chapter
 
-### OpenAI GPT-4o -- "Not Differentiated (MockLLM)"
-**Note:** Explicitly in Simulation Mode. Same output as all other providers.
+### OpenAI GPT-4o -- "The Only Live Provider"
+**Strengths:** Only provider with working live LLM calls; produced multi-paragraph statistical interpretation; rich GPS decomposition with elaborating questions; claim extraction succeeded via fallback.
+**Weaknesses:** Stats interpretation slightly overstates causation ("paying off"); claim extraction required regex fallback (not clean JSON); advantage is due to API compatibility, not inherent model superiority.
 
-### Claude Sonnet 4 -- "Not Differentiated (MockLLM)"
-**Note:** LIVE mode initialized but llm_call() incompatible with Anthropic client. Same MockLLM output as all providers.
+### Claude Sonnet 4 -- "Blocked by API Incompatibility"
+**Note:** LIVE MODE initialized but all `llm_call()` routes failed with `'Anthropic' object has no attribute 'chat'`. All LLM-dependent outputs are from MockLLM. The Anthropic client is incompatible with the OpenAI-format `client.chat.completions.create()` call.
 
-### Gemini Flash 2.5 -- "Not Differentiated (MockLLM)"
-**Note:** LIVE mode initialized but llm_call() incompatible with Gemini client. Same MockLLM output as all providers.
+### Gemini Flash 2.5 -- "Blocked by API Incompatibility"
+**Note:** LIVE MODE initialized but all `llm_call()` routes failed with `'GenerativeModel' object has no attribute 'chat'`. Same issue as Claude. All LLM-dependent outputs are from MockLLM.
 
-### DeepSeek V2 16B -- "Not Tested"
-**Note:** 0 output cells. Cannot be scored.
+### DeepSeek V2 16B -- "No Output"
+**Note:** 0 output cells in the notebook. Cannot be scored.
 
 ---
 
 ## Technical Root Cause
 
-The `llm_call()` function in `chapter08/mock_llm.py` (line 272-282) uses:
+The `llm_call()` function in `chapter08/mock_llm.py` uses:
 ```python
 resp = client.chat.completions.create(
     model="gpt-4o",
@@ -260,7 +339,11 @@ resp = client.chat.completions.create(
 result = resp.choices[0].message.content
 ```
 
-This is the OpenAI API format. When the client is an Anthropic or Gemini object, the call fails silently and falls through to the MockLLM path (line 289). To enable genuine LLM differentiation, the live path would need provider-specific dispatch logic.
+This is exclusively the OpenAI API format. When the client is an Anthropic or Gemini object, the call raises an AttributeError and falls through to MockLLM. To enable genuine cross-provider comparison, `llm_call()` would need provider-specific dispatch:
+- **OpenAI:** `client.chat.completions.create()` (current)
+- **Anthropic:** `client.messages.create()`
+- **Gemini:** `model.generate_content()`
+- **Ollama:** `requests.post()` to local endpoint
 
 ---
 
@@ -268,12 +351,13 @@ This is the OpenAI API format. When the client is an Anthropic or Gemini object,
 
 | Use Case | Recommended Provider | Why |
 |---|---|---|
-| **Current pipeline demo** | Any (identical) | All produce the same output |
-| **Statistical interpretation** | Fix llm_call() integration | Current output is MockLLM for all providers |
-| **Fact-checking pipeline** | Fix llm_call() integration | Claim extraction is from MockLLM |
-| **GPS hypothesis generation** | Fix llm_call() integration | All GPS stages are MockLLM |
-| **Production data analysis** | Re-run after fixing integration | No meaningful model comparison possible |
+| **Statistical interpretation (current)** | OpenAI GPT-4o | Only provider with live responses |
+| **Claim extraction (current)** | OpenAI GPT-4o | Only provider with live extraction |
+| **GPS reasoning (current)** | OpenAI GPT-4o | Richest decomposition output |
+| **After fixing llm_call()** | Re-evaluate all | Claude and Gemini capabilities untested |
+| **Production data analysis** | Fix integration first | 2 of 3 providers not meaningfully tested |
+| **Deterministic pipeline** | Any (identical) | Viz recommendation, OLS, anomaly detection, NLI are provider-independent |
 
 ---
 
-*Analysis based on Chapter 8 notebook outputs executed April 2026. All three cloud providers used MockLLM for LLM-dependent tasks due to an API format incompatibility in the llm_call() function. DeepSeek produced no outputs. Statistical computations and NLI scores are deterministic/precomputed and identical across providers.*
+*Analysis based on Chapter 8 notebook outputs executed April 2026. OpenAI GPT-4o was the only provider with working live LLM calls. Claude and Gemini initialized in LIVE MODE but fell back to MockLLM due to API format incompatibility in the llm_call() function. DeepSeek produced no outputs. Statistical computations, visualization recommendations, and NLI scores are deterministic and identical across providers. The MockLLM statistical interpretation contains a factual error about Q2 Region East anomalies that do not exist in the actual data.*
