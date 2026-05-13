@@ -2,12 +2,12 @@
 # Author: Imran Ahmad
 # Ref: §Technical requirements (p. 2)
 #
-# Book specifies: langchain==0.2.16, langchain-openai==0.1.23,
+# Book specifies: langchain==0.3.30, langchain-openai==0.1.23,
 #   langgraph==0.1.4, openai==1.40.0, pydantic==2.8.2, python-dotenv==1.0.1
 # See TROUBLESHOOTING.md for version conflict resolutions.
 
-langchain==0.2.16
-langchain-core>=0.2.38,<0.3.0        # Peer dep of langchain==0.2.16
+langchain==0.3.30
+langchain-core>=0.2.38,<0.3.0        # Peer dep of langchain==0.3.30
 langgraph==0.1.4
 pydantic==2.8.2
 python-dotenv==1.0.1
