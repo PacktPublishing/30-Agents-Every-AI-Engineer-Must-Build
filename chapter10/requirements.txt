@@ -5,7 +5,7 @@
 # Tested on Python 3.10, 3.11, 3.12
 # Install: pip install -r requirements.txt
 
-langchain==0.2.16
+langchain==0.3.30
 langchain-community==0.2.16
 langchain-core==0.2.38
 faiss-cpu==1.8.0
