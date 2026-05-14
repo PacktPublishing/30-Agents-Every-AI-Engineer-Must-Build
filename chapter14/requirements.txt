@@ -6,7 +6,7 @@
 # Note: Python 3.10+ required
 
 # --- Core LLM Framework ---
-langchain==0.2.16
+langchain==0.3.30
 langchain-community==0.2.16
 langgraph==0.2.28
 
