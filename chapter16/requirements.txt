@@ -3,14 +3,14 @@
 # Ref: §Technical requirements (p. 2)
 #
 # Book specifies: langchain==0.2.16, langchain-openai==0.1.23,
-#   langgraph==0.1.4, openai==1.40.0, pydantic==2.8.2, python-dotenv==1.0.1
+#   langgraph==0.1.4, openai==1.40.0, pydantic==2.8.2, python-dotenv==1.2.2
 # See TROUBLESHOOTING.md for version conflict resolutions.
 
 langchain==0.2.16
 langchain-core>=0.2.38,<0.3.0        # Peer dep of langchain==0.2.16
 langgraph==0.1.4
 pydantic==2.8.2
-python-dotenv==1.0.1
+python-dotenv==1.2.2
 
 # Notebook runtime
 jupyter>=1.0.0
