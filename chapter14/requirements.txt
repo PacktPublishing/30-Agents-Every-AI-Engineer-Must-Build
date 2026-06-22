@@ -7,7 +7,7 @@
 
 # --- Core LLM Framework ---
 langchain==0.2.16
-langchain-community==0.2.16
+langchain-community==0.3.27
 langgraph==0.2.28
 
 # --- Financial Data ---
