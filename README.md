@@ -229,7 +229,7 @@ This book accommodates three distinct reading approaches:
 
 ### Corrected Figure
 
-![Figure 1.5 Corrected](Errata/Figure%201.5.png)
+![Figure 1.5 Corrected](Errata/Figure%201.14.png)
 
 ---
 
@@ -247,8 +247,8 @@ This book accommodates three distinct reading approaches:
 
 ### Corrected Figure
 
-![Figure 1.14 Corrected](Errata/Figure%201.14.png)
 
+![Figure 1.14 Corrected](Errata/Figure%201.5.png)
 
 
 

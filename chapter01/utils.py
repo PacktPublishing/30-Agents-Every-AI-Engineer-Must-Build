@@ -139,6 +139,7 @@ def detect_api_key():
     # Tier 2: Multi-provider detection via shared utility
     try:
         sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
+        # This is how you point to the one step upper directory using code.
         from supporting.llm_provider import detect_provider
         provider, key, mode = detect_provider()
         _LLM_PROVIDER = provider
