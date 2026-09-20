@@ -32,9 +32,9 @@ PROVIDER_MODELS = {
         "legacy": "gpt-3.5-turbo",
     },
     "anthropic": {
-        "default": "claude-sonnet-4-20250514",
+        "default": "claude-sonnet-5",
         "fast": "claude-haiku-4-5-20251001",
-        "legacy": "claude-sonnet-4-20250514",
+        "legacy": "claude-sonnet-4-20250514",  # retired API-side; kept only as a labeled historical reference
     },
     "google": {
         "default": "gemini-2.5-flash",
@@ -282,12 +282,31 @@ def chat_completion(client, provider, messages, model=None, temperature=0):
             else:
                 user_messages.append(m)
 
-        kwargs = {"model": model, "messages": user_messages, "max_tokens": 4096, "temperature": temperature}
+        # NOTE: `temperature` is intentionally NOT sent here. As of
+        # anthropic-sdk-python 1.0 (Aug 2026) the parameter was removed
+        # from Messages.create() client-side, and as of Claude Sonnet 5 /
+        # Opus 4.7+ the API itself now returns a 400 error for any
+        # non-default sampling parameter (temperature/top_p/top_k).
+        # Adaptive thinking is also on by default on these newer models,
+        # so it's explicitly disabled to keep this helper's contract
+        # (one deterministic text string) stable across model generations.
+        kwargs = {
+            "model": model,
+            "messages": user_messages,
+            "max_tokens": 4096,
+            "thinking": {"type": "disabled"},
+        }
         if system_msg:
             kwargs["system"] = system_msg
 
         response = client.messages.create(**kwargs)
-        return response.content[0].text
+        # response.content is a list of content blocks; when thinking is
+        # enabled (or on future models where this can't be disabled) it
+        # may contain a ThinkingBlock before the TextBlock, so filter by
+        # block type instead of assuming content[0] is always text.
+        return "".join(
+            block.text for block in response.content if block.type == "text"
+        )
 
     elif provider == "google":
         # Google Gemini uses a different conversation format
