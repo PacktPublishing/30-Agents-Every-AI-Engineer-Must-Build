@@ -6,3 +6,4 @@
 
 # Ollama local LLM provider (no API key needed)
 langchain-ollama>=0.1.0
+langchain-classic
