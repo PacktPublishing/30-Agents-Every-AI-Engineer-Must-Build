@@ -7,3 +7,4 @@
 # OpenAI provider
 openai>=1.40.0,<2.0.0
 langchain-openai>=0.3.0
+langchain-classic
